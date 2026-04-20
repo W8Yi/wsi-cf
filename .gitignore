@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtualenvs / local tooling
+.venv/
+venv/
+env/
+.python-version
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local configs
+configs/paths.yaml
+configs/*.local.yaml
+
+# Generated experiment outputs
+artifacts/*
+!artifacts/.gitkeep
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+*.swo
