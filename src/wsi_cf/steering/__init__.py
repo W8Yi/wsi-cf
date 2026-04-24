@@ -1,1 +1,1 @@
-"""Steering manifests and feature-edit helpers."""
+"""Steering manifests, progressive planning, and feature-edit helpers."""

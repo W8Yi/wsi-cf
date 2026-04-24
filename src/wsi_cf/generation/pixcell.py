@@ -138,8 +138,8 @@ def compute_condition_blend_for_step(
         step_ratio = float(step_idx) / float(num_steps - 1)
     alpha0 = float(alpha_start)
     alpha1 = float(alpha_end)
-    if not (0.0 <= alpha0 <= 1.0 and 0.0 <= alpha1 <= 1.0):
-        raise ValueError("alpha_start and alpha_end must be in [0,1]")
+    if alpha0 < 0.0 or alpha1 < 0.0:
+        raise ValueError("alpha_start and alpha_end must be >= 0")
     mode = str(schedule).strip().lower()
     if mode not in {"linear", "cosine"}:
         raise ValueError("schedule must be 'linear' or 'cosine'")
@@ -209,6 +209,36 @@ def prepare_edit_region_mask(
             f"edit_region_mask spatial shape {tuple(mask.shape[-2:])} must match output {(out_h, out_w)} or latent {(h_lat, w_lat)}"
         )
     return mask.clamp(0.0, 1.0).to(dtype=dtype)
+
+
+def prepare_preserve_strength_map(
+    preserve_strength_map: torch.Tensor | None,
+    *,
+    out_h: int,
+    out_w: int,
+    h_lat: int,
+    w_lat: int,
+    device: torch.device,
+    dtype: torch.dtype,
+) -> torch.Tensor | None:
+    if preserve_strength_map is None:
+        return None
+    strength_map = preserve_strength_map.to(device=device, dtype=torch.float32)
+    if strength_map.dim() == 2:
+        strength_map = strength_map.unsqueeze(0).unsqueeze(0)
+    elif strength_map.dim() == 3:
+        strength_map = strength_map.unsqueeze(1)
+    elif strength_map.dim() != 4:
+        raise ValueError("preserve_strength_map must have 2, 3, or 4 dimensions")
+    if strength_map.shape[0] != 1:
+        raise ValueError("preserve_strength_map currently supports batch size 1")
+    if strength_map.shape[-2:] == (int(out_h), int(out_w)):
+        strength_map = F.interpolate(strength_map, size=(int(h_lat), int(w_lat)), mode="area")
+    elif strength_map.shape[-2:] != (int(h_lat), int(w_lat)):
+        raise ValueError(
+            f"preserve_strength_map spatial shape {tuple(strength_map.shape[-2:])} must match output {(out_h, out_w)} or latent {(h_lat, w_lat)}"
+        )
+    return strength_map.clamp(0.0, 1.0).to(dtype=dtype)
 
 
 def load_uni2(device: torch.device):
@@ -397,7 +427,9 @@ def sample_large_pixcell_multidiffusion(
     init_latents: torch.Tensor | None,
     preserve_source_latents: torch.Tensor | None = None,
     edit_region_mask: torch.Tensor | None = None,
+    preserve_strength_map: torch.Tensor | None = None,
     preserve_outside_strength: float = 1.0,
+    preserve_edit_strength: float = 0.0,
     use_tiled_vae_decode: bool,
     decode_tile_lat: int,
     decode_overlap_lat: int,
@@ -438,6 +470,7 @@ def sample_large_pixcell_multidiffusion(
     preserve_ref_lat = None
     preserve_noise = None
     latent_edit_mask = None
+    latent_preserve_strength_map = None
     if preserve_source_latents is not None:
         preserve_ref_lat = preserve_source_latents.to(device=device, dtype=dtype)[:, :, :h_lat, :w_lat]
         if hasattr(pipeline.vae.config, "scaling_factor"):
@@ -451,11 +484,25 @@ def sample_large_pixcell_multidiffusion(
             device=device,
             dtype=dtype,
         )
-        if latent_edit_mask is None:
-            raise ValueError("edit_region_mask is required when preserve_source_latents is provided")
         preserve_alpha = float(preserve_outside_strength)
         if not (0.0 <= preserve_alpha <= 1.0):
             raise ValueError("preserve_outside_strength must be in [0,1]")
+        preserve_edit_alpha = float(preserve_edit_strength)
+        if not (0.0 <= preserve_edit_alpha <= 1.0):
+            raise ValueError("preserve_edit_strength must be in [0,1]")
+        latent_preserve_strength_map = prepare_preserve_strength_map(
+            preserve_strength_map,
+            out_h=int(out_h),
+            out_w=int(out_w),
+            h_lat=int(h_lat),
+            w_lat=int(w_lat),
+            device=device,
+            dtype=dtype,
+        )
+        if latent_edit_mask is None and latent_preserve_strength_map is None:
+            raise ValueError(
+                "edit_region_mask or preserve_strength_map is required when preserve_source_latents is provided"
+            )
         preserve_noise = torch.randn(
             preserve_ref_lat.shape,
             device=device,
@@ -569,8 +616,16 @@ def sample_large_pixcell_multidiffusion(
         eps_full = eps_accum / weight.clamp(min=1e-8)
         step = pipeline.scheduler.step(eps_full, t, latents, return_dict=True)
         latents = step.prev_sample if hasattr(step, "prev_sample") else step[0]
-        if preserve_ref_lat is not None and latent_edit_mask is not None:
-            preserve_weight = (1.0 - latent_edit_mask) * float(preserve_outside_strength)
+        if preserve_ref_lat is not None:
+            if latent_preserve_strength_map is not None:
+                preserve_weight = latent_preserve_strength_map
+            elif latent_edit_mask is not None:
+                preserve_weight = (
+                    (1.0 - latent_edit_mask) * float(preserve_outside_strength)
+                    + latent_edit_mask * float(preserve_edit_strength)
+                )
+            else:
+                raise RuntimeError("Preservation enabled without a latent preserve map or edit mask")
             if t_idx + 1 < total_steps:
                 next_t = timesteps[t_idx + 1]
                 if not torch.is_tensor(next_t):

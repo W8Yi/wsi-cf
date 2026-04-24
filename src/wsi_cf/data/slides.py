@@ -56,6 +56,17 @@ def find_slide_path(slides_dir: Path, slide_key: str) -> Path | None:
 
 def infer_objective_power(slide: Any) -> float:
     props = slide.properties
+    try:
+        mpp_x = float(props.get("openslide.mpp-x", -1.0))
+    except Exception:
+        mpp_x = -1.0
+    mpp_objective = -1.0
+    if 0 < mpp_x <= 0.30:
+        mpp_objective = 40.0
+    elif 0 < mpp_x <= 0.60:
+        mpp_objective = 20.0
+
+    prop_objective = -1.0
     for key in ("openslide.objective-power", "aperio.AppMag"):
         if key in props:
             try:
@@ -63,15 +74,19 @@ def infer_objective_power(slide: Any) -> float:
             except Exception:
                 value = -1.0
             if value > 0:
-                return value
-    try:
-        mpp_x = float(props.get("openslide.mpp-x", -1.0))
-    except Exception:
-        mpp_x = -1.0
-    if 0 < mpp_x <= 0.30:
-        return 40.0
-    if 0 < mpp_x <= 0.60:
-        return 20.0
+                prop_objective = float(value)
+                break
+
+    # Some TCGA slides expose inconsistent AppMag/objective metadata while the
+    # physical microns-per-pixel clearly indicate 40x-equivalent sampling.
+    # When they disagree materially, trust mpp because it better matches the
+    # true pixel spacing and keeps crops aligned to feature coordinates.
+    if mpp_objective > 0 and prop_objective > 0 and abs(mpp_objective - prop_objective) >= 10.0:
+        return float(mpp_objective)
+    if prop_objective > 0:
+        return float(prop_objective)
+    if mpp_objective > 0:
+        return float(mpp_objective)
     return 20.0
 
 

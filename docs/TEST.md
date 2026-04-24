@@ -110,53 +110,9 @@ Suggested generation metadata should record:
 - PixCell model id
 - seed
 
-## Runner Command
+## SAE Prototype Run
 
-Use the prepared region bank and roles manifest with:
-
-```bash
-python /common/users/wq50/wsi_cf/scripts/run_region_bank_experiments.py \
-  --region-roles-csv /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_1024/region_roles.csv \
-  --out-dir /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_1024_runs \
-  --pix_model_id StonyBrook-CVLab/PixCell-1024 \
-  --conditions all \
-  --seed 7 \
-  --device cuda:0 \
-  --skip-existing
-```
-
-This writes:
-
-- `pairings.csv`
-- `experiment_manifest.csv`
-- `by_source/<source_region_id>/`
-- one output directory per condition and source region
-- `run_meta.json` beside each generated image
-- `run_summary.csv`
-- `run_summary.json`
-
-Each `by_source/<source_region_id>/` folder should contain:
-
-- `source_region.png`
-- `source_tile_gx1_gy1.png`
-- one generated image per condition
-- donor tile previews for one-cell conditions
-- donor region previews for full-grid conditions
-- `comparison_contact_sheet.png`
-
-## SAE Prototype Follow-Up
-
-After the donor-replacement baseline is ready, run the SAE prototype version on the same source bank. This keeps the original source region and steers its source feature grid toward an HPV+ or HPV- prototype instead of copying donor cells.
-
-Prototype conditions:
-
-- `baseline`
-- `to_hpv_pos_one_cell`
-- `to_hpv_neg_one_cell`
-- `to_hpv_pos_selected_cells`
-- `to_hpv_neg_selected_cells`
-- `to_hpv_pos_full_grid`
-- `to_hpv_neg_full_grid`
+The current focused runner is the sampled-bank `10x` SAE case sweep. It keeps the original source region and steers selected source cells toward an HPV+ or HPV- prototype instead of copying donor cells.
 
 Selected-cells local multi-tile test:
 
@@ -169,19 +125,6 @@ Selected-cells local multi-tile test:
 - use conditions:
   - `to_hpv_pos_selected_cells`
   - `to_hpv_neg_selected_cells`
-
-One-off 10x fresh-crop test:
-
-- use `scripts/run_sae_10x_selected_cells_test.py`
-- extract a fresh `1024x1024` source region at `10x`
-- encode the `4x4` UNI feature grid from that `10x` image
-- steer manually selected, random, connected, or block-structured cell sets
-- use this for controlled tests such as:
-  - random two
-  - neighboring two
-  - neighboring three
-  - `2x2`
-  - `2x3`
 
 First-step 10x random region sampling:
 
@@ -230,23 +173,31 @@ Scheduled-strength test:
 Runner command:
 
 ```bash
-python /common/users/wq50/wsi_cf/scripts/run_region_bank_sae_experiments.py \
-  --region-roles-csv /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_1024/region_roles.csv \
-  --out-dir /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_1024_sae_runs \
-  --pix_model_id StonyBrook-CVLab/PixCell-1024 \
+python /common/users/wq50/wsi_cf/scripts/run_region_bank_10x_sae_cases.py \
+  --region-bank-csv /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_10x_1024_sample4/region_bank.csv \
+  --out-dir /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_10x_1024_sample4_sae_cases_preserve3_s0.2_mid0.5_rerun \
+  --cases baseline,random_two,neighbor_three,block_2x2 \
+  --direction hpv_pos \
+  --max-sources 4 \
+  --grid-step-px 256 \
+  --dtype fp16 \
   --prototype-strength 0.8 \
   --steer-blend 1.0 \
-  --conditions all \
+  --preserve-outside-latents \
+  --preserve-outside-strength 0.2 \
+  --mid-steer-start-ratio 0.5 \
+  --mid-steer-end-ratio 1.0 \
+  --mid-steer-alpha-start 0.5 \
+  --mid-steer-alpha-end 1.0 \
+  --mid-steer-alpha-schedule linear \
   --seed 7 \
-  --device cuda:0 \
-  --skip-existing
+  --device cuda:0
 ```
 
 Each `by_source/<source_region_id>/` folder from the SAE run should contain:
 
 - `source_region.png`
-- `source_tile_gx1_gy1.png`
-- one generated image per SAE condition
+- one generated image per SAE case
 - `comparison_contact_sheet.png`
 
 Use the repo-local prototype bundle by default:
@@ -362,7 +313,6 @@ This bundle was built from the default SAE:
 Current `10x` local-region runners:
 
 - `export_hnscc_region_bank_10x.py`
-- `run_sae_10x_selected_cells_test.py`
 - `run_region_bank_10x_sae_cases.py`
 
 These encode actual `10x` image crops into UNI features.
