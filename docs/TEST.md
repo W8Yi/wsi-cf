@@ -202,8 +202,8 @@ Each `by_source/<source_region_id>/` folder from the SAE run should contain:
 
 Use the repo-local prototype bundle by default:
 
-- `/common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
-- `/common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.json`
+- `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
+- `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.json`
 
 Current pinned concept latents:
 
@@ -226,7 +226,7 @@ The current SAE steering pipeline for local region experiments is:
    - selected cells define a binary `tile_mask` over the `4x4` grid
 
 4. Edit only the selected UNI cells in SAE latent space.
-   - implementation: `/common/users/wq50/SAE_path/utils/sae_edit.py`
+   - implementation: `third_party/SAE_path/utils/sae_edit.py`
    - function: `edit_uni_z_grid_with_sae(...)`
 
 Exact prototype edit mode used by the current `wsi_cf` runners:
@@ -303,11 +303,11 @@ The contact sheet should include:
 
 Current default prototype bundle:
 
-- `/common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
+- `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
 
 This bundle was built from the default SAE:
 
-- SAE config: `/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json`
+- SAE config: `third_party/SAE_path/runs/relu_sae_base/run_config.json`
 - magnification: `20x`
 
 Current `10x` local-region runners:
@@ -342,7 +342,7 @@ For the next `10x` concept test, we keep the currently validated `20x` represent
 Workflow:
 
 1. Read the repo-local prototype bundle JSON:
-   - `/common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.json`
+   - `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.json`
 2. Recover the original representative tile coordinates from:
    - `/common/users/wq50/SAE_path/runs/hnsc_hpv_attention_mil_5fold_filtered_uni2h_80/sae_neuron_pipeline_batch_topk/split_0/top_neuron_tiles.csv`
 3. Use each representative `20x` tile as the center anchor for a real `10x` `1024x1024` crop.

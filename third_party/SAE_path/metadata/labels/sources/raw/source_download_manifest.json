@@ -1,0 +1,48 @@
+{
+  "generated_at_utc": "2026-02-27T06:03:09.215664+00:00",
+  "out_dir": "metadata/labels/sources/raw",
+  "sources": {
+    "cbioportal_data": {
+      "filename": "cBioportal_data.tsv",
+      "url": "https://raw.githubusercontent.com/GerkeLab/TCGAclinical/master/data/cBioportal_data.tsv",
+      "status": "downloaded",
+      "size_bytes": 8987191,
+      "sha256": "e7f30c1ce2ac05c971c6a0c2dc068946b18315806c9f44584a51d343037c269a"
+    },
+    "tcga_subtype_20170308": {
+      "filename": "TCGASubtype.20170308.tsv",
+      "url": "https://api.gdc.cancer.gov/data/0f31b768-7f67-4fc4-abc3-06ac5bd90bf0",
+      "status": "downloaded",
+      "size_bytes": 603836,
+      "sha256": "1631cf7dd1324074957b42ee2ecd556b24d0977e5b2b2fb10c891c641994eb94"
+    },
+    "viral_scores": {
+      "filename": "viral.tsv",
+      "url": "https://api.gdc.cancer.gov/data/a55229b3-da03-49fc-a310-9b1bf16b8512",
+      "status": "downloaded",
+      "size_bytes": 1657030,
+      "sha256": "1ffa9869fabaf69d1eb39a0e73e15784a8770a3cb43ad23e667c41473ea34f82"
+    },
+    "absolute_mastercalls": {
+      "filename": "TCGA_mastercalls.abs_tables_JSedit.fixed.txt",
+      "url": "https://api.gdc.cancer.gov/data/4f277128-f793-4354-a13d-30cc7fe9f6b5",
+      "status": "downloaded",
+      "size_bytes": 901812,
+      "sha256": "f430a975433d82e0098d7405619d4f12a0c765fcd97e7d63cc9b1de7f2d763cd"
+    },
+    "absolute_scores": {
+      "filename": "ABSOLUTE_scores.tsv",
+      "url": "https://api.gdc.cancer.gov/data/0e8831f4-dd7e-4673-8624-b4519c2e0d65",
+      "status": "downloaded",
+      "size_bytes": 456006,
+      "sha256": "4e115fd7408a06b002f34678fa46df0b05aa20ac71db57acf535238f37aa64c8"
+    },
+    "immune_subtype_mclust": {
+      "filename": "immune_subtype_mclust.tsv.gz",
+      "url": "https://raw.githubusercontent.com/CRI-iAtlas/ImmuneSubtypeClassifier/master/inst/extdata/five_signature_mclust_ensemble_results.tsv.gz",
+      "status": "downloaded",
+      "size_bytes": 475832,
+      "sha256": "06681cbb8ad2075a8751313a8a439e9f0fb3d425a2f97b2ee4caea5c08bd39c4"
+    }
+  }
+}

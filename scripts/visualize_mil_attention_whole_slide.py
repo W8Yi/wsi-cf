@@ -20,6 +20,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import write_json
+from wsi_cf.common.paths import DEFAULT_HNSCC_SPLIT_TSV
 from wsi_cf.data.slides import find_slide_path, infer_objective_power, level0_tile_size, open_slide
 from wsi_cf.eval.hnsc_hpv import build_mil_from_checkpoint, read_h5_features_coords, run_mil_attention
 
@@ -32,7 +33,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "top-tile CSVs, and cohort-level summaries."
         )
     )
-    parser.add_argument("--split-tsv", type=Path, default=Path("/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.tsv"))
+    parser.add_argument("--split-tsv", type=Path, default=DEFAULT_HNSCC_SPLIT_TSV)
     parser.add_argument("--features-root", type=Path, default=Path("/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2"))
     parser.add_argument("--slides-dir", type=Path, default=Path("/common/users/wq50/HNSCC/HNSCC_slides"))
     parser.add_argument("--mil-ckpt", type=Path, default=Path("/common/users/wq50/SAE_path/runs/hnsc_hpv_attention_mil_5fold_filtered_uni2h_80/split_0/final.pt"))

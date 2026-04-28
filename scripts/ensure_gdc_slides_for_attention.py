@@ -19,6 +19,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import write_json
+from wsi_cf.common.paths import DEFAULT_HNSCC_SPLIT_TSV
 from wsi_cf.data.slides import open_slide
 
 
@@ -34,7 +35,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "match the feature H5 coordinate frame."
         )
     )
-    parser.add_argument("--split-tsv", type=Path, default=Path("/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.tsv"))
+    parser.add_argument("--split-tsv", type=Path, default=DEFAULT_HNSCC_SPLIT_TSV)
     parser.add_argument("--features-root", type=Path, default=Path("/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2"))
     parser.add_argument("--slides-dir", type=Path, default=Path("/common/users/wq50/HNSCC/test"))
     parser.add_argument("--out-dir", type=Path, default=Path("/common/users/wq50/wsi_cf/artifacts/gdc_slide_downloads"))

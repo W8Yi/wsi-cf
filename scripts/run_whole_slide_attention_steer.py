@@ -24,7 +24,13 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import save_png, write_json
-from wsi_cf.common.paths import ensure_legacy_repo_root_on_path
+from wsi_cf.common.paths import (
+    DEFAULT_HNSCC_PROTOTYPE_NPZ,
+    DEFAULT_HNSCC_SPLIT_TSV,
+    DEFAULT_SAE_CFG,
+    DEFAULT_SAE_CKPT,
+    ensure_legacy_repo_root_on_path,
+)
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.slides import find_slide_path, open_slide, read_region_rgb_at_magnification
 
@@ -64,7 +70,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--slide-key", type=str, default="TCGA-BB-4225-01Z-00-DX1")
     parser.add_argument("--model-backend", type=str, default="mil", choices=["mil", "clam"])
-    parser.add_argument("--split-tsv", type=Path, default=Path("/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.tsv"))
+    parser.add_argument("--split-tsv", type=Path, default=DEFAULT_HNSCC_SPLIT_TSV)
     parser.add_argument("--features-root", type=Path, default=Path("/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2"))
     parser.add_argument("--slides-dir", type=Path, default=Path("/common/users/wq50/HNSCC/test"))
     parser.add_argument("--out-dir", type=Path, default=Path("/common/users/wq50/wsi_cf/artifacts/whole_slide_attention_steer_pilot"))
@@ -114,12 +120,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mid-steer-alpha-start", type=float, default=0.5)
     parser.add_argument("--mid-steer-alpha-end", type=float, default=1.0)
     parser.add_argument("--mid-steer-alpha-schedule", type=str, default="linear", choices=["linear", "cosine"])
-    parser.add_argument("--sae-ckpt", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt"))
-    parser.add_argument("--sae-cfg", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json"))
+    parser.add_argument("--sae-ckpt", type=Path, default=DEFAULT_SAE_CKPT)
+    parser.add_argument("--sae-cfg", type=Path, default=DEFAULT_SAE_CFG)
     parser.add_argument(
         "--prototype-npz",
         type=Path,
-        default=Path("/common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz"),
+        default=DEFAULT_HNSCC_PROTOTYPE_NPZ,
     )
     parser.add_argument("--prototype-key", type=str, default="prototype_median", choices=["prototype_mean", "prototype_median"])
     parser.add_argument("--pos-latent", type=int, default=2645)

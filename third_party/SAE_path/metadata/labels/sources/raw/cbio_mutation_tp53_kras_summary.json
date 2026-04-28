@@ -1,0 +1,92 @@
+{
+  "generated_at_utc": "2026-02-27T05:25:15.948564+00:00",
+  "manifest_index": "metadata/indexes/manifest_index.json",
+  "cohort_samples_total": 9564,
+  "cohort_samples_with_mutation_data": 8710,
+  "tp53_mutated_samples": 3139,
+  "kras_mutated_samples": 683,
+  "studies_queried": 32,
+  "studies_with_hits": 31,
+  "top_study_mutation_record_counts": [
+    [
+      "coadread_tcga_pan_can_atlas_2018",
+      555
+    ],
+    [
+      "luad_tcga_pan_can_atlas_2018",
+      486
+    ],
+    [
+      "hnsc_tcga_pan_can_atlas_2018",
+      437
+    ],
+    [
+      "lusc_tcga_pan_can_atlas_2018",
+      437
+    ],
+    [
+      "ov_tcga_pan_can_atlas_2018",
+      388
+    ],
+    [
+      "brca_tcga_pan_can_atlas_2018",
+      359
+    ],
+    [
+      "lgg_tcga_pan_can_atlas_2018",
+      322
+    ],
+    [
+      "ucec_tcga_pan_can_atlas_2018",
+      319
+    ],
+    [
+      "stad_tcga_pan_can_atlas_2018",
+      265
+    ],
+    [
+      "blca_tcga_pan_can_atlas_2018",
+      252
+    ],
+    [
+      "paad_tcga_pan_can_atlas_2018",
+      226
+    ],
+    [
+      "esca_tcga_pan_can_atlas_2018",
+      182
+    ],
+    [
+      "gbm_tcga_pan_can_atlas_2018",
+      151
+    ],
+    [
+      "lihc_tcga_pan_can_atlas_2018",
+      118
+    ],
+    [
+      "skcm_tcga_pan_can_atlas_2018",
+      93
+    ],
+    [
+      "sarc_tcga_pan_can_atlas_2018",
+      90
+    ],
+    [
+      "ucs_tcga_pan_can_atlas_2018",
+      64
+    ],
+    [
+      "prad_tcga_pan_can_atlas_2018",
+      62
+    ],
+    [
+      "cesc_tcga_pan_can_atlas_2018",
+      43
+    ],
+    [
+      "kich_tcga_pan_can_atlas_2018",
+      26
+    ]
+  ]
+}

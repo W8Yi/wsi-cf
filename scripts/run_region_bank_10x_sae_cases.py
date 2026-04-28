@@ -19,7 +19,12 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import save_png, write_json
-from wsi_cf.common.paths import ensure_legacy_repo_root_on_path
+from wsi_cf.common.paths import (
+    DEFAULT_HNSCC_PROTOTYPE_NPZ,
+    DEFAULT_SAE_CFG,
+    DEFAULT_SAE_CKPT,
+    ensure_legacy_repo_root_on_path,
+)
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.region_bank import parse_region_bank_csv, write_region_bank_csv
 from wsi_cf.eval.hnsc_hpv import load_prototypes, pick_prototype_latent
@@ -116,12 +121,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mid-steer-alpha-start", type=float, default=1.0)
     parser.add_argument("--mid-steer-alpha-end", type=float, default=1.0)
     parser.add_argument("--mid-steer-alpha-schedule", type=str, default="linear", choices=["linear", "cosine"])
-    parser.add_argument("--sae-ckpt", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt"))
-    parser.add_argument("--sae-cfg", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json"))
+    parser.add_argument("--sae-ckpt", type=Path, default=DEFAULT_SAE_CKPT)
+    parser.add_argument("--sae-cfg", type=Path, default=DEFAULT_SAE_CFG)
     parser.add_argument(
         "--prototype-npz",
         type=Path,
-        default=Path("/common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz"),
+        default=DEFAULT_HNSCC_PROTOTYPE_NPZ,
     )
     parser.add_argument("--prototype-key", type=str, default="prototype_median", choices=["prototype_mean", "prototype_median"])
     parser.add_argument("--pos-latent", type=int, default=2645)

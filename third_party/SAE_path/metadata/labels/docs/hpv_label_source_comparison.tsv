@@ -1,0 +1,4 @@
+source	cancer	cohort_cases	labeled_cases_in_cohort	coverage	hpv_pos	hpv_neg	agreement_vs_official_on_overlap
+Nature2017_CESC_SuppTable3_official	CESC	269	146	0.542751	138	8	
+Nature2015_HNSC_SuppTable1_2_official	HNSC	450	222	0.493333	20	202	
+cBio_SUBTYPE_HNSC_HPVpm	HNSC	450	412	0.915556	42	370	216/218 (0.990826)

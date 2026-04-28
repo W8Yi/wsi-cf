@@ -15,6 +15,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import write_json
+from wsi_cf.common.paths import DEFAULT_HNSCC_SPLIT_TSV
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.region_bank import (
     assign_region_roles,
@@ -37,7 +38,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "and PixCell-ready 4x4 UNI feature grids."
         )
     )
-    parser.add_argument("--split-tsv", type=Path, default=Path("/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.tsv"))
+    parser.add_argument("--split-tsv", type=Path, default=DEFAULT_HNSCC_SPLIT_TSV)
     parser.add_argument("--features-dir", type=Path, default=Path("/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2"))
     parser.add_argument("--slides-dir", type=Path, default=Path("/common/users/wq50/HNSCC/HNSCC_slides"))
     parser.add_argument("--out-dir", type=Path, default=WSI_CF_ROOT / "artifacts/hnscc_region_bank_10x_1024")

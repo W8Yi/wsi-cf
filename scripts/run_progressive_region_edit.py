@@ -18,17 +18,24 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import save_png, write_json
-from wsi_cf.common.paths import ensure_legacy_repo_root_on_path
+from wsi_cf.common.paths import (
+    DEFAULT_HNSCC_PROTOTYPE_NPZ,
+    DEFAULT_SAE_CFG,
+    DEFAULT_SAE_CKPT,
+    ensure_legacy_repo_root_on_path,
+)
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.region_bank import parse_region_bank_csv
 from wsi_cf.eval.hnsc_hpv import load_prototypes, pick_prototype_latent
 from wsi_cf.generation.pixcell import resolve_pixcell_window_config, sample_large_pixcell_multidiffusion, vae_encode_auto
 from wsi_cf.steering.progressive import (
     CENTER_2X2_LOCAL_CELLS,
+    EDIT_SUPPORT_CHOICES,
     advance_progressive_state,
     build_history_aware_preserve_map,
     draw_cells_overlay,
     load_progressive_edit_manifest,
+    local_edit_support_global_cells,
     make_initial_progressive_state,
     plan_progressive_steps,
     preserve_map_preview,
@@ -88,16 +95,23 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mid-steer-alpha-start", type=float, default=0.5)
     parser.add_argument("--mid-steer-alpha-end", type=float, default=1.0)
     parser.add_argument("--mid-steer-alpha-schedule", type=str, default="linear", choices=["linear", "cosine"])
-    parser.add_argument("--sae-ckpt", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt"))
-    parser.add_argument("--sae-cfg", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json"))
+    parser.add_argument("--sae-ckpt", type=Path, default=DEFAULT_SAE_CKPT)
+    parser.add_argument("--sae-cfg", type=Path, default=DEFAULT_SAE_CFG)
     parser.add_argument(
         "--prototype-npz",
         type=Path,
-        default=Path("/common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz"),
+        default=DEFAULT_HNSCC_PROTOTYPE_NPZ,
     )
     parser.add_argument("--prototype-key", type=str, default="prototype_median", choices=["prototype_mean", "prototype_median"])
     parser.add_argument("--pos-latent", type=int, default=2645)
     parser.add_argument("--neg-latent", type=int, default=7036)
+    parser.add_argument(
+        "--edit-support",
+        type=str,
+        default="center_2x2",
+        choices=list(EDIT_SUPPORT_CHOICES),
+        help="Use border_relaxed to allow region-edge target cells outside the local center 2x2.",
+    )
     parser.add_argument("--output-mode", type=str, default="debug", choices=["minimal", "debug"])
     parser.add_argument("--skip-existing", action="store_true")
     return parser
@@ -221,6 +235,7 @@ def main(argv: list[str] | None = None) -> None:
             window_grid_side=4,
             stride_cells=2,
             grid_step_px=int(row.grid_step_px),
+            edit_support=str(args.edit_support),
         )
         current_canvas = np.asarray(source_img, dtype=np.float32) / 255.0
         current_zgrid = np.asarray(source_zgrid, dtype=np.float32).copy()
@@ -254,11 +269,20 @@ def main(argv: list[str] | None = None) -> None:
             local_edit_t = local_base_t.clone()
 
             local_edit_cells = window_local_cells(window=window, global_cells=step.edit_cells_global)
-            bad_local_cells = [cell for cell in local_edit_cells if cell not in CENTER_2X2_LOCAL_CELLS]
+            allowed_local_cells = window_local_cells(
+                window=window,
+                global_cells=local_edit_support_global_cells(
+                    window,
+                    grid_w=int(grid_w),
+                    grid_h=int(grid_h),
+                    edit_support=str(args.edit_support),
+                ),
+            )
+            bad_local_cells = [cell for cell in local_edit_cells if cell not in set(allowed_local_cells)]
             if bad_local_cells:
                 raise RuntimeError(
-                    f"Planned local edit cells must stay inside the center 2x2 support, got {bad_local_cells} "
-                    f"for window {window.window_id}"
+                    f"Planned local edit cells are outside edit_support={args.edit_support}, got {bad_local_cells} "
+                    f"for window {window.window_id}. Center support is {CENTER_2X2_LOCAL_CELLS}."
                 )
             tile_mask = np.zeros(local_base_zgrid.shape[:2], dtype=np.float32)
             for lx, ly in local_edit_cells:
@@ -425,6 +449,7 @@ def main(argv: list[str] | None = None) -> None:
             "steps": int(args.steps),
             "guidance": float(args.guidance),
             "seed": int(args.seed),
+            "edit_support": str(args.edit_support),
             "output_mode": str(args.output_mode),
             "output_path": str(final_out_path),
             "experiment_args_path": str(args.out_dir / "experiment_args.json"),

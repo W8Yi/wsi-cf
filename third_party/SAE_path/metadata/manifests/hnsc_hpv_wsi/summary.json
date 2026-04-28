@@ -1,0 +1,13 @@
+{
+  "labels_tsv": "metadata/labels/master/slide_labels_master.tsv",
+  "manifest_index": "metadata/indexes/manifest_index.json",
+  "include_conflicts": false,
+  "slides_total": 435,
+  "cases_total": 414,
+  "slides_hpv_pos": 42,
+  "slides_hpv_neg": 393,
+  "total_size_bytes": 424289399358,
+  "total_size_gb_decimal": 424.289399358,
+  "total_size_gib_binary": 395.1502957921475,
+  "slide_keys_txt": "metadata/manifests/hnsc_hpv_wsi/slide_keys.txt"
+}

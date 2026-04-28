@@ -481,7 +481,7 @@ This is an important current limitation.
 
 The repo-local prototype bundle currently used by default was built from the SAE at:
 
-- `/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json`
+- `third_party/SAE_path/runs/relu_sae_base/run_config.json`
 
 That SAE was trained with:
 
@@ -536,7 +536,7 @@ But it should not be described as:
 
 Prototype edit:
 
-- `/common/users/wq50/SAE_path/utils/sae_edit.py`
+- `third_party/SAE_path/utils/sae_edit.py`
 
 PixCell scheduling and preservation:
 

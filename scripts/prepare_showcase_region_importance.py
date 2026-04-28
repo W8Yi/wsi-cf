@@ -33,9 +33,17 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import save_png, write_json
+from wsi_cf.common.paths import (
+    DEFAULT_HNSCC_PROTOTYPE_NPZ,
+    DEFAULT_SAE_CFG,
+    DEFAULT_SAE_CKPT,
+    ensure_legacy_repo_root_on_path,
+)
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.region_bank import make_region_cells_preview
 from wsi_cf.eval.hnsc_hpv import load_prototypes, pick_prototype_latent
+
+ensure_legacy_repo_root_on_path()
 
 from utils.sae import load_sae_from_config  # type: ignore
 
@@ -51,9 +59,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--clam-ckpt", type=Path, default=Path("/common/users/wq50/CLAM/results/HPV_CLAM_50_mb_s1/s_0_checkpoint.pt"))
     parser.add_argument("--clam-attn-class", type=str, default="pred", choices=["pred", "pos", "neg"])
-    parser.add_argument("--sae-ckpt", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt"))
-    parser.add_argument("--sae-cfg", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json"))
-    parser.add_argument("--prototype-npz", type=Path, default=WSI_CF_ROOT / "artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz")
+    parser.add_argument("--sae-ckpt", type=Path, default=DEFAULT_SAE_CKPT)
+    parser.add_argument("--sae-cfg", type=Path, default=DEFAULT_SAE_CFG)
+    parser.add_argument("--prototype-npz", type=Path, default=DEFAULT_HNSCC_PROTOTYPE_NPZ)
     parser.add_argument("--prototype-key", type=str, default="prototype_median", choices=["prototype_mean", "prototype_median"])
     parser.add_argument("--pos-latent", type=int, default=2645)
     parser.add_argument("--neg-latent", type=int, default=7036)

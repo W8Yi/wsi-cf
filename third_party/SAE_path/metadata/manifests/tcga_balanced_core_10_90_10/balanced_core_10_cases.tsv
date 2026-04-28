@@ -1,0 +1,331 @@
+split	project_dir	case_id	num_tokens	rarity_score	tokens
+test	TCGA-ACC	TCGA-OR-A5JJ	7	0.005702	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=9
+test	TCGA-BLCA	TCGA-K4-A54R	8	0.024829	immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIC|tp53_mutated=1|tumor_grade=HIGH GRADE|tumor_purity_bin=4
+test	TCGA-BRCA_IDC	TCGA-A8-A08H	8	0.038799	immune_subtype=C6|kras_mutated=0|os_status=Alive|pam50_subtype=Normal|pfs_status=CENSORED|stage=Stage IIA|tp53_mutated=0|tumor_purity_bin=7
+test	TCGA-BRCA_OTHERS	TCGA-AC-A2FK	8	0.037238	immune_subtype=C3|kras_mutated=0|os_status=Alive|pam50_subtype=Normal|pfs_status=CENSORED|stage=Stage IIIC|tp53_mutated=0|tumor_purity_bin=9
+test	TCGA-CESC	TCGA-Q1-A73R	8	0.021676	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=9
+test	TCGA-CHOL	TCGA-ZH-A8Y1	8	0.006149	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVA|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=8
+test	TCGA-COAD	TCGA-A6-5666	8	0.025183	immune_subtype=C1|kras_mutated=1|msi_status=NonMSI|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IIC|tp53_mutated=0|tumor_purity_bin=8
+test	TCGA-DLBC	TCGA-FA-A7Q1	5	0.002910	kras_mutated=1|os_status=Dead|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=8
+test	TCGA-ESCA	TCGA-L5-A43H	8	0.017837	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=5
+test	TCGA-GBM	TCGA-06-5858	6	0.003125	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=9
+test	TCGA-HNSC	TCGA-HD-8635	9	0.088633	hpv_status=HPV-|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage 0|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=5
+test	TCGA-KICH	TCGA-KL-8325	7	0.006472	immune_subtype=C5|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_purity_bin=9
+test	TCGA-KIRC	TCGA-BP-4974	8	0.015154	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=3
+test	TCGA-KIRP	TCGA-P4-AAVL	7	0.009656	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=0|tumor_purity_bin=9
+test	TCGA-LGG	TCGA-HT-7882	7	0.009315	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=2
+test	TCGA-LIHC	TCGA-DD-A1EK	8	0.058426	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=8
+test	TCGA-LUAD	TCGA-55-8096	7	0.011521	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IB|tp53_mutated=1|tumor_purity_bin=2
+test	TCGA-LUSC	TCGA-46-3766	7	0.018131	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=0|tumor_purity_bin=1
+test	TCGA-MESO	TCGA-UD-AAC6	7	0.004671	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage II|tp53_mutated=0|tumor_purity_bin=4
+test	TCGA-OV	TCGA-25-1623	7	0.003350	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=3
+test	TCGA-PAAD	TCGA-2J-AABT	8	0.088344	immune_subtype=C3|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage 0|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=2
+test	TCGA-PCPG	TCGA-QR-A70V	5	0.003337	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0
+test	TCGA-PRAD	TCGA-YL-A9WY	6	0.003962	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=3
+test	TCGA-READ	TCGA-DC-6156	7	0.010889	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IVA|tp53_mutated=0|tumor_purity_bin=4
+test	TCGA-SARC	TCGA-DX-AB2Z	6	0.008278	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=2
+test	TCGA-SKCM	TCGA-D3-A1Q5	6	0.102181	kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=9
+test	TCGA-STAD	TCGA-VQ-A8PD	9	0.022861	immune_subtype=C6|kras_mutated=0|msi_status=NonMSI|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIIC|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=1
+test	TCGA-TGCT	TCGA-XE-AAOB	7	0.025404	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=3
+test	TCGA-THCA	TCGA-EL-A3T9	7	0.009930	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=6
+test	TCGA-THYM	TCGA-4V-A9QS	5	0.009555	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=1
+test	TCGA-UCEC	TCGA-BG-A0M8	3	1.001095	os_status=Alive|stage=Stage IC|tumor_purity_bin=4
+test	TCGA-UCS	TCGA-NA-A4R0	6	0.003344	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=2
+test	TCGA-UVM	TCGA-V4-A9EU	7	0.007099	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IIIC|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-ACC	TCGA-OR-A5J1	7	0.004924	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage II|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-ACC	TCGA-OR-A5J8	7	0.009283	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-ACC	TCGA-OR-A5JA	7	0.005189	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-ACC	TCGA-OR-A5JG	7	0.005189	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-ACC	TCGA-OR-A5JM	7	0.005563	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-ACC	TCGA-OR-A5JV	7	0.006181	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage II|tp53_mutated=0|tumor_purity_bin=4
+train	TCGA-ACC	TCGA-OR-A5JY	7	0.005115	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-ACC	TCGA-OR-A5K9	7	0.004924	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage II|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-ACC	TCGA-OR-A5LL	7	0.006122	immune_subtype=C5|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage II|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-BLCA	TCGA-CF-A47W	8	0.052178	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=LOW GRADE|tumor_purity_bin=9
+train	TCGA-BLCA	TCGA-CF-A47X	8	0.053070	immune_subtype=C4|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=LOW GRADE|tumor_purity_bin=8
+train	TCGA-BLCA	TCGA-CF-A5U8	8	0.052317	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=1|tumor_grade=LOW GRADE|tumor_purity_bin=9
+train	TCGA-BLCA	TCGA-CF-A5UA	8	0.052964	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=LOW GRADE|tumor_purity_bin=9
+train	TCGA-BLCA	TCGA-E7-A5KF	8	0.052178	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=LOW GRADE|tumor_purity_bin=9
+train	TCGA-BLCA	TCGA-E7-A7DU	8	0.056602	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage III|tp53_mutated=1|tumor_grade=LOW GRADE|tumor_purity_bin=8
+train	TCGA-BLCA	TCGA-FJ-A3ZF	8	0.337975	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage 0a|tp53_mutated=1|tumor_grade=HIGH GRADE|tumor_purity_bin=8
+train	TCGA-BLCA	TCGA-HQ-A2OE	7	1.001822	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=UNKNOWN|tumor_purity_bin=8
+train	TCGA-BLCA	TCGA-K4-A83P	7	0.203603	immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=0
+train	TCGA-BRCA_IDC	TCGA-A8-A09A	8	0.087756	immune_subtype=C3|kras_mutated=0|os_status=Alive|pam50_subtype=LumA|pfs_status=CENSORED|stage=Stage X|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-BRCA_IDC	TCGA-A8-A09C	8	0.090283	immune_subtype=C1|kras_mutated=0|os_status=Alive|pam50_subtype=LumB|pfs_status=CENSORED|stage=Stage X|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-BRCA_IDC	TCGA-AR-A252	8	0.204017	immune_subtype=C2|kras_mutated=0|os_status=Alive|pam50_subtype=LumA|pfs_status=CENSORED|stage=Stage I|tp53_mutated=0|tumor_purity_bin=0
+train	TCGA-BRCA_IDC	TCGA-B6-A0IC	8	0.087907	immune_subtype=C3|kras_mutated=0|os_status=Dead|pam50_subtype=LumA|pfs_status=CENSORED|stage=Stage X|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-BRCA_IDC	TCGA-B6-A0IN	8	0.090678	immune_subtype=C1|kras_mutated=0|os_status=Dead|pam50_subtype=LumB|pfs_status=PROGRESSION|stage=Stage X|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-BRCA_IDC	TCGA-B6-A0RE	8	0.091293	immune_subtype=C1|kras_mutated=0|os_status=Alive|pam50_subtype=Basal|pfs_status=CENSORED|stage=Stage X|tp53_mutated=1|tumor_purity_bin=6
+train	TCGA-BRCA_IDC	TCGA-B6-A0WW	8	0.090575	immune_subtype=C2|kras_mutated=0|os_status=Dead|pam50_subtype=LumB|pfs_status=PROGRESSION|stage=Stage X|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-BRCA_IDC	TCGA-B6-A0X7	8	0.087652	immune_subtype=C2|kras_mutated=0|os_status=Dead|pam50_subtype=LumA|pfs_status=PROGRESSION|stage=Stage X|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-BRCA_IDC	TCGA-S3-AA17	8	0.090774	immune_subtype=C2|kras_mutated=0|os_status=Alive|pam50_subtype=LumB|pfs_status=CENSORED|stage=Stage 0|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-BRCA_OTHERS	TCGA-A2-A25A	8	0.115956	immune_subtype=C1|kras_mutated=0|os_status=Alive|pam50_subtype=Normal|pfs_status=CENSORED|stage=Stage 0|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-BRCA_OTHERS	TCGA-A8-A09T	8	0.087757	immune_subtype=C4|kras_mutated=0|os_status=Alive|pam50_subtype=LumA|pfs_status=CENSORED|stage=Stage X|tp53_mutated=0|tumor_purity_bin=6
+train	TCGA-BRCA_OTHERS	TCGA-AC-A3YI	8	0.037245	immune_subtype=C1|kras_mutated=0|os_status=Alive|pam50_subtype=Normal|pfs_status=CENSORED|stage=Stage IIIC|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-BRCA_OTHERS	TCGA-AR-A2LH	8	0.035239	immune_subtype=C2|kras_mutated=0|os_status=Dead|pam50_subtype=Normal|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=1|tumor_purity_bin=2
+train	TCGA-BRCA_OTHERS	TCGA-AR-A2LQ	8	0.041681	immune_subtype=C3|kras_mutated=0|os_status=Alive|pam50_subtype=Normal|pfs_status=CENSORED|stage=Stage IIB|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-BRCA_OTHERS	TCGA-C8-A8HR	8	0.035351	immune_subtype=C2|kras_mutated=0|os_status=Alive|pam50_subtype=Normal|pfs_status=CENSORED|stage=Stage IIIA|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-BRCA_OTHERS	TCGA-EW-A1PG	8	0.034164	immune_subtype=C1|kras_mutated=0|os_status=Alive|pam50_subtype=Normal|pfs_status=CENSORED|stage=Stage IIB|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-BRCA_OTHERS	TCGA-GM-A2DO	8	0.090774	immune_subtype=C2|kras_mutated=0|os_status=Alive|pam50_subtype=LumB|pfs_status=CENSORED|stage=Stage 0|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-BRCA_OTHERS	TCGA-LL-A440	8	0.093142	immune_subtype=C6|kras_mutated=0|os_status=Alive|pam50_subtype=LumA|pfs_status=CENSORED|stage=Stage 0|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-CESC	TCGA-BI-A20A	9	1.008346	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IB1|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=4
+train	TCGA-CESC	TCGA-DG-A2KH	7	0.020718	hpv_status=HPV+|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=7
+train	TCGA-CESC	TCGA-EX-A449	3	0.059166	os_status=Alive|stage=Stage IVB|tumor_grade=G1
+train	TCGA-CESC	TCGA-IR-A3LH	8	0.017635	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=4
+train	TCGA-CESC	TCGA-JW-A69B	8	0.021163	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=7
+train	TCGA-CESC	TCGA-Q1-A6DW	8	0.021163	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=7
+train	TCGA-CESC	TCGA-Q1-A73O	8	0.021259	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=5
+train	TCGA-CESC	TCGA-Q1-A73Q	8	0.021228	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=8
+train	TCGA-CESC	TCGA-RA-A741	8	0.021228	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=8
+train	TCGA-CHOL	TCGA-3X-AAVB	8	0.062814	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IVB|tp53_mutated=1|tumor_grade=G1|tumor_purity_bin=3
+train	TCGA-CHOL	TCGA-W5-AA2Q	8	0.005250	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=9
+train	TCGA-CHOL	TCGA-W5-AA2W	8	0.006691	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVA|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=8
+train	TCGA-CHOL	TCGA-W5-AA2X	8	0.067618	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IVB|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=6
+train	TCGA-CHOL	TCGA-W5-AA2Z	8	0.009599	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=6
+train	TCGA-CHOL	TCGA-W5-AA36	8	0.005788	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=8
+train	TCGA-CHOL	TCGA-W5-AA39	8	0.014577	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage II|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=8
+train	TCGA-CHOL	TCGA-YR-A95A	8	0.005181	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=7
+train	TCGA-CHOL	TCGA-ZH-A8Y5	8	0.058206	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=8
+train	TCGA-COAD	TCGA-5M-AAT6	8	0.015848	immune_subtype=C2|kras_mutated=1|msi_status=MSI|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-COAD	TCGA-A6-A565	8	0.023803	immune_subtype=C3|kras_mutated=0|msi_status=MSI|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIIC|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-COAD	TCGA-AA-3949	8	0.015639	immune_subtype=C2|kras_mutated=0|msi_status=MSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=1|tumor_purity_bin=2
+train	TCGA-COAD	TCGA-AD-6895	8	0.015844	immune_subtype=C2|kras_mutated=1|msi_status=MSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-COAD	TCGA-CM-6675	8	0.059979	immune_subtype=C2|kras_mutated=0|msi_status=NonMSI|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-COAD	TCGA-F4-6703	8	0.021420	immune_subtype=C1|kras_mutated=1|msi_status=MSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IIA|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-COAD	TCGA-G4-6304	8	0.015374	immune_subtype=C4|kras_mutated=1|msi_status=MSI|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IIB|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-COAD	TCGA-NH-A6GC	8	0.060649	immune_subtype=C1|kras_mutated=1|msi_status=NonMSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IVB|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-COAD	TCGA-WS-AB45	8	0.018655	immune_subtype=C6|kras_mutated=0|msi_status=MSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IIA|tp53_mutated=1|tumor_purity_bin=2
+train	TCGA-DLBC	TCGA-FA-A4BB	5	0.002396	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-DLBC	TCGA-FA-A6HO	5	0.002031	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-DLBC	TCGA-FA-A86F	5	0.002559	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-DLBC	TCGA-FF-8047	5	0.001980	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-DLBC	TCGA-G8-6325	5	0.001868	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-DLBC	TCGA-G8-6907	3	0.001877	os_status=Dead|pfs_status=PROGRESSION|tumor_purity_bin=9
+train	TCGA-DLBC	TCGA-GR-A4D5	5	0.009391	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-DLBC	TCGA-GS-A9U4	5	0.009756	kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-DLBC	TCGA-VB-A8QN	5	0.002740	kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-ESCA	TCGA-KH-A6WC	8	0.020148	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=2
+train	TCGA-ESCA	TCGA-L5-A4OM	8	0.018908	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=8
+train	TCGA-ESCA	TCGA-L5-A4OQ	7	0.017664	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIIA|tp53_mutated=1|tumor_grade=GX
+train	TCGA-ESCA	TCGA-L5-A4OR	8	0.018846	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=6
+train	TCGA-ESCA	TCGA-L5-A4OT	8	0.018784	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=4
+train	TCGA-ESCA	TCGA-L5-A4OU	8	0.017650	immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIA|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=3
+train	TCGA-ESCA	TCGA-L5-A4OW	8	0.017622	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IIB|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=5
+train	TCGA-ESCA	TCGA-L5-A4OX	8	0.017519	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IIB|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=7
+train	TCGA-ESCA	TCGA-VR-A8ER	8	0.017745	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=6
+train	TCGA-GBM	TCGA-06-0125	6	0.003187	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-GBM	TCGA-06-0130	6	0.003905	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=2
+train	TCGA-GBM	TCGA-06-0141	6	0.003766	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-GBM	TCGA-06-0174	6	0.003187	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-GBM	TCGA-06-5408	6	0.003327	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-GBM	TCGA-06-5412	6	0.003766	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-GBM	TCGA-26-1442	6	0.004161	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-GBM	TCGA-27-2521	6	0.003327	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-GBM	TCGA-41-5651	6	0.003327	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-HNSC	TCGA-BA-A8YP	9	0.060771	hpv_status=HPV-|immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IVB|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=6
+train	TCGA-HNSC	TCGA-CN-5363	9	0.061201	hpv_status=HPV-|immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=5
+train	TCGA-HNSC	TCGA-CN-5365	9	0.061637	hpv_status=HPV-|immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=9
+train	TCGA-HNSC	TCGA-CN-A642	9	0.060966	hpv_status=HPV-|immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=7
+train	TCGA-HNSC	TCGA-CV-5978	9	0.061687	hpv_status=HPV-|immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=3
+train	TCGA-HNSC	TCGA-CV-6948	9	0.061033	hpv_status=HPV-|immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IVB|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=8
+train	TCGA-HNSC	TCGA-CV-A6JU	9	0.061020	hpv_status=HPV-|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IVB|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=4
+train	TCGA-HNSC	TCGA-P3-A6SW	9	0.064066	hpv_status=HPV+|immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IVB|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=3
+train	TCGA-HNSC	TCGA-QK-A8Z8	9	0.148426	hpv_status=HPV-|immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVC|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=7
+train	TCGA-KICH	TCGA-KL-8330	7	0.006271	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-KICH	TCGA-KL-8337	7	0.006410	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-KICH	TCGA-KL-8339	7	0.005702	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-KICH	TCGA-KL-8341	7	0.007413	immune_subtype=C5|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-KICH	TCGA-KL-8343	7	0.005978	immune_subtype=C5|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-KICH	TCGA-KL-8345	7	0.005679	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage III|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-KICH	TCGA-KM-8443	7	0.005823	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-KICH	TCGA-KO-8406	7	0.005378	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-KICH	TCGA-KO-8411	7	0.005378	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-KIRC	TCGA-AK-3433	6	0.017583	immune_subtype=C3|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tumor_grade=GX|tumor_purity_bin=9
+train	TCGA-KIRC	TCGA-AK-3443	8	0.020159	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=9
+train	TCGA-KIRC	TCGA-B0-4700	8	0.020031	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=6
+train	TCGA-KIRC	TCGA-B0-4703	6	0.020287	immune_subtype=C6|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tumor_grade=G4|tumor_purity_bin=3
+train	TCGA-KIRC	TCGA-B0-5096	8	0.017692	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage III|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=4
+train	TCGA-KIRC	TCGA-CJ-4891	6	0.019868	immune_subtype=C6|os_status=Dead|pfs_status=CENSORED|stage=Stage III|tumor_grade=G4|tumor_purity_bin=2
+train	TCGA-KIRC	TCGA-CJ-5677	8	0.020262	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_grade=G4|tumor_purity_bin=5
+train	TCGA-KIRC	TCGA-CJ-6033	8	0.020123	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=5
+train	TCGA-KIRC	TCGA-CZ-5468	8	0.020288	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=4
+train	TCGA-KIRP	TCGA-2Z-A9J7	7	0.005563	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-KIRP	TCGA-4A-A93X	7	0.004751	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-KIRP	TCGA-A4-A57E	7	0.005254	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=8
+train	TCGA-KIRP	TCGA-BQ-5894	7	0.004695	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-KIRP	TCGA-DW-7838	7	0.005334	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IA|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-KIRP	TCGA-SX-A71W	3	0.083929	immune_subtype=C3|os_status=Alive|stage=Stage 0
+train	TCGA-KIRP	TCGA-SX-A7SM	7	0.005050	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-KIRP	TCGA-SX-A7SO	7	0.004930	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-KIRP	TCGA-Y8-A8S1	7	0.009121	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-LGG	TCGA-CS-5396	7	0.006238	immune_subtype=C5|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=8
+train	TCGA-LGG	TCGA-DU-7011	7	0.006308	immune_subtype=C5|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=2
+train	TCGA-LGG	TCGA-DU-8162	7	0.006150	immune_subtype=C5|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=2
+train	TCGA-LGG	TCGA-E1-A7YY	7	0.013164	immune_subtype=C5|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=1
+train	TCGA-LGG	TCGA-FG-8182	7	0.012939	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=1
+train	TCGA-LGG	TCGA-FG-8188	7	0.006106	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=2
+train	TCGA-LGG	TCGA-HT-7609	7	0.012920	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=1
+train	TCGA-LGG	TCGA-HT-A5R5	7	0.011228	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=1
+train	TCGA-LGG	TCGA-RY-A843	7	0.006038	immune_subtype=C5|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=6
+train	TCGA-LIHC	TCGA-BC-A5W4	8	0.087332	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage 0|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=9
+train	TCGA-LIHC	TCGA-DD-A3A9	8	0.058621	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVB|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=4
+train	TCGA-LIHC	TCGA-DD-AACD	8	0.013619	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage I|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=7
+train	TCGA-LIHC	TCGA-DD-AACG	8	0.014651	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage II|tp53_mutated=1|tumor_grade=G4|tumor_purity_bin=7
+train	TCGA-LIHC	TCGA-DD-AACZ	8	0.013457	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage I|tp53_mutated=1|tumor_grade=G4|tumor_purity_bin=4
+train	TCGA-LIHC	TCGA-DD-AADD	8	0.013459	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I|tp53_mutated=1|tumor_grade=G4|tumor_purity_bin=8
+train	TCGA-LIHC	TCGA-DD-AADF	8	0.013968	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage I|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=9
+train	TCGA-LIHC	TCGA-DD-AAE0	8	0.014208	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIA|tp53_mutated=1|tumor_grade=G4|tumor_purity_bin=6
+train	TCGA-LIHC	TCGA-DD-AAEE	8	0.013483	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage I|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=8
+train	TCGA-LUAD	TCGA-49-4487	7	0.013197	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IA|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUAD	TCGA-49-AARO	7	0.012638	immune_subtype=C6|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IA|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-LUAD	TCGA-55-7574	7	0.013080	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IB|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUAD	TCGA-55-8511	7	0.012879	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IB|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUAD	TCGA-86-A4P7	7	0.012716	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IB|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUAD	TCGA-97-7552	7	0.012740	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IB|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-LUAD	TCGA-99-8028	7	0.014173	immune_subtype=C3|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUAD	TCGA-L9-A743	7	0.207950	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIA|tp53_mutated=1|tumor_purity_bin=0
+train	TCGA-LUAD	TCGA-MP-A4T9	7	0.012548	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIIA|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-21-5784	7	0.012722	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IB|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-22-1000	7	0.013087	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IB|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-22-1005	7	0.018332	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-39-5028	7	0.012384	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IIIA|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-43-A56U	7	0.012693	immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-56-7731	7	0.012784	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IB|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-56-A4ZJ	7	0.018131	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-60-2709	7	0.012722	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IB|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-LUSC	TCGA-85-8048	7	0.012832	immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=1|tumor_purity_bin=1
+train	TCGA-MESO	TCGA-3U-A98G	7	0.009930	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=6
+train	TCGA-MESO	TCGA-3U-A98H	7	0.010490	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-MESO	TCGA-3U-A98I	7	0.010161	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=5
+train	TCGA-MESO	TCGA-LK-A4O5	7	0.009147	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=0|tumor_purity_bin=6
+train	TCGA-MESO	TCGA-SC-AA5Z	7	0.010792	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IV|tp53_mutated=1|tumor_purity_bin=2
+train	TCGA-MESO	TCGA-SH-A7BC	7	0.009239	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-MESO	TCGA-UD-AABY	6	0.008459	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=0
+train	TCGA-MESO	TCGA-UT-A88G	7	0.009209	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-MESO	TCGA-YS-AA4M	7	0.012576	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-OV	TCGA-25-1313	7	0.003582	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=5
+train	TCGA-OV	TCGA-25-1316	7	0.004646	immune_subtype=C1|kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=9
+train	TCGA-OV	TCGA-25-1631	7	0.003697	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=9
+train	TCGA-OV	TCGA-25-1632	7	0.003860	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=9
+train	TCGA-OV	TCGA-25-2397	7	0.003836	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=9
+train	TCGA-OV	TCGA-42-2591	6	0.015845	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=9
+train	TCGA-OV	TCGA-5X-AA5U	7	0.015711	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=8
+train	TCGA-OV	TCGA-OY-A56Q	7	0.003635	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=9
+train	TCGA-OV	TCGA-VG-A8LO	7	1.002765	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_grade=GB|tumor_purity_bin=9
+train	TCGA-PAAD	TCGA-2J-AABV	8	0.014854	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIB|tp53_mutated=0|tumor_grade=G4|tumor_purity_bin=2
+train	TCGA-PAAD	TCGA-3A-A9I7	8	0.019008	immune_subtype=C6|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IIB|tp53_mutated=0|tumor_grade=G2|tumor_purity_bin=1
+train	TCGA-PAAD	TCGA-3A-A9IL	7	0.338163	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage 0a|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=8
+train	TCGA-PAAD	TCGA-FZ-5921	7	0.019668	kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIB|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=2
+train	TCGA-PAAD	TCGA-FZ-5926	7	0.204746	kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|stage=Stage III|tp53_mutated=1|tumor_grade=G2|tumor_purity_bin=0
+train	TCGA-PAAD	TCGA-HV-A7OP	7	0.018302	kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IIB|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=8
+train	TCGA-PAAD	TCGA-HZ-8638	7	0.018764	kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=9
+train	TCGA-PAAD	TCGA-HZ-A4BK	8	0.018966	immune_subtype=C6|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IIB|tp53_mutated=1|tumor_grade=G3|tumor_purity_bin=1
+train	TCGA-PAAD	TCGA-IB-7889	8	0.022118	immune_subtype=C6|kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIB|tp53_mutated=1|tumor_grade=G1|tumor_purity_bin=1
+train	TCGA-PCPG	TCGA-QR-A6GT	6	0.007446	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-PCPG	TCGA-RW-A67V	6	0.002986	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-PCPG	TCGA-RW-A688	6	0.004698	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-PCPG	TCGA-S7-A7WV	6	0.008278	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-PCPG	TCGA-TT-A6YN	6	0.004087	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-PCPG	TCGA-TT-A6YO	6	0.002986	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-PCPG	TCGA-W2-A7HB	6	0.004585	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-PCPG	TCGA-W2-A7HF	7	0.005094	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IVA|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-PCPG	TCGA-WB-A81A	6	0.004087	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-PRAD	TCGA-CH-5763	6	0.003922	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IA|tp53_mutated=0
+train	TCGA-PRAD	TCGA-EJ-A46D	6	0.009837	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-PRAD	TCGA-G9-6343	5	0.009391	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-PRAD	TCGA-G9-6371	6	0.003402	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-PRAD	TCGA-G9-7519	6	0.009837	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-PRAD	TCGA-KK-A8II	6	0.003187	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-PRAD	TCGA-M7-A71Y	6	0.009837	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-PRAD	TCGA-XK-AAIW	6	0.003464	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=8
+train	TCGA-PRAD	TCGA-YL-A8SI	6	0.010000	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-READ	TCGA-AF-2687	7	0.006992	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IIIC|tp53_mutated=1|tumor_purity_bin=4
+train	TCGA-READ	TCGA-AF-2690	7	0.007326	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IIIC|tp53_mutated=1|tumor_purity_bin=3
+train	TCGA-READ	TCGA-AG-3909	7	0.007062	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=1|tumor_purity_bin=5
+train	TCGA-READ	TCGA-AG-A032	7	0.007133	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IIIB|tp53_mutated=1|tumor_purity_bin=6
+train	TCGA-READ	TCGA-CL-5917	7	0.007908	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIC|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-READ	TCGA-DY-A1DF	7	0.008622	immune_subtype=C1|kras_mutated=1|os_status=Dead|pfs_status=CENSORED|stage=Stage IIIC|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-READ	TCGA-EI-6883	7	0.021961	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIC|tp53_mutated=1|tumor_purity_bin=8
+train	TCGA-READ	TCGA-F5-6464	7	0.007030	immune_subtype=C1|kras_mutated=0|os_status=Dead|pfs_status=CENSORED|stage=Stage IIIC|tp53_mutated=1|tumor_purity_bin=4
+train	TCGA-READ	TCGA-F5-6702	7	0.007241	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IVA|tp53_mutated=1|tumor_purity_bin=3
+train	TCGA-SARC	TCGA-3B-A9HL	6	0.007555	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=6
+train	TCGA-SARC	TCGA-DX-A1KU	6	0.007811	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=4
+train	TCGA-SARC	TCGA-DX-A1L0	6	0.007616	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-SARC	TCGA-DX-A1L4	6	0.008441	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-SARC	TCGA-DX-A23T	6	0.008642	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-SARC	TCGA-DX-A23V	6	0.007811	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=4
+train	TCGA-SARC	TCGA-DX-A3LS	6	0.007811	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=4
+train	TCGA-SARC	TCGA-IW-A3M6	7	1.007187	immune_subtype=C6|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage 0is|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-SARC	TCGA-QQ-A5V9	6	0.007950	immune_subtype=C6|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=4
+train	TCGA-SKCM	TCGA-D3-A2JL	6	0.101728	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=4
+train	TCGA-SKCM	TCGA-D3-A3C1	6	0.101400	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-SKCM	TCGA-D3-A3C3	6	0.101400	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-SKCM	TCGA-D3-A3CB	6	0.102396	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-SKCM	TCGA-D3-A51E	6	0.101304	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-SKCM	TCGA-D3-A8GN	6	0.102559	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-SKCM	TCGA-D3-A8GO	6	0.102232	kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-SKCM	TCGA-D3-A8GV	6	0.102181	kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-SKCM	TCGA-FS-A1ZC	6	0.101734	kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage I/II (NOS)|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-STAD	TCGA-BR-7957	9	0.021172	immune_subtype=C1|kras_mutated=0|msi_status=NonMSI|os_status=Dead|pfs_status=CENSORED|stage=Stage IV|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=2
+train	TCGA-STAD	TCGA-BR-8297	9	0.023400	immune_subtype=C2|kras_mutated=0|msi_status=NonMSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIC|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=2
+train	TCGA-STAD	TCGA-D7-6522	9	0.206336	immune_subtype=C3|kras_mutated=0|msi_status=NonMSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IB|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=0
+train	TCGA-STAD	TCGA-D7-A748	9	0.020545	immune_subtype=C6|kras_mutated=0|msi_status=NonMSI|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=1
+train	TCGA-STAD	TCGA-RD-A7BW	9	0.020746	immune_subtype=C6|kras_mutated=0|msi_status=NonMSI|os_status=Dead|pfs_status=CENSORED|stage=Stage IB|tp53_mutated=0|tumor_grade=G3|tumor_purity_bin=1
+train	TCGA-STAD	TCGA-SW-A7EA	9	0.028650	immune_subtype=C2|kras_mutated=1|msi_status=MSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IB|tp53_mutated=0|tumor_grade=GX|tumor_purity_bin=6
+train	TCGA-STAD	TCGA-VQ-A8PJ	9	0.020387	immune_subtype=C1|kras_mutated=0|msi_status=NonMSI|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=6
+train	TCGA-STAD	TCGA-VQ-A91S	9	0.021371	immune_subtype=C2|kras_mutated=0|msi_status=NonMSI|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=6
+train	TCGA-STAD	TCGA-VQ-A94P	9	0.028463	immune_subtype=C3|kras_mutated=0|msi_status=NonMSI|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=1|tumor_grade=GX|tumor_purity_bin=1
+train	TCGA-TGCT	TCGA-2G-AAEW	7	0.026441	immune_subtype=C2|kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=4
+train	TCGA-TGCT	TCGA-2G-AAF1	7	0.032563	immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-TGCT	TCGA-2G-AAF6	7	0.026075	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-TGCT	TCGA-2G-AAGW	7	0.024996	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-TGCT	TCGA-S6-A8JW	7	0.025820	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=6
+train	TCGA-TGCT	TCGA-SN-A84W	7	0.024996	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-TGCT	TCGA-XE-A8H5	7	0.025820	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=6
+train	TCGA-TGCT	TCGA-XY-A9T9	7	0.026380	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=3
+train	TCGA-TGCT	TCGA-ZM-AA0H	7	0.025568	immune_subtype=C2|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IS|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-THCA	TCGA-BJ-A0Z2	7	0.145283	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IVC|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-THCA	TCGA-BJ-A291	7	0.335083	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage 0a|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-THCA	TCGA-DE-A0Y3	7	0.145283	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|stage=Stage IVC|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-THCA	TCGA-DJ-A1QM	7	0.010680	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage I|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-THCA	TCGA-DO-A2HM	7	0.013115	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IVA|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-THCA	TCGA-EL-A3MX	7	0.144975	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVC|tp53_mutated=0|tumor_purity_bin=6
+train	TCGA-THCA	TCGA-EL-A3MY	7	0.145067	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IVC|tp53_mutated=0|tumor_purity_bin=5
+train	TCGA-THCA	TCGA-EM-A2CN	7	0.145120	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IVC|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-THCA	TCGA-L6-A4ET	7	0.145120	immune_subtype=C3|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IVC|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-THYM	TCGA-4V-A9QX	5	0.009391	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-THYM	TCGA-X7-A8D7	5	0.002559	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-THYM	TCGA-X7-A8M6	5	0.002559	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-THYM	TCGA-XM-A8RC	5	0.009391	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-THYM	TCGA-XU-A92Y	5	0.002760	kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-THYM	TCGA-XU-A932	5	0.009391	kras_mutated=0|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=1
+train	TCGA-THYM	TCGA-ZB-A96B	5	0.002559	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-THYM	TCGA-ZB-A96H	5	0.003157	kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-THYM	TCGA-ZC-AAAA	5	0.002559	kras_mutated=0|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_purity_bin=2
+train	TCGA-UCEC	TCGA-A5-A0GM	8	0.007018	immune_subtype=C1|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage II|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=8
+train	TCGA-UCEC	TCGA-A5-A0GP	7	0.006560	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=6
+train	TCGA-UCEC	TCGA-AP-A05P	7	0.006816	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=4
+train	TCGA-UCEC	TCGA-B5-A11N	7	0.006784	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G1|tumor_purity_bin=5
+train	TCGA-UCEC	TCGA-B5-A11O	7	0.007283	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=3
+train	TCGA-UCEC	TCGA-BS-A0U8	7	0.006621	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=8
+train	TCGA-UCEC	TCGA-BS-A0UL	7	0.007112	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=3
+train	TCGA-UCEC	TCGA-BS-A0V7	7	0.013078	immune_subtype=C6|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=0|tumor_grade=G1|tumor_purity_bin=2
+train	TCGA-UCEC	TCGA-D1-A16Y	7	0.007314	immune_subtype=C4|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_grade=G1|tumor_purity_bin=8
+train	TCGA-UCS	TCGA-N5-A4RF	6	0.003228	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-UCS	TCGA-N5-A4RS	6	0.004112	immune_subtype=C1|kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-UCS	TCGA-N6-A4V9	6	0.003740	immune_subtype=C2|kras_mutated=1|os_status=Alive|pfs_status=CENSORED|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-UCS	TCGA-N6-A4VC	6	0.003665	immune_subtype=C1|kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=8
+train	TCGA-UCS	TCGA-N8-A4PI	6	0.002814	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=7
+train	TCGA-UCS	TCGA-N8-A4PL	6	0.004112	immune_subtype=C1|kras_mutated=1|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-UCS	TCGA-N8-A4PP	7	0.003657	immune_subtype=C2|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIA|tp53_mutated=1|tumor_purity_bin=5
+train	TCGA-UCS	TCGA-N9-A4Q3	6	0.003464	immune_subtype=C1|kras_mutated=1|os_status=Alive|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=8
+train	TCGA-UCS	TCGA-NG-A4VU	6	0.003327	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|tp53_mutated=1|tumor_purity_bin=9
+train	TCGA-UVM	TCGA-V4-A9E5	7	0.006554	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-UVM	TCGA-V4-A9EF	7	0.006554	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-UVM	TCGA-V4-A9EH	7	0.006042	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=7
+train	TCGA-UVM	TCGA-V4-A9EQ	7	0.005395	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIIA|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-UVM	TCGA-V4-A9F0	7	0.005911	immune_subtype=C3|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=8
+train	TCGA-UVM	TCGA-VD-A8KF	7	0.006919	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-UVM	TCGA-VD-A8KH	7	0.006554	immune_subtype=C4|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-UVM	TCGA-WC-A88A	7	0.005563	immune_subtype=C4|kras_mutated=0|os_status=Dead|pfs_status=PROGRESSION|stage=Stage IV|tp53_mutated=0|tumor_purity_bin=9
+train	TCGA-UVM	TCGA-YZ-A982	7	0.008266	immune_subtype=C5|kras_mutated=0|os_status=Alive|pfs_status=CENSORED|stage=Stage IIIB|tp53_mutated=0|tumor_purity_bin=9

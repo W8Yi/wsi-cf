@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "source_labels_tsv": "/common/users/wq50/SAE_path/metadata/labels/master/slide_labels_master.tsv",
+    "out_dir": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold",
+    "project_dir": "TCGA-HNSC",
+    "label_field": "hpv_status",
+    "label_map": {
+      "HPV-": 0,
+      "HPV+": 1
+    },
+    "split_level": "case_id",
+    "split_style": "stratified_kfold",
+    "num_splits": 5,
+    "test_frac": 0.2,
+    "train_frac": 0.8,
+    "exclude_conflicts": true,
+    "require_h5_exists": true,
+    "dropped_conflict_rows": 2,
+    "dropped_missing_h5_rows": 0,
+    "cases_total": 414,
+    "slides_total": 435,
+    "cases_by_label": {
+      "HPV-": 373,
+      "HPV+": 41
+    },
+    "slides_by_label": {
+      "HPV-": 393,
+      "HPV+": 42
+    }
+  },
+  "splits": [
+    {
+      "split_name": "split_0",
+      "json_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.json",
+      "tsv_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.tsv",
+      "counts": {
+        "cases_by_split": {
+          "train": 330,
+          "test": 84
+        },
+        "slides_by_split": {
+          "train": 346,
+          "test": 89
+        },
+        "cases_by_split_and_label": {
+          "train": {
+            "HPV-": 298,
+            "HPV+": 32
+          },
+          "test": {
+            "HPV-": 75,
+            "HPV+": 9
+          }
+        }
+      }
+    },
+    {
+      "split_name": "split_1",
+      "json_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_1.json",
+      "tsv_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_1.tsv",
+      "counts": {
+        "cases_by_split": {
+          "train": 331,
+          "test": 83
+        },
+        "slides_by_split": {
+          "train": 349,
+          "test": 86
+        },
+        "cases_by_split_and_label": {
+          "train": {
+            "HPV-": 298,
+            "HPV+": 33
+          },
+          "test": {
+            "HPV-": 75,
+            "HPV+": 8
+          }
+        }
+      }
+    },
+    {
+      "split_name": "split_2",
+      "json_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_2.json",
+      "tsv_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_2.tsv",
+      "counts": {
+        "cases_by_split": {
+          "train": 331,
+          "test": 83
+        },
+        "slides_by_split": {
+          "train": 347,
+          "test": 88
+        },
+        "cases_by_split_and_label": {
+          "train": {
+            "HPV-": 298,
+            "HPV+": 33
+          },
+          "test": {
+            "HPV-": 75,
+            "HPV+": 8
+          }
+        }
+      }
+    },
+    {
+      "split_name": "split_3",
+      "json_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_3.json",
+      "tsv_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_3.tsv",
+      "counts": {
+        "cases_by_split": {
+          "test": 82,
+          "train": 332
+        },
+        "slides_by_split": {
+          "test": 85,
+          "train": 350
+        },
+        "cases_by_split_and_label": {
+          "train": {
+            "HPV-": 299,
+            "HPV+": 33
+          },
+          "test": {
+            "HPV-": 74,
+            "HPV+": 8
+          }
+        }
+      }
+    },
+    {
+      "split_name": "split_4",
+      "json_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_4.json",
+      "tsv_path": "/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_4.tsv",
+      "counts": {
+        "cases_by_split": {
+          "train": 332,
+          "test": 82
+        },
+        "slides_by_split": {
+          "train": 348,
+          "test": 87
+        },
+        "cases_by_split_and_label": {
+          "train": {
+            "HPV-": 299,
+            "HPV+": 33
+          },
+          "test": {
+            "HPV-": 74,
+            "HPV+": 8
+          }
+        }
+      }
+    }
+  ]
+}

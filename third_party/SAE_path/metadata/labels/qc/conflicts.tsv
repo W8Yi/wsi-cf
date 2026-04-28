@@ -1,0 +1,3 @@
+case_id	target	detail
+TCGA-BA-6869	hpv_status	cbio(HPV+) != official_hnsc(HPV-)
+TCGA-CV-5970	hpv_status	cbio(HPV+) != official_hnsc(HPV-)

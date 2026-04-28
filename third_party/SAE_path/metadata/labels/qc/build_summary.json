@@ -1,0 +1,162 @@
+{
+  "generated_at_utc": "2026-02-27T06:03:36.519283+00:00",
+  "counts": {
+    "cases": 9547,
+    "slides": 11594,
+    "conflicts": 2
+  },
+  "conflicts_by_target": {
+    "hpv_status": 2
+  },
+  "coverage_by_target": [
+    {
+      "target": "hpv_status",
+      "labeled_cases": 562,
+      "total_cases": 9547,
+      "coverage": "0.058867",
+      "applicable_cases": 719,
+      "coverage_applicable": "0.781641"
+    },
+    {
+      "target": "immune_subtype",
+      "labeled_cases": 8237,
+      "total_cases": 9547,
+      "coverage": "0.862784",
+      "applicable_cases": 9547,
+      "coverage_applicable": "0.862784"
+    },
+    {
+      "target": "msi_status",
+      "labeled_cases": 650,
+      "total_cases": 9547,
+      "coverage": "0.068084",
+      "applicable_cases": 809,
+      "coverage_applicable": "0.803461"
+    },
+    {
+      "target": "pam50_subtype",
+      "labeled_cases": 942,
+      "total_cases": 9547,
+      "coverage": "0.098670",
+      "applicable_cases": 1055,
+      "coverage_applicable": "0.892891"
+    },
+    {
+      "target": "tumor_grade",
+      "labeled_cases": 3790,
+      "total_cases": 9547,
+      "coverage": "0.396983",
+      "applicable_cases": 9547,
+      "coverage_applicable": "0.396983"
+    },
+    {
+      "target": "stage",
+      "labeled_cases": 6338,
+      "total_cases": 9547,
+      "coverage": "0.663873",
+      "applicable_cases": 9547,
+      "coverage_applicable": "0.663873"
+    },
+    {
+      "target": "os_status",
+      "labeled_cases": 9526,
+      "total_cases": 9547,
+      "coverage": "0.997800",
+      "applicable_cases": 9547,
+      "coverage_applicable": "0.997800"
+    },
+    {
+      "target": "tp53_mutated",
+      "labeled_cases": 8710,
+      "total_cases": 9547,
+      "coverage": "0.912328",
+      "applicable_cases": 9547,
+      "coverage_applicable": "0.912328"
+    },
+    {
+      "target": "kras_mutated",
+      "labeled_cases": 8710,
+      "total_cases": 9547,
+      "coverage": "0.912328",
+      "applicable_cases": 9547,
+      "coverage_applicable": "0.912328"
+    },
+    {
+      "target": "tumor_purity",
+      "labeled_cases": 8902,
+      "total_cases": 9547,
+      "coverage": "0.932440",
+      "applicable_cases": 9547,
+      "coverage_applicable": "0.932440"
+    }
+  ],
+  "outputs": {
+    "targets_dir": "metadata/labels/targets",
+    "case_master": "metadata/labels/master/case_labels_master.tsv",
+    "slide_master": "metadata/labels/master/slide_labels_master.tsv",
+    "coverage_tsv": "metadata/labels/qc/coverage_by_target.tsv",
+    "conflicts_tsv": "metadata/labels/qc/conflicts.tsv"
+  },
+  "sources": {
+    "manifest_index": {
+      "path": "metadata/indexes/manifest_index.json",
+      "size_bytes": 7644546,
+      "sha256": "4562478f2feefcf5d028f491846e9aac2df259f56f5c78bfa394f078b706c65f",
+      "mtime_utc": "2026-02-26T02:59:29.576005+00:00"
+    },
+    "cbio_slide_tsv": {
+      "path": "metadata/labels/sources/intermediate/tcga_slide_label_catalog.tsv",
+      "size_bytes": 4036320,
+      "sha256": "dd5c144c0161307848de69a7d2fc578ff3946937239a802e5f42d1cdc00094c4",
+      "mtime_utc": "2026-02-27T06:03:15.898114+00:00"
+    },
+    "gdc_slide_tsv": {
+      "path": "metadata/labels/sources/intermediate/tcga_gdc_slide_labels.tsv",
+      "size_bytes": 5028614,
+      "sha256": "810ccbe14b09a796da231b2b95f7e19d1ca7045c3a527ac234eb3871349e83e6",
+      "mtime_utc": "2026-02-27T06:03:34.439447+00:00"
+    },
+    "cesc_hpv_tsv": {
+      "path": "metadata/labels/sources/curated/hpv/nature2017_cesc_hpv_consensus.tsv",
+      "size_bytes": 13163,
+      "sha256": "b9737b3b91bc6520250032f6d8f874869b4402e4e3b4403ce7fd60afcb89ba9c",
+      "mtime_utc": "2026-02-27T03:51:02.919852+00:00"
+    },
+    "hnsc_hpv_tsv": {
+      "path": "metadata/labels/sources/curated/hpv/nature2015_hnsc_hpv_status.tsv",
+      "size_bytes": 25009,
+      "sha256": "20b2c988185931af24d989401faa7526b1b9439891e9d4199587edd76c9d5532",
+      "mtime_utc": "2026-02-27T03:51:02.951852+00:00"
+    },
+    "pancan_subtype_tsv": {
+      "path": "metadata/labels/sources/raw/TCGASubtype.20170308.tsv",
+      "size_bytes": 603836,
+      "sha256": "1631cf7dd1324074957b42ee2ecd556b24d0977e5b2b2fb10c891c641994eb94",
+      "mtime_utc": "2026-02-27T06:03:11.485035+00:00"
+    },
+    "viral_tsv": {
+      "path": "metadata/labels/sources/raw/viral.tsv",
+      "size_bytes": 1657030,
+      "sha256": "1ffa9869fabaf69d1eb39a0e73e15784a8770a3cb43ad23e667c41473ea34f82",
+      "mtime_utc": "2026-02-27T06:03:12.738057+00:00"
+    },
+    "purity_tsv": {
+      "path": "metadata/labels/sources/raw/TCGA_mastercalls.abs_tables_JSedit.fixed.txt",
+      "size_bytes": 901812,
+      "sha256": "f430a975433d82e0098d7405619d4f12a0c765fcd97e7d63cc9b1de7f2d763cd",
+      "mtime_utc": "2026-02-27T06:03:13.988080+00:00"
+    },
+    "mutation_tsv": {
+      "path": "metadata/labels/sources/raw/cbio_mutation_tp53_kras.tsv",
+      "size_bytes": 472676,
+      "sha256": "7967890461eced187040977d207fb2889a65cb534d1f0d0448c43bb7b35db468",
+      "mtime_utc": "2026-02-27T05:25:15.947140+00:00"
+    },
+    "immune_tsv": {
+      "path": "metadata/labels/sources/raw/immune_subtype_mclust.tsv.gz",
+      "size_bytes": 475832,
+      "sha256": "06681cbb8ad2075a8751313a8a439e9f0fb3d425a2f97b2ee4caea5c08bd39c4",
+      "mtime_utc": "2026-02-27T06:03:15.096100+00:00"
+    }
+  }
+}

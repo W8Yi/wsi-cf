@@ -72,11 +72,26 @@ def test_progressive_planner_rejects_targets_outside_center_support() -> None:
             window_grid_side=4,
             stride_cells=2,
             grid_step_px=256,
-        )
+    )
     except RuntimeError as exc:
-        assert "center 2x2" in str(exc)
+        assert "edit_support=center_2x2" in str(exc)
     else:
         raise AssertionError("Expected planner to reject a target outside the center 2x2 support")
+
+
+def test_progressive_planner_border_relaxed_covers_region_edge_targets() -> None:
+    target_cells = [(0, 0), (7, 0), (7, 4), (6, 7)]
+    steps = plan_progressive_steps(
+        target_cells=target_cells,
+        grid_w=8,
+        grid_h=8,
+        window_grid_side=4,
+        stride_cells=2,
+        grid_step_px=256,
+        edit_support="border_relaxed",
+    )
+    covered = sorted({cell for step in steps for cell in step.edit_cells_global}, key=lambda item: (item[1], item[0]))
+    assert covered == sorted(target_cells, key=lambda item: (item[1], item[0]))
 
 
 def test_progressive_state_tracks_edited_visited_and_history() -> None:

@@ -23,7 +23,13 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from wsi_cf.common.io import save_png, write_json
-from wsi_cf.common.paths import ensure_legacy_repo_root_on_path
+from wsi_cf.common.paths import (
+    DEFAULT_HNSCC_PROTOTYPE_NPZ,
+    DEFAULT_HNSCC_SPLIT_TSV,
+    DEFAULT_SAE_CFG,
+    DEFAULT_SAE_CKPT,
+    ensure_legacy_repo_root_on_path,
+)
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.donor_pool import load_split_rows
 from wsi_cf.data.region_bank import make_region_cells_preview
@@ -46,7 +52,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "valid feature density, and controlled high-importance tile counts."
         )
     )
-    parser.add_argument("--split-tsv", type=Path, default=Path("/common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.tsv"))
+    parser.add_argument("--split-tsv", type=Path, default=DEFAULT_HNSCC_SPLIT_TSV)
     parser.add_argument("--split", type=str, default="test", help="Use 'all' to scan every split.")
     parser.add_argument("--model-backend", type=str, default="mil", choices=["mil", "clam"])
     parser.add_argument("--features-root", type=Path, default=Path("/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2"))
@@ -66,9 +72,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=True,
         help="For curated CLAM 40x tiles, aggregate raw 256px cells into target-magnification-equivalent supercells before region mining/export.",
     )
-    parser.add_argument("--sae-ckpt", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt"))
-    parser.add_argument("--sae-cfg", type=Path, default=Path("/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json"))
-    parser.add_argument("--prototype-npz", type=Path, default=WSI_CF_ROOT / "artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz")
+    parser.add_argument("--sae-ckpt", type=Path, default=DEFAULT_SAE_CKPT)
+    parser.add_argument("--sae-cfg", type=Path, default=DEFAULT_SAE_CFG)
+    parser.add_argument("--prototype-npz", type=Path, default=DEFAULT_HNSCC_PROTOTYPE_NPZ)
     parser.add_argument("--prototype-key", type=str, default="prototype_median", choices=["prototype_mean", "prototype_median"])
     parser.add_argument("--pos-latent", type=int, default=2645)
     parser.add_argument("--neg-latent", type=int, default=7036)

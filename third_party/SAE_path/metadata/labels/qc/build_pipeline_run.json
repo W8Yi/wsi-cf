@@ -1,0 +1,145 @@
+{
+  "started_at_utc": "2026-02-27T06:03:09.036429+00:00",
+  "repo_root": "/common/users/wq50/SAE_path",
+  "manifest_index": "metadata/indexes/manifest_index.json",
+  "labels_root": "metadata/labels",
+  "commands": [
+    {
+      "cmd": [
+        "/common/home/wq50/conda/bin/python",
+        "metadata/labels/scripts/fetch_label_sources.py",
+        "--out_dir",
+        "metadata/labels/sources/raw",
+        "--refresh"
+      ],
+      "returncode": 0,
+      "duration_sec": 6.08
+    },
+    {
+      "cmd": [
+        "/common/home/wq50/conda/bin/python",
+        "metadata/labels/scripts/build_tcga_label_catalog.py",
+        "--manifest_index",
+        "metadata/indexes/manifest_index.json",
+        "--out_dir",
+        "metadata/labels/sources/intermediate",
+        "--raw_dir",
+        "metadata/labels/sources/raw"
+      ],
+      "returncode": 0,
+      "duration_sec": 0.818
+    },
+    {
+      "cmd": [
+        "/common/home/wq50/conda/bin/python",
+        "metadata/labels/scripts/fetch_gdc_slide_labels.py",
+        "--manifest_index",
+        "metadata/indexes/manifest_index.json",
+        "--out_dir",
+        "metadata/labels/sources/intermediate",
+        "--batch_size",
+        "300",
+        "--sleep_sec",
+        "0.05"
+      ],
+      "returncode": 0,
+      "duration_sec": 18.593
+    },
+    {
+      "cmd": [
+        "/common/home/wq50/conda/bin/python",
+        "metadata/labels/scripts/build_master_labels.py",
+        "--manifest_index",
+        "metadata/indexes/manifest_index.json",
+        "--cbio_slide_tsv",
+        "metadata/labels/sources/intermediate/tcga_slide_label_catalog.tsv",
+        "--gdc_slide_tsv",
+        "metadata/labels/sources/intermediate/tcga_gdc_slide_labels.tsv",
+        "--out_dir",
+        "metadata/labels"
+      ],
+      "returncode": 0,
+      "duration_sec": 2.028
+    }
+  ],
+  "git_head": "7ccfeeca0c10002b4f238cc2f7faf124e82ce220",
+  "outputs": {
+    "metadata/labels/targets/hpv_status_case.tsv": {
+      "size_bytes": 47800,
+      "sha256": "7452807d7294cea0e64db86d2d4b3078b680e961209da52cbe6768e30f75bfee",
+      "mtime_utc": "2026-02-27T06:03:35.574467+00:00"
+    },
+    "metadata/labels/targets/immune_subtype_case.tsv": {
+      "size_bytes": 602476,
+      "sha256": "da717fd2c2652f5b118597060c77bc74969962ac6acf63388f1663102407378c",
+      "mtime_utc": "2026-02-27T06:03:35.635468+00:00"
+    },
+    "metadata/labels/targets/msi_status_case.tsv": {
+      "size_bytes": 36298,
+      "sha256": "35b774fa9768221c595fcfa6e9cbd0a4bc1e20481a24549b2f24d439d0818a90",
+      "mtime_utc": "2026-02-27T06:03:35.641468+00:00"
+    },
+    "metadata/labels/targets/pam50_case.tsv": {
+      "size_bytes": 51515,
+      "sha256": "f0e117e1a844a40808e67d2aefebc4fbb84671714803376bb3234acc96878837",
+      "mtime_utc": "2026-02-27T06:03:35.648468+00:00"
+    },
+    "metadata/labels/targets/tumor_grade_case.tsv": {
+      "size_bytes": 424095,
+      "sha256": "4206beb6e8761bd638eea6b2399ffbaf6927b68c0c77fe2298d4c6a7c463ac57",
+      "mtime_utc": "2026-02-27T06:03:35.695469+00:00"
+    },
+    "metadata/labels/targets/stage_case.tsv": {
+      "size_bytes": 516238,
+      "sha256": "9159cdb7eabf6c9ea4aa73bea1285cc4af71f1f2a2a7c0e24b5843a91d06f8d0",
+      "mtime_utc": "2026-02-27T06:03:35.751470+00:00"
+    },
+    "metadata/labels/targets/survival_case.tsv": {
+      "size_bytes": 641180,
+      "sha256": "a1131c5370fd5a619ad152f94da9e1075c34dfd399789c19bcbfaa6d3cdc4954",
+      "mtime_utc": "2026-02-27T06:03:35.819472+00:00"
+    },
+    "metadata/labels/targets/mutation_tp53_kras_case.tsv": {
+      "size_bytes": 548534,
+      "sha256": "746c272df8e6274093560a45ac5230e93bcdd3a85eae2385c3957d2c20dcaebe",
+      "mtime_utc": "2026-02-27T06:03:35.878473+00:00"
+    },
+    "metadata/labels/targets/tumor_purity_case.tsv": {
+      "size_bytes": 524900,
+      "sha256": "24d6628677e120f9b50e483e3885f2dfcfea2391bca668ee33382c86472c89aa",
+      "mtime_utc": "2026-02-27T06:03:35.933474+00:00"
+    },
+    "metadata/labels/master/case_labels_master.tsv": {
+      "size_bytes": 3069346,
+      "sha256": "a127f95db52d8c9fa8a8457e42e707504109644e6fdd5d580aaac044c32caf05",
+      "mtime_utc": "2026-02-27T06:03:35.567467+00:00"
+    },
+    "metadata/labels/master/slide_labels_master.tsv": {
+      "size_bytes": 5589562,
+      "sha256": "3d7c55654a01b95d89cc62599bb28224035866f179b31269b121be1b63e7b02c",
+      "mtime_utc": "2026-02-27T06:03:36.475483+00:00"
+    },
+    "metadata/labels/qc/coverage_by_target.tsv": {
+      "size_bytes": 533,
+      "sha256": "7b5cf930cba8b1193d1a6e6902243c7ad01aa287d35643fdeca2dcb41678dedb",
+      "mtime_utc": "2026-02-27T06:03:36.491483+00:00"
+    },
+    "metadata/labels/qc/conflicts.tsv": {
+      "size_bytes": 141,
+      "sha256": "5fb93e37e19997d34d60dbd366aa440558bc1a21428abfd415c645e7255da92f",
+      "mtime_utc": "2026-02-27T06:03:36.492484+00:00"
+    },
+    "metadata/labels/qc/build_summary.json": {
+      "size_bytes": 5283,
+      "sha256": "c0b8ba082cebb174ad72926ca6e0669835091eaf322b529a35ae0a9d52719e6f",
+      "mtime_utc": "2026-02-27T06:03:36.519484+00:00"
+    },
+    "metadata/labels/sources/raw/source_download_manifest.json": {
+      "size_bytes": 2047,
+      "sha256": "fff9ef16c846209de8d516e65f6a28e5a3d16dbeb7b3e26d6d8b5a42226c80ec",
+      "mtime_utc": "2026-02-27T06:03:15.098100+00:00"
+    }
+  },
+  "finished_at_utc": "2026-02-27T06:03:36.578665+00:00",
+  "status": "ok"
+}

@@ -18,6 +18,9 @@ CENTER_2X2_LOCAL_CELLS: tuple[tuple[int, int], ...] = (
     (1, 2),
     (2, 2),
 )
+EDIT_SUPPORT_CENTER_2X2 = "center_2x2"
+EDIT_SUPPORT_BORDER_RELAXED = "border_relaxed"
+EDIT_SUPPORT_CHOICES: tuple[str, ...] = (EDIT_SUPPORT_CENTER_2X2, EDIT_SUPPORT_BORDER_RELAXED)
 
 
 @dataclass(frozen=True)
@@ -162,8 +165,17 @@ def enumerate_progressive_windows(
 def _window_target_cells(
     window: ProgressiveWindow,
     target_set: set[tuple[int, int]],
+    *,
+    grid_w: int,
+    grid_h: int,
+    edit_support: str,
 ) -> set[tuple[int, int]]:
-    return center_support_global_cells(window).intersection(target_set)
+    return local_edit_support_global_cells(
+        window,
+        grid_w=int(grid_w),
+        grid_h=int(grid_h),
+        edit_support=str(edit_support),
+    ).intersection(target_set)
 
 
 def center_support_global_cells(window: ProgressiveWindow) -> set[tuple[int, int]]:
@@ -174,6 +186,23 @@ def center_support_global_cells(window: ProgressiveWindow) -> set[tuple[int, int
     }
 
 
+def local_edit_support_global_cells(
+    window: ProgressiveWindow,
+    *,
+    grid_w: int,
+    grid_h: int,
+    edit_support: str = EDIT_SUPPORT_CENTER_2X2,
+) -> set[tuple[int, int]]:
+    if str(edit_support) not in EDIT_SUPPORT_CHOICES:
+        raise ValueError(f"Unsupported edit_support: {edit_support}")
+    allowed = set(center_support_global_cells(window))
+    if str(edit_support) == EDIT_SUPPORT_BORDER_RELAXED:
+        for gx, gy in window.global_cells():
+            if int(gx) in {0, int(grid_w) - 1} or int(gy) in {0, int(grid_h) - 1}:
+                allowed.add((int(gx), int(gy)))
+    return allowed
+
+
 def plan_progressive_steps(
     *,
     target_cells: Sequence[tuple[int, int]],
@@ -182,7 +211,10 @@ def plan_progressive_steps(
     window_grid_side: int = 4,
     stride_cells: int = 2,
     grid_step_px: int = 256,
+    edit_support: str = EDIT_SUPPORT_CENTER_2X2,
 ) -> list[PlannedProgressiveStep]:
+    if str(edit_support) not in EDIT_SUPPORT_CHOICES:
+        raise ValueError(f"Unsupported edit_support: {edit_support}")
     validated_targets = validate_cells(list(target_cells), grid_w=int(grid_w), grid_h=int(grid_h))
     target_set = set(validated_targets)
     if not target_set:
@@ -196,13 +228,19 @@ def plan_progressive_steps(
         grid_step_px=int(grid_step_px),
     )
     window_targets = {
-        window.window_id: _window_target_cells(window, target_set)
+        window.window_id: _window_target_cells(
+            window,
+            target_set,
+            grid_w=int(grid_w),
+            grid_h=int(grid_h),
+            edit_support=str(edit_support),
+        )
         for window in windows
     }
     candidate_windows = [window for window in windows if window_targets[window.window_id]]
     if not candidate_windows:
         raise RuntimeError(
-            "No progressive windows cover the requested target cells using the enforced center 2x2 edit support"
+            f"No progressive windows cover the requested target cells using edit_support={edit_support}"
         )
 
     remaining = set(target_set)
@@ -218,7 +256,7 @@ def plan_progressive_steps(
         ]
         if not viable:
             raise RuntimeError(
-                "Could not cover all requested target cells using only the center 2x2 edit support of each progressive window"
+                f"Could not cover all requested target cells using edit_support={edit_support}"
             )
 
         if current_window is None:

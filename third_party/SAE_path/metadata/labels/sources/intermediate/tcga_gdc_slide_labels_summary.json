@@ -1,0 +1,202 @@
+{
+  "slides_in_manifest": 11593,
+  "gdc_hit_count": 11593,
+  "coverage": {
+    "gdc_project_id": 11593,
+    "gdc_primary_site": 11593,
+    "gdc_disease_type": 11593,
+    "gdc_sample_type": 11593,
+    "gdc_primary_diagnosis": 11064,
+    "gdc_tumor_grade": 3465,
+    "gdc_ajcc_pathologic_stage": 5468,
+    "gdc_vital_status": 11546
+  },
+  "top_counts": {
+    "gdc_project_id": [
+      [
+        "TCGA-BRCA",
+        1126
+      ],
+      [
+        "TCGA-GBM",
+        858
+      ],
+      [
+        "TCGA-LGG",
+        833
+      ],
+      [
+        "TCGA-SARC",
+        579
+      ],
+      [
+        "TCGA-UCEC",
+        566
+      ],
+      [
+        "TCGA-LUAD",
+        531
+      ],
+      [
+        "TCGA-KIRC",
+        519
+      ],
+      [
+        "TCGA-THCA",
+        518
+      ],
+      [
+        "TCGA-LUSC",
+        512
+      ],
+      [
+        "TCGA-SKCM",
+        475
+      ],
+      [
+        "TCGA-HNSC",
+        472
+      ],
+      [
+        "TCGA-BLCA",
+        457
+      ],
+      [
+        "TCGA-PRAD",
+        449
+      ],
+      [
+        "TCGA-COAD",
+        442
+      ],
+      [
+        "TCGA-STAD",
+        400
+      ],
+      [
+        "TCGA-LIHC",
+        372
+      ],
+      [
+        "TCGA-KIRP",
+        296
+      ],
+      [
+        "TCGA-CESC",
+        279
+      ],
+      [
+        "TCGA-TGCT",
+        248
+      ],
+      [
+        "TCGA-ACC",
+        227
+      ]
+    ],
+    "gdc_sample_type": [
+      [
+        "Primary Tumor",
+        11396
+      ],
+      [
+        "Metastatic",
+        172
+      ],
+      [
+        "Recurrent Tumor",
+        13
+      ],
+      [
+        "Additional - New Primary",
+        11
+      ],
+      [
+        "Additional Metastatic",
+        1
+      ]
+    ],
+    "gdc_primary_diagnosis": [
+      [
+        "Adenocarcinoma, NOS",
+        1272
+      ],
+      [
+        "Squamous cell carcinoma, NOS",
+        1085
+      ],
+      [
+        "Infiltrating duct carcinoma, NOS",
+        942
+      ],
+      [
+        "Glioblastoma",
+        827
+      ],
+      [
+        "Papillary adenocarcinoma, NOS",
+        631
+      ],
+      [
+        "Not Reported",
+        529
+      ],
+      [
+        "Clear cell adenocarcinoma, NOS",
+        438
+      ],
+      [
+        "Malignant melanoma, NOS",
+        431
+      ],
+      [
+        "Endometrioid adenocarcinoma, NOS",
+        403
+      ],
+      [
+        "Hepatocellular carcinoma, NOS",
+        338
+      ],
+      [
+        "Transitional cell carcinoma",
+        321
+      ],
+      [
+        "Adrenal cortical carcinoma",
+        221
+      ],
+      [
+        "Serous cystadenocarcinoma, NOS",
+        220
+      ],
+      [
+        "Mixed glioma",
+        202
+      ],
+      [
+        "Lobular carcinoma, NOS",
+        189
+      ],
+      [
+        "Oligodendroglioma, NOS",
+        187
+      ],
+      [
+        "Acinar cell carcinoma",
+        186
+      ],
+      [
+        "Oligodendroglioma, anaplastic",
+        147
+      ],
+      [
+        "Leiomyosarcoma, NOS",
+        143
+      ],
+      [
+        "Astrocytoma, anaplastic",
+        142
+      ]
+    ]
+  }
+}

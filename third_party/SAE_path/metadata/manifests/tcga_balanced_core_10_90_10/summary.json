@@ -1,0 +1,284 @@
+{
+  "source_manifest": "/common/users/wq50/SAE_path/metadata/manifests/tcga_balanced_core_90_10",
+  "design": {
+    "cases_per_project": 10,
+    "target_train_per_project": 9,
+    "target_test_per_project": 1,
+    "selection": "highest_rarity_within_split"
+  },
+  "counts": {
+    "projects": 33,
+    "cases_total": 330,
+    "cases_train": 297,
+    "cases_test": 33,
+    "slides_total": 330,
+    "slides_train": 297,
+    "slides_test": 33
+  },
+  "case_counts_by_project": {
+    "TCGA-ACC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-BLCA": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-BRCA_IDC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-BRCA_OTHERS": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-CESC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-CHOL": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 35,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-COAD": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-DLBC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-ESCA": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-GBM": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-HNSC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-KICH": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-KIRC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-KIRP": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-LGG": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-LIHC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-LUAD": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-LUSC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-MESO": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-OV": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-PAAD": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-PCPG": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-PRAD": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-READ": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-SARC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-SKCM": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-STAD": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-TGCT": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-THCA": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-THYM": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-UCEC": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-UCS": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    },
+    "TCGA-UVM": {
+      "selected_cases": 10,
+      "selected_train": 9,
+      "selected_test": 1,
+      "available_train": 36,
+      "available_test": 4,
+      "slides_selected": 10
+    }
+  }
+}
