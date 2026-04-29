@@ -1,0 +1,24 @@
+{
+  "source_region_dir": "/common/users/wq50/wsi_cf/artifacts/pathology_aware_4096_regions_clam_demo_40x/label_1_hpv_pos/TCGA-P3-A5QE-01Z-00-DX1.AC509BDE-864F-4E38-A693-09EE13C666A5_001__pathaware2048__mag_40p0__gx_24__gy_48",
+  "source_region_id": "TCGA-P3-A5QE-01Z-00-DX1.AC509BDE-864F-4E38-A693-09EE13C666A5_001__pathaware2048__mag_40p0__gx_24__gy_48",
+  "source_region_size_px": [
+    4096,
+    4096
+  ],
+  "selected_showcase_quadrant": "top_right",
+  "crop_box_xyxy": [
+    2048,
+    0,
+    4096,
+    2048
+  ],
+  "saved_original_image": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png",
+  "saved_overlay_image": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/importance_overlay_top_right_2048.png",
+  "note": "Top-right 2048x2048 crop extracted from the 4096x4096 source region for showcase use.",
+  "slide_key": "TCGA-P3-A5QE-01Z-00-DX1.AC509BDE-864F-4E38-A693-09EE13C666A5_001",
+  "label": 1,
+  "hpv_status": "hpv_pos",
+  "target_magnification": null,
+  "region_x": 6144,
+  "region_y": 12288
+}

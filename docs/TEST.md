@@ -202,8 +202,8 @@ Each `by_source/<source_region_id>/` folder from the SAE run should contain:
 
 Use the repo-local prototype bundle by default:
 
-- `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
-- `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.json`
+- `resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.npz`
+- `resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.json`
 
 Current pinned concept latents:
 
@@ -226,7 +226,7 @@ The current SAE steering pipeline for local region experiments is:
    - selected cells define a binary `tile_mask` over the `4x4` grid
 
 4. Edit only the selected UNI cells in SAE latent space.
-   - implementation: `third_party/SAE_path/utils/sae_edit.py`
+   - implementation: `src/wsi_cf/steering/sae_edit.py`
    - function: `edit_uni_z_grid_with_sae(...)`
 
 Exact prototype edit mode used by the current `wsi_cf` runners:
@@ -303,11 +303,11 @@ The contact sheet should include:
 
 Current default prototype bundle:
 
-- `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
+- `resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.npz`
 
 This bundle was built from the default SAE:
 
-- SAE config: `third_party/SAE_path/runs/relu_sae_base/run_config.json`
+- SAE config: `resources/models/sae/relu_sae_base/run_config.json`
 - magnification: `20x`
 
 Current `10x` local-region runners:
@@ -324,16 +324,11 @@ Therefore, the current default `10x` SAE steering setup has a representation mis
 
 This is a real caveat and should be stated explicitly in experiments and writing.
 
-Available closer alternative:
+Historical closer alternative:
 
-- `/common/users/wq50/SAE_path/runs/tcga_sae_batch_topk_10x_pool2x2/batch_topk_ckpt_best.pt`
-- `/common/users/wq50/SAE_path/runs/tcga_sae_batch_topk_10x_pool2x2/run_config.json`
-
-That run uses:
-
-- magnification: `10x_pool2x2`
-
-This is closer to the current `10x` workflow than the default `20x` SAE, but it is still not identical to actual optical `10x`.
+- an older `10x_pool2x2` SAE existed during exploration, but it is not part of
+  the current self-contained repo bundle.
+- the current reproducible default is the vendored `relu_sae_base` checkpoint.
 
 ## 10x Concept Bank Anchored On Current 20x Representative Tiles
 
@@ -342,9 +337,9 @@ For the next `10x` concept test, we keep the currently validated `20x` represent
 Workflow:
 
 1. Read the repo-local prototype bundle JSON:
-   - `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.json`
-2. Recover the original representative tile coordinates from:
-   - `/common/users/wq50/SAE_path/runs/hnsc_hpv_attention_mil_5fold_filtered_uni2h_80/sae_neuron_pipeline_batch_topk/split_0/top_neuron_tiles.csv`
+   - `resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.json`
+2. Recover the original representative tile coordinates from the vendored
+   prototype JSON metadata when available.
 3. Use each representative `20x` tile as the center anchor for a real `10x` `1024x1024` crop.
 4. Re-encode that real `10x` region into an aligned `4x4` UNI feature grid.
 5. Save the result as a reusable concept-centered `10x` bank that can feed the existing `10x` SAE runners.

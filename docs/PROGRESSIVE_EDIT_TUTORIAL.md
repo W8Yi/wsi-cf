@@ -528,17 +528,17 @@ This section explains **every argument** of the canonical runner.
 
 `--sae-ckpt`
 
-- Default: `third_party/SAE_path/runs/relu_sae_base/relu_final.pt`
+- Default: `resources/models/sae/relu_sae_base/relu_final.pt`
 - Path to the SAE checkpoint used for latent editing.
 
 `--sae-cfg`
 
-- Default: `third_party/SAE_path/runs/relu_sae_base/run_config.json`
+- Default: `resources/models/sae/relu_sae_base/run_config.json`
 - Config used to reconstruct and load the SAE model correctly.
 
 `--prototype-npz`
 
-- Default: `third_party/SAE_path/outputs/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
+- Default: `resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.npz`
 - Prototype bundle containing latent ids and prototype vectors.
 
 `--prototype-key`

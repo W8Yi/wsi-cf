@@ -1,0 +1,11 @@
+{
+  "runs": [
+    {
+      "run_id": "case_clean_sae_expand_attn_seed_p90__coverable_progressive",
+      "region_id": "case_clean_sae_expand_attn_seed_p90",
+      "output_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_progressive_clean_sae_p90_to_hpvneg/case_clean_sae_expand_attn_seed_p90__coverable_progressive/generated.png",
+      "num_targets": 13,
+      "num_windows": 6
+    }
+  ]
+}

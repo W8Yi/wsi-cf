@@ -437,11 +437,9 @@ So default `10x` steering currently uses:
 
 That is a representation mismatch.
 
-We do have a closer existing alternative:
-
-- `/common/users/wq50/SAE_path/runs/tcga_sae_batch_topk_10x_pool2x2`
-
-This uses `10x_pool2x2`, which is closer to the current `10x` setup than the default `20x` SAE, but still not identical to actual optical `10x`.
+We previously explored a closer `10x_pool2x2` SAE alternative, but it is not
+part of the current self-contained repo bundle. The reproducible default is the
+repo-local `resources/models/sae/relu_sae_base` checkpoint.
 
 Paper implication:
 

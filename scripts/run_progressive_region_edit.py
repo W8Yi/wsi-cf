@@ -22,12 +22,22 @@ from wsi_cf.common.paths import (
     DEFAULT_HNSCC_PROTOTYPE_NPZ,
     DEFAULT_SAE_CFG,
     DEFAULT_SAE_CKPT,
-    ensure_legacy_repo_root_on_path,
+    DEFAULT_SHOWCASE_EDIT_MANIFEST,
+    DEFAULT_SHOWCASE_OUT_DIR,
+    DEFAULT_SHOWCASE_REGION_IMAGE,
+    DEFAULT_TASK,
 )
 from wsi_cf.common.runtime import resolve_device, set_seed
-from wsi_cf.data.region_bank import parse_region_bank_csv
+from wsi_cf.data.region_bank import RegionBankRow, parse_region_bank_csv
 from wsi_cf.eval.hnsc_hpv import load_prototypes, pick_prototype_latent
-from wsi_cf.generation.pixcell import resolve_pixcell_window_config, sample_large_pixcell_multidiffusion, vae_encode_auto
+from wsi_cf.generation.pixcell import (
+    build_uni_grid_from_image,
+    load_uni2,
+    resolve_pixcell_window_config,
+    sample_large_pixcell_multidiffusion,
+    vae_encode_auto,
+)
+from wsi_cf.steering.sae_edit import edit_uni_z_grid_with_sae
 from wsi_cf.steering.progressive import (
     CENTER_2X2_LOCAL_CELLS,
     EDIT_SUPPORT_CHOICES,
@@ -41,11 +51,7 @@ from wsi_cf.steering.progressive import (
     preserve_map_preview,
     window_local_cells,
 )
-
-ensure_legacy_repo_root_on_path()
-
-from utils.sae import load_sae_from_config  # type: ignore
-from utils.sae_edit import edit_uni_z_grid_with_sae  # type: ignore
+from wsi_cf.steering.sae_runtime import load_sae_from_config
 
 
 def _jsonify(value):
@@ -70,9 +76,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "tracks edit/visit history, and uses history-aware preservation during diffusion."
         )
     )
-    parser.add_argument("--region-bank-csv", type=Path, required=True)
-    parser.add_argument("--edit-manifest", type=Path, required=True)
-    parser.add_argument("--out-dir", type=Path, required=True)
+    parser.add_argument("--task", type=str, default=DEFAULT_TASK)
+    parser.add_argument("--region-image", type=Path, default=DEFAULT_SHOWCASE_REGION_IMAGE)
+    parser.add_argument("--region-bank-csv", type=Path, default=None)
+    parser.add_argument("--edit-manifest", type=Path, default=DEFAULT_SHOWCASE_EDIT_MANIFEST)
+    parser.add_argument("--out-dir", type=Path, default=DEFAULT_SHOWCASE_OUT_DIR)
+    parser.add_argument("--target-magnification", type=float, default=20.0)
     parser.add_argument("--direction", type=str, default="hpv_pos", choices=["hpv_pos", "hpv_neg"])
     parser.add_argument("--max-runs", type=int, default=0, help="Optional cap on number of manifest runs to execute")
     parser.add_argument("--seed", type=int, default=7)
@@ -127,6 +136,66 @@ def infer_grid_shape(z_grid: np.ndarray) -> tuple[int, int]:
     return int(z_grid.shape[0]), int(z_grid.shape[1])
 
 
+def build_image_first_region_row(
+    *,
+    region_image: Path,
+    request_region_id: str,
+    out_dir: Path,
+    grid_step_px: int,
+    device: torch.device,
+) -> RegionBankRow:
+    """Encode a standalone region image and expose it through the RegionBankRow interface."""
+    source_img = load_image(str(region_image))
+    width, height = source_img.size
+    if width % int(grid_step_px) != 0 or height % int(grid_step_px) != 0:
+        raise ValueError(
+            f"Image-first progressive editing requires image dimensions divisible by grid_step_px={grid_step_px}; "
+            f"got {width}x{height} for {region_image}"
+        )
+    source_dir = out_dir / "_image_first_source"
+    source_dir.mkdir(parents=True, exist_ok=True)
+    image_path = source_dir / "region.png"
+    zgrid_path = source_dir / "region_zgrid.npy"
+    save_png(source_img, image_path)
+    if not zgrid_path.exists():
+        uni_model, uni_transform = load_uni2(device)
+        z_grid = build_uni_grid_from_image(
+            source_img,
+            uni_model=uni_model,
+            uni_transform=uni_transform,
+            grid_step_px=int(grid_step_px),
+            device=device,
+            out_dtype=torch.float32,
+        )
+        np.save(zgrid_path, z_grid.detach().cpu().numpy().astype(np.float32))
+        del uni_model
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+    z_grid_np = np.asarray(np.load(zgrid_path), dtype=np.float32)
+    return RegionBankRow(
+        region_id=str(request_region_id),
+        split="showcase",
+        label=1,
+        hpv_status="HPV+",
+        case_id=Path(region_image).stem,
+        slide_key=Path(region_image).stem,
+        slide_path=str(region_image),
+        canonical_h5_path="",
+        region_x=0,
+        region_y=0,
+        region_w=int(width),
+        region_h=int(height),
+        grid_step_px=int(grid_step_px),
+        feature_dim=int(z_grid_np.shape[-1]),
+        tissue_score=1.0,
+        seed=0,
+        image_path=str(image_path),
+        feature_grid_path=str(zgrid_path),
+        cell_preview_path="",
+        region_dir=str(source_dir),
+    )
+
+
 def commit_full_window(
     *,
     current_canvas: np.ndarray,
@@ -173,8 +242,6 @@ def main(argv: list[str] | None = None) -> None:
     }
     write_json(args.out_dir / "experiment_args.json", args_payload)
 
-    region_rows = parse_region_bank_csv(args.region_bank_csv)
-    region_by_id = {str(row.region_id): row for row in region_rows}
     edit_requests = load_progressive_edit_manifest(args.edit_manifest)
     if int(args.max_runs) > 0:
         edit_requests = edit_requests[: int(args.max_runs)]
@@ -186,6 +253,21 @@ def main(argv: list[str] | None = None) -> None:
     duplicate_run_ids = {run_id for run_id, count in run_id_counts.items() if count > 1}
     if duplicate_run_ids:
         raise ValueError(f"Duplicate run_id values in edit manifest: {sorted(duplicate_run_ids)}")
+
+    if args.region_bank_csv is not None:
+        region_rows = parse_region_bank_csv(args.region_bank_csv)
+    else:
+        first_region_id = str(edit_requests[0].region_id)
+        region_rows = [
+            build_image_first_region_row(
+                region_image=args.region_image,
+                request_region_id=first_region_id,
+                out_dir=args.out_dir,
+                grid_step_px=256,
+                device=device,
+            )
+        ]
+    region_by_id = {str(row.region_id): row for row in region_rows}
 
     sae_model, _, _ = load_sae_from_config(args.sae_ckpt, args.sae_cfg, device=str(device))
     proto_by_latent, direction_by_latent = load_prototypes(args.prototype_npz, args.prototype_key)

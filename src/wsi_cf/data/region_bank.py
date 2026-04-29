@@ -229,27 +229,35 @@ def parse_region_bank_csv(csv_path: Path) -> list[RegionBankRow]:
     with csv_path.open("r", newline="") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
+            def _int_value(key: str, default: int = 0) -> int:
+                value = row.get(key, "")
+                return int(value) if str(value).strip() else int(default)
+
+            def _float_value(key: str, default: float = 0.0) -> float:
+                value = row.get(key, "")
+                return float(value) if str(value).strip() else float(default)
+
             out.append(
                 RegionBankRow(
                     region_id=str(row["region_id"]),
-                    split=str(row["split"]),
-                    label=int(row["label"]),
-                    hpv_status=str(row["hpv_status"]),
-                    case_id=str(row["case_id"]),
-                    slide_key=str(row["slide_key"]),
-                    slide_path=str(row["slide_path"]),
-                    canonical_h5_path=str(row["canonical_h5_path"]),
-                    region_x=int(row["region_x"]),
-                    region_y=int(row["region_y"]),
-                    region_w=int(row["region_w"]),
-                    region_h=int(row["region_h"]),
-                    grid_step_px=int(row["grid_step_px"]),
-                    feature_dim=int(row["feature_dim"]),
-                    tissue_score=float(row["tissue_score"]),
-                    seed=int(row["seed"]),
+                    split=str(row.get("split", "")),
+                    label=_int_value("label", 0),
+                    hpv_status=str(row.get("hpv_status", "")),
+                    case_id=str(row.get("case_id", row.get("slide_key", ""))),
+                    slide_key=str(row.get("slide_key", "")),
+                    slide_path=str(row.get("slide_path", "")),
+                    canonical_h5_path=str(row.get("canonical_h5_path", row.get("feature_path", ""))),
+                    region_x=_int_value("region_x", 0),
+                    region_y=_int_value("region_y", 0),
+                    region_w=_int_value("region_w", 0),
+                    region_h=_int_value("region_h", 0),
+                    grid_step_px=_int_value("grid_step_px", 256),
+                    feature_dim=_int_value("feature_dim", 1536),
+                    tissue_score=_float_value("tissue_score", 0.0),
+                    seed=_int_value("seed", 0),
                     image_path=str(row["image_path"]),
                     feature_grid_path=str(row["feature_grid_path"]),
-                    cell_preview_path=str(row["cell_preview_path"]),
+                    cell_preview_path=str(row.get("cell_preview_path", "")),
                     region_dir=str(row.get("region_dir", "")),
                 )
             )

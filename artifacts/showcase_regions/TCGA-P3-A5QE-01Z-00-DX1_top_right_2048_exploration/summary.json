@@ -1,0 +1,30 @@
+{
+  "region_id": "TCGA-P3-A5QE_top_right_2048",
+  "region_image": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png",
+  "label": 1,
+  "hpv_status": "hpv_pos",
+  "pred": 1,
+  "prob_pos": 0.9752721190452576,
+  "grid_h": 8,
+  "grid_w": 8,
+  "attention_percentiles": [
+    75.0,
+    80.0,
+    85.0,
+    90.0,
+    95.0
+  ],
+  "expansion_methods": [
+    "seed_only",
+    "feature_neighbors",
+    "sae_neighbors",
+    "connected_support",
+    "feature_plus_connected",
+    "sae_plus_connected",
+    "full_stack_feature",
+    "full_stack_sae"
+  ],
+  "n_runs": 40,
+  "summary_csv": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_exploration/exploration_summary.csv",
+  "manifest_json": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_exploration/progressive_edit_manifest.json"
+}

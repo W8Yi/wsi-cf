@@ -1,0 +1,26 @@
+{
+  "selector_dir": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90",
+  "progressive_run_dir": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_progressive_clean_sae_p90_to_hpvneg_border_relaxed/case_clean_sae_expand_attn_seed_p90__image_first_tile_selection",
+  "plot_dir": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_method_plots_full_sae",
+  "sae_map_used": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/sae_match_map_all_tiles.npy",
+  "sae_nonzero_tiles": 64,
+  "sae_min": 0.3520529568195343,
+  "sae_max": 0.6667839884757996,
+  "attention_min": 0.001361773582175374,
+  "attention_max": 0.041440200060606,
+  "seed_cell_count": 6,
+  "expanded_cell_count": 22,
+  "final_cell_count": 28,
+  "window_count": 8,
+  "plots": [
+    "01_selection_maps.png",
+    "02_score_maps_8x8.png",
+    "02a_attention_scores_8x8.png",
+    "02b_sae_similarity_scores_8x8.png",
+    "02c_combined_scores_8x8.png",
+    "03_progressive_window_plan.png",
+    "04_before_after_diff.png",
+    "05_progressive_step_overview.png",
+    "06_seed_vs_expanded_mask.png"
+  ]
+}

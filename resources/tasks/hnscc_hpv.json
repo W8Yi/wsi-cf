@@ -1,0 +1,49 @@
+{
+  "task_id": "hnscc_hpv",
+  "display_name": "HNSCC HPV status",
+  "default_target_magnification": 20,
+  "grid_step_px": 256,
+  "feature_dim": 1536,
+  "positive_label": 1,
+  "negative_label": 0,
+  "label_names": {
+    "0": "HPV-",
+    "1": "HPV+"
+  },
+  "directions": {
+    "to_positive": "hpv_pos",
+    "to_negative": "hpv_neg"
+  },
+  "sae": {
+    "checkpoint": "resources/models/sae/relu_sae_base/relu_final.pt",
+    "config": "resources/models/sae/relu_sae_base/run_config.json",
+    "pos_latent": 2645,
+    "neg_latent": 7036
+  },
+  "prototypes": {
+    "npz": "resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.npz",
+    "json": "resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.json",
+    "default_key": "prototype_median"
+  },
+  "classifiers": {
+    "mil_split0": "resources/models/classifiers/hnscc_hpv/mil_split0.pt",
+    "clam_split0": "resources/models/classifiers/hnscc_hpv/clam_split0.pt",
+    "clam_dataset_csv": "resources/models/classifiers/hnscc_hpv/HNSCC.csv",
+    "clam_splits_csv": "resources/models/classifiers/hnscc_hpv/splits_0.csv"
+  },
+  "manifests": {
+    "split_0_tsv": "resources/manifests/hnsc_hpv_5fold/split_0.tsv",
+    "split_0_json": "resources/manifests/hnsc_hpv_5fold/split_0.json"
+  },
+  "external_data_defaults": {
+    "slides_dir": "/common/users/wq50/HNSCC/HNSCC_slides",
+    "features_root": "/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2",
+    "clam_features_pt_dir": "/common/users/wq50/CLAM/features/HPV_UNI2_features/pt_files",
+    "clam_coords_h5_dir": "/common/users/wq50/CLAM/HNSCC_cases/patches",
+    "clam_slides_dir": "/common/users/wq50/CLAM/HNSCC_slides"
+  },
+  "showcase": {
+    "region_image": "artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png",
+    "edit_manifest": "resources/examples/showcase_hnscc_hpv/progressive_edit_manifest.json"
+  }
+}

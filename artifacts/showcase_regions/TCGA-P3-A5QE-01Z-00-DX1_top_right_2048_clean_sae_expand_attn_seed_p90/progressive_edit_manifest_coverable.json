@@ -1,0 +1,266 @@
+[
+  {
+    "run_id": "case_clean_sae_expand_attn_seed_p90__coverable_progressive",
+    "region_id": "case_clean_sae_expand_attn_seed_p90",
+    "selection_mode": "importance_mass_plus_sae_neighbor_plus_connected_support_plus_gap_fill__coverable_center2x2_only",
+    "target_cells": [
+      {
+        "gx": 2,
+        "gy": 1
+      },
+      {
+        "gx": 3,
+        "gy": 1
+      },
+      {
+        "gx": 3,
+        "gy": 2
+      },
+      {
+        "gx": 4,
+        "gy": 2
+      },
+      {
+        "gx": 3,
+        "gy": 3
+      },
+      {
+        "gx": 4,
+        "gy": 3
+      },
+      {
+        "gx": 2,
+        "gy": 4
+      },
+      {
+        "gx": 3,
+        "gy": 4
+      },
+      {
+        "gx": 1,
+        "gy": 5
+      },
+      {
+        "gx": 2,
+        "gy": 5
+      },
+      {
+        "gx": 1,
+        "gy": 6
+      },
+      {
+        "gx": 2,
+        "gy": 6
+      },
+      {
+        "gx": 3,
+        "gy": 6
+      }
+    ],
+    "seed_target_cells": [
+      {
+        "gx": 3,
+        "gy": 0
+      },
+      {
+        "gx": 2,
+        "gy": 4
+      },
+      {
+        "gx": 1,
+        "gy": 5
+      },
+      {
+        "gx": 1,
+        "gy": 6
+      },
+      {
+        "gx": 2,
+        "gy": 7
+      },
+      {
+        "gx": 6,
+        "gy": 7
+      }
+    ],
+    "selector": "region_image_clam_attention_plus_sae",
+    "label": 1,
+    "direction_recommendation": "hpv_neg",
+    "original_selected_cells": [
+      {
+        "gx": 2,
+        "gy": 0
+      },
+      {
+        "gx": 3,
+        "gy": 0
+      },
+      {
+        "gx": 7,
+        "gy": 0
+      },
+      {
+        "gx": 2,
+        "gy": 1
+      },
+      {
+        "gx": 3,
+        "gy": 1
+      },
+      {
+        "gx": 7,
+        "gy": 1
+      },
+      {
+        "gx": 3,
+        "gy": 2
+      },
+      {
+        "gx": 4,
+        "gy": 2
+      },
+      {
+        "gx": 7,
+        "gy": 2
+      },
+      {
+        "gx": 3,
+        "gy": 3
+      },
+      {
+        "gx": 4,
+        "gy": 3
+      },
+      {
+        "gx": 7,
+        "gy": 3
+      },
+      {
+        "gx": 2,
+        "gy": 4
+      },
+      {
+        "gx": 3,
+        "gy": 4
+      },
+      {
+        "gx": 7,
+        "gy": 4
+      },
+      {
+        "gx": 1,
+        "gy": 5
+      },
+      {
+        "gx": 2,
+        "gy": 5
+      },
+      {
+        "gx": 7,
+        "gy": 5
+      },
+      {
+        "gx": 1,
+        "gy": 6
+      },
+      {
+        "gx": 2,
+        "gy": 6
+      },
+      {
+        "gx": 3,
+        "gy": 6
+      },
+      {
+        "gx": 7,
+        "gy": 6
+      },
+      {
+        "gx": 0,
+        "gy": 7
+      },
+      {
+        "gx": 1,
+        "gy": 7
+      },
+      {
+        "gx": 2,
+        "gy": 7
+      },
+      {
+        "gx": 3,
+        "gy": 7
+      },
+      {
+        "gx": 6,
+        "gy": 7
+      },
+      {
+        "gx": 7,
+        "gy": 7
+      }
+    ],
+    "excluded_edge_cells": [
+      {
+        "gx": 2,
+        "gy": 0
+      },
+      {
+        "gx": 3,
+        "gy": 0
+      },
+      {
+        "gx": 7,
+        "gy": 0
+      },
+      {
+        "gx": 7,
+        "gy": 1
+      },
+      {
+        "gx": 7,
+        "gy": 2
+      },
+      {
+        "gx": 7,
+        "gy": 3
+      },
+      {
+        "gx": 7,
+        "gy": 4
+      },
+      {
+        "gx": 7,
+        "gy": 5
+      },
+      {
+        "gx": 7,
+        "gy": 6
+      },
+      {
+        "gx": 0,
+        "gy": 7
+      },
+      {
+        "gx": 1,
+        "gy": 7
+      },
+      {
+        "gx": 2,
+        "gy": 7
+      },
+      {
+        "gx": 3,
+        "gy": 7
+      },
+      {
+        "gx": 6,
+        "gy": 7
+      },
+      {
+        "gx": 7,
+        "gy": 7
+      }
+    ]
+  }
+]

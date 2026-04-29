@@ -1,0 +1,62 @@
+[
+  {
+    "run_id": "TCGA-P3-A5QE-01Z-00-DX1.AC509BDE-864F-4E38-A693-09EE13C666A5_001__pathaware2048__mag_40p0__gx_24__gy_48__manual_showcase",
+    "region_id": "TCGA-P3-A5QE-01Z-00-DX1.AC509BDE-864F-4E38-A693-09EE13C666A5_001__pathaware2048__mag_40p0__gx_24__gy_48",
+    "selection_mode": "importance_mass_plus_sae_neighbor_expansion",
+    "target_cells": [
+      {
+        "gx": 3,
+        "gy": 0
+      },
+      {
+        "gx": 2,
+        "gy": 4
+      },
+      {
+        "gx": 1,
+        "gy": 5
+      },
+      {
+        "gx": 1,
+        "gy": 6
+      },
+      {
+        "gx": 2,
+        "gy": 7
+      },
+      {
+        "gx": 6,
+        "gy": 7
+      }
+    ],
+    "seed_target_cells": [
+      {
+        "gx": 1,
+        "gy": 6
+      },
+      {
+        "gx": 3,
+        "gy": 0
+      },
+      {
+        "gx": 2,
+        "gy": 7
+      },
+      {
+        "gx": 6,
+        "gy": 7
+      },
+      {
+        "gx": 1,
+        "gy": 5
+      },
+      {
+        "gx": 2,
+        "gy": 4
+      }
+    ],
+    "selector": "manual_showcase_clam_attention_plus_sae",
+    "label": 1,
+    "direction_recommendation": "hpv_neg"
+  }
+]

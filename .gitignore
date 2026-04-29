@@ -28,6 +28,9 @@ configs/*.local.yaml
 # Generated experiment outputs
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/showcase_regions/
+!artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/
+!artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png
 
 # Temporary files
 *.log

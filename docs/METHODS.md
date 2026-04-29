@@ -481,7 +481,7 @@ This is an important current limitation.
 
 The repo-local prototype bundle currently used by default was built from the SAE at:
 
-- `third_party/SAE_path/runs/relu_sae_base/run_config.json`
+- `resources/models/sae/relu_sae_base/run_config.json`
 
 That SAE was trained with:
 
@@ -503,15 +503,9 @@ This is a representation mismatch.
 
 ### Closer Existing Alternative
 
-There is also an older SAE run at:
-
-- `/common/users/wq50/SAE_path/runs/tcga_sae_batch_topk_10x_pool2x2/`
-
-with:
-
-- `magnification = 10x_pool2x2`
-
-This is closer to the current `10x` workflow than the default `20x` SAE, but still not identical to actual optical `10x`.
+There was also an older exploratory `10x_pool2x2` SAE run, but it is not part
+of the current self-contained repo bundle. The reproducible default is the
+repo-local `resources/models/sae/relu_sae_base` checkpoint.
 
 ## Honest Interpretation
 
@@ -536,7 +530,7 @@ But it should not be described as:
 
 Prototype edit:
 
-- `third_party/SAE_path/utils/sae_edit.py`
+- `src/wsi_cf/steering/sae_edit.py`
 
 PixCell scheduling and preservation:
 

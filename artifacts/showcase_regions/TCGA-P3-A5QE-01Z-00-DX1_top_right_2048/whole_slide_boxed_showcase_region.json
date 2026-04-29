@@ -1,0 +1,16 @@
+{
+  "slide_path": "/common/users/wq50/CLAM/HNSCC_slides/TCGA-P3-A5QE-01Z-00-DX1.AC509BDE-864F-4E38-A693-09EE13C666A5_001.svs",
+  "overview_level": 2,
+  "overview_level_dimensions": [
+    3154,
+    1689
+  ],
+  "overview_downsample": 16.000634115409007,
+  "boxed_region_level0_xyxy": [
+    8192,
+    12288,
+    10240,
+    14336
+  ],
+  "saved_preview": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/whole_slide_boxed_showcase_region.png"
+}

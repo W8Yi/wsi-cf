@@ -1,0 +1,19 @@
+{
+  "run_name": "attn_p75p0__connected_support",
+  "attention_percentile": 75.0,
+  "expansion_method": "connected_support",
+  "neighbor_similarity_space": "feature",
+  "pred": 1,
+  "prob_pos": 0.9752721190452576,
+  "high_importance_cell_count": 16,
+  "seed_selected_cell_count": 7,
+  "neighbor_expanded_cell_count": 0,
+  "sae_expanded_cell_count": 0,
+  "connected_support_added_cell_count": 6,
+  "gap_fill_added_cell_count": 0,
+  "selected_cell_count": 13,
+  "high_importance_cells_local": "3,0;4,0;0,1;3,1;4,1;3,2;3,3;4,3;2,4;7,4;1,5;1,6;3,6;2,7;6,7;7,7",
+  "seed_selected_cells_local": "3,0;3,1;2,4;1,5;1,6;2,7;6,7",
+  "selected_cells_local": "3,0;4,0;3,1;4,1;3,2;3,3;4,3;2,4;1,5;1,6;2,7;6,7;7,7",
+  "overlay_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_exploration/attn_p75p0__connected_support/importance_overlay.png"
+}

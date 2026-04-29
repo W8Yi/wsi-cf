@@ -1,130 +1,61 @@
 # WSI Counterfactual Steering
 
-`wsi_cf` is now narrowed to the workflow we are actively using:
+`wsi_cf` is organized around one smooth counterfactual workflow:
 
-- export balanced `10x`, `1024x1024` HNSCC region banks with aligned `4x4` UNI feature grids
-- run SAE prototype steering over selected cells inside those saved `10x` regions with PixCell-1024
+1. visualize attention on whole-slide feature bags,
+2. find useful `20x`-equivalent regions,
+3. run progressive region editing with SAE concept steering,
+4. optionally evaluate edited regions/features downstream.
 
-This repo is intentionally no longer a grab-bag of every experimental runner. The current focus is the sampled-bank `10x` SAE case workflow built around [`export_hnscc_region_bank_10x.py`](scripts/export_hnscc_region_bank_10x.py) and [`run_region_bank_10x_sae_cases.py`](scripts/run_region_bank_10x_sae_cases.py).
+The default task is HNSCC HPV. The default progressive-edit demo starts from:
 
-## What Belongs Here
+`artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png`
 
-- balanced `10x` region-bank export
-- SAE selected-cell steering on saved `10x` region banks
-- the small shared modules those two workflows depend on
-- focused tests, docs, and configs for that pipeline
+## Canonical Scripts
 
-## What Stays In The Legacy Repo
+- `scripts/visualize_attention.py`: whole-slide attention heatmaps, CLAM-first.
+- `scripts/find_regions.py`: region discovery by attention/pathology-aware scoring.
+- `scripts/run_progressive_region_edit.py`: image-first or region-bank progressive editing.
 
-- generic SAE training
-- generic MIL training
-- broad mining and visualization utilities
-- notebooks, legacy outputs, `wandb/`, and unrelated runs
-
-## Directory Overview
-
-- `docs/`: migration notes and design docs
-- `docs/METHODS.md`: current steering method, formulas, and implementation caveats
-- `docs/PAPER.md`: living paper outline, claims, figure plan, and writing checklist
-- `docs/PROGRESS.md`: running log of experiments, results, failures, and next ideas
-- `configs/`: example path/config templates
-- `scripts/`: thin CLI entrypoints for the focused CF workflows
-- `src/wsi_cf/common/`: shared runtime, path, and I/O helpers
-- `src/wsi_cf/data/`: H5 loading, slide utilities, donor-pool helpers
-- `src/wsi_cf/steering/`: manifest parsing, real-grid validation, feature replacement
-- `src/wsi_cf/generation/`: PixCell windowing and MultiDiffusion helpers
-- `src/wsi_cf/eval/`: HNSCC HPV evaluation helpers
-- `tests/`: focused unit and smoke tests
-- `artifacts/`: local manifests, previews, smoke-test outputs, and generated examples
-
-## Data Assumptions
-
-The current workflow assumes:
-
-- local HNSCC slides under `/common/users/wq50/HNSCC/HNSCC_slides`
-- TCGA HNSC UNI2 H5 features under `/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2`
-- split metadata from `metadata/manifests/hnsc_hpv_5fold`
-- PixCell backbones `StonyBrook-CVLab/PixCell-256` and `StonyBrook-CVLab/PixCell-1024`
-- repo-local SAE prototype bundle under `artifacts/sae_prototypes/hnscc_hpv_split0_selected`
-
-Raw slides and large feature stores stay outside `wsi_cf`.
-
-## Supported Workflow
-
-- export a balanced bank of real `10x` `1024x1024` regions with aligned `4x4x1536` UNI grids
-- run SAE-selected-cell steering cases like `baseline`, `random_two`, `neighbor_three`, and `block_2x2`
-- compare source actual, source regenerated baseline, and steered outputs by source region
-
-## Quickstarts
-
-These examples assume you are running from `/common/users/wq50/SAE_path` with the `pace` environment active.
-
-### 1. Export A Random `10x` Region Bank With Aligned Features
+Core HPV examples live in `examples/hnscc_hpv/`:
 
 ```bash
-python wsi_cf/scripts/export_hnscc_region_bank_10x.py \
-  --split-tsv /common/users/wq50/SAE_path/metadata/manifests/hnsc_hpv_5fold/split_0.tsv \
-  --features-dir /research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2 \
-  --slides-dir /common/users/wq50/HNSCC/HNSCC_slides \
-  --out-dir /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_10x_1024 \
-  --target-magnification 10 \
-  --region-size 1024 \
-  --grid-step-px 256 \
-  --regions-total 20 \
-  --seed 7 \
-  --device cuda:0
+bash examples/hnscc_hpv/01_visualize_attention.sh
+bash examples/hnscc_hpv/02_find_regions.sh
+bash examples/hnscc_hpv/03_run_showcase_edit.sh
+bash examples/hnscc_hpv/04_run_region_eval.sh
 ```
 
-### 2. Run The 10x SAE Case Sweep
+## Project Layout
 
-The current repo-local prototype bundle lives here:
+- `src/wsi_cf/models/`: SAE, MIL, and CLAM model definitions maintained inside this repo.
+- `src/wsi_cf/steering/`: SAE runtime/editing plus progressive edit planning.
+- `src/wsi_cf/generation/`: PixCell/UNI helpers and diffusion windowing.
+- `src/wsi_cf/data/`: slide, H5, region-bank, and proposal utilities.
+- `src/wsi_cf/eval/`: task-specific classifier/evaluation helpers.
+- `resources/`: versioned labels, manifests, model weights, prototypes, and task configs.
+- `examples/hnscc_hpv/`: minimal runnable HPV workflow scripts.
+- `docs/`: paper, method, testing, and migration notes.
 
-- `artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz`
-- `artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.json`
+Large raw slides and precomputed feature stores stay external. The repo stores only compact resources needed to reproduce the workflow configuration.
 
-The default concept latents are:
+## Default Resources
 
-- HPV+ prototype latent: `2645`
-- HPV- prototype latent: `7036`
+- SAE checkpoint: `resources/models/sae/relu_sae_base/relu_final.pt`
+- SAE config: `resources/models/sae/relu_sae_base/run_config.json`
+- HNSCC HPV MIL checkpoint: `resources/models/classifiers/hnscc_hpv/mil_split0.pt`
+- HNSCC HPV CLAM checkpoint: `resources/models/classifiers/hnscc_hpv/clam_split0.pt`
+- HNSCC HPV prototypes: `resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.npz`
+- Task registry: `resources/tasks/hnscc_hpv.json`
+
+## Quick Demo
 
 ```bash
-python wsi_cf/scripts/run_region_bank_10x_sae_cases.py \
-  --region-bank-csv /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_10x_1024_sample4/region_bank.csv \
-  --out-dir /common/users/wq50/wsi_cf/artifacts/hnscc_region_bank_10x_1024_sample4_sae_cases_preserve3_s0.2_mid0.5_rerun \
-  --cases baseline,random_two,neighbor_three,block_2x2 \
-  --direction hpv_pos \
-  --max-sources 4 \
-  --grid-step-px 256 \
-  --dtype fp16 \
-  --pix_model_id StonyBrook-CVLab/PixCell-1024 \
-  --pix_pipeline_id StonyBrook-CVLab/PixCell-pipeline \
-  --vae_model_id stabilityai/stable-diffusion-3-medium-diffusers \
-  --vae_subfolder vae \
-  --steps 30 \
-  --guidance 2.0 \
-  --patch-batch 256 \
-  --prototype-strength 0.8 \
-  --steer-blend 1.0 \
-  --preserve-outside-latents \
-  --preserve-outside-strength 0.2 \
-  --mid-steer-start-ratio 0.5 \
-  --mid-steer-end-ratio 1.0 \
-  --mid-steer-alpha-start 0.5 \
-  --mid-steer-alpha-end 1.0 \
-  --mid-steer-alpha-schedule linear \
-  --seed 7 \
-  --sae-ckpt /common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt \
-  --sae-cfg /common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json \
-  --prototype-npz /common/users/wq50/wsi_cf/artifacts/sae_prototypes/hnscc_hpv_split0_selected/prototype_vectors_for_selected_sae.npz \
-  --prototype-key prototype_median \
-  --pos-latent 2645 \
-  --neg-latent 7036 \
-  --device cuda:0
+python scripts/run_progressive_region_edit.py \
+  --task hnscc_hpv \
+  --direction hpv_neg \
+  --output-mode debug \
+  --out-dir artifacts/hnscc_hpv_showcase_progressive_edit
 ```
 
-## Current Layout
-
-- `scripts/export_hnscc_region_bank_10x.py`: build the sampled `10x` bank
-- `scripts/run_region_bank_10x_sae_cases.py`: run the selected-cell SAE steering sweep
-- `src/wsi_cf/`: shared helpers for slide reading, region-bank I/O, PixCell generation, and prototype loading
-- `tests/`: focused unit and smoke tests for the kept workflow
+This uses the default showcase image and the repo-provided default edit manifest, so no checkpoint/prototype paths are needed on the command line.

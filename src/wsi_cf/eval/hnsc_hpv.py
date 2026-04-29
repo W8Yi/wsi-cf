@@ -10,13 +10,9 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from wsi_cf.common.paths import ensure_legacy_repo_root_on_path
-
-ensure_legacy_repo_root_on_path()
-
-from models.classifier import AttentionMIL, GatedAttentionMIL  # type: ignore
-from utils.sae import load_sae_from_config  # type: ignore
-from utils.sae_edit import edit_uni_z_grid_with_sae  # type: ignore
+from wsi_cf.models.mil import AttentionMIL, GatedAttentionMIL
+from wsi_cf.steering.sae_edit import edit_uni_z_grid_with_sae
+from wsi_cf.steering.sae_runtime import load_sae_from_config
 
 
 def build_mil_from_checkpoint(ckpt_path: Path, device: torch.device) -> torch.nn.Module:

@@ -1,0 +1,562 @@
+{
+  "region_id": "case_clean_sae_expand_attn_seed_p90",
+  "region_image": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png",
+  "label": 1,
+  "hpv_status": "hpv_pos",
+  "model_backend": "clam",
+  "pred": 1,
+  "prob_pos": 0.9752721190452576,
+  "grid_step_px": 256,
+  "grid_h": 8,
+  "grid_w": 8,
+  "feature_dim": 1536,
+  "neighbor_similarity_space": "sae",
+  "attention_weight": 1.0,
+  "sae_weight": 0.0,
+  "attention_threshold": 0.028066342696547508,
+  "sae_threshold": 0.6121575236320496,
+  "combined_threshold": 1.0,
+  "high_importance_cell_count": 7,
+  "seed_selected_cell_count": 6,
+  "neighbor_expanded_cell_count": 22,
+  "sae_expanded_cell_count": 22,
+  "connected_support_added_cell_count": 0,
+  "gap_fill_added_cell_count": 0,
+  "selected_cell_count": 28,
+  "high_importance_cells_local": "3,0;3,2;2,4;1,5;1,6;2,7;6,7",
+  "seed_selected_cells_local": "3,0;2,4;1,5;1,6;2,7;6,7",
+  "neighbor_expanded_cells_local": "2,0;7,0;2,1;3,1;7,1;3,2;4,2;7,2;3,3;4,3;7,3;3,4;7,4;2,5;7,5;2,6;3,6;7,6;0,7;1,7;3,7;7,7",
+  "sae_expanded_cells_local": "2,0;7,0;2,1;3,1;7,1;3,2;4,2;7,2;3,3;4,3;7,3;3,4;7,4;2,5;7,5;2,6;3,6;7,6;0,7;1,7;3,7;7,7",
+  "connected_support_added_cells_local": "",
+  "gap_fill_added_cells_local": "",
+  "selected_cells_local": "2,0;3,0;7,0;2,1;3,1;7,1;3,2;4,2;7,2;3,3;4,3;7,3;2,4;3,4;7,4;1,5;2,5;7,5;1,6;2,6;3,6;7,6;0,7;1,7;2,7;3,7;6,7;7,7",
+  "selection_mode": "importance_mass_plus_sae_neighbor_plus_connected_support_plus_gap_fill",
+  "image_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/region.png",
+  "overlay_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/importance_overlay.png",
+  "feature_grid_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/region_zgrid.npy",
+  "valid_mask_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/valid_feature_mask.npy",
+  "attention_map_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/attention_map.npy",
+  "sae_match_map_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/sae_match_map.npy",
+  "combined_importance_map_path": "/common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90/combined_importance_map.npy",
+  "quality_rows": [
+    {
+      "cell_gx": 0,
+      "cell_gy": 0,
+      "tissue_score": 0.99078369140625,
+      "dark_fraction": 0.80999755859375,
+      "saturation_fraction": 0.9912261962890625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 0,
+      "tissue_score": 0.98150634765625,
+      "dark_fraction": 0.7161865234375,
+      "saturation_fraction": 0.982208251953125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 0,
+      "tissue_score": 0.9894561767578125,
+      "dark_fraction": 0.793212890625,
+      "saturation_fraction": 0.9881439208984375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 0,
+      "tissue_score": 0.9981842041015625,
+      "dark_fraction": 0.87738037109375,
+      "saturation_fraction": 0.99798583984375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 0,
+      "tissue_score": 0.9899444580078125,
+      "dark_fraction": 0.739776611328125,
+      "saturation_fraction": 0.9898529052734375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 0,
+      "tissue_score": 0.9843902587890625,
+      "dark_fraction": 0.6060028076171875,
+      "saturation_fraction": 0.9830169677734375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 0,
+      "tissue_score": 0.99371337890625,
+      "dark_fraction": 0.5740203857421875,
+      "saturation_fraction": 0.9939422607421875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 0,
+      "tissue_score": 0.9988861083984375,
+      "dark_fraction": 0.8205108642578125,
+      "saturation_fraction": 0.999176025390625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 0,
+      "cell_gy": 1,
+      "tissue_score": 0.996612548828125,
+      "dark_fraction": 0.809906005859375,
+      "saturation_fraction": 0.9937896728515625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 1,
+      "tissue_score": 0.9840087890625,
+      "dark_fraction": 0.7682037353515625,
+      "saturation_fraction": 0.9833831787109375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 1,
+      "tissue_score": 0.986663818359375,
+      "dark_fraction": 0.7616729736328125,
+      "saturation_fraction": 0.9874420166015625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 1,
+      "tissue_score": 0.9982147216796875,
+      "dark_fraction": 0.86785888671875,
+      "saturation_fraction": 0.998016357421875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 1,
+      "tissue_score": 0.994110107421875,
+      "dark_fraction": 0.77349853515625,
+      "saturation_fraction": 0.99224853515625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 1,
+      "tissue_score": 0.9928741455078125,
+      "dark_fraction": 0.5408782958984375,
+      "saturation_fraction": 0.993499755859375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 1,
+      "tissue_score": 0.9898834228515625,
+      "dark_fraction": 0.57562255859375,
+      "saturation_fraction": 0.989898681640625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 1,
+      "tissue_score": 0.9972381591796875,
+      "dark_fraction": 0.824005126953125,
+      "saturation_fraction": 0.9972991943359375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 0,
+      "cell_gy": 2,
+      "tissue_score": 0.995697021484375,
+      "dark_fraction": 0.8225555419921875,
+      "saturation_fraction": 0.994659423828125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 2,
+      "tissue_score": 0.99090576171875,
+      "dark_fraction": 0.79302978515625,
+      "saturation_fraction": 0.9870452880859375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 2,
+      "tissue_score": 0.993408203125,
+      "dark_fraction": 0.77130126953125,
+      "saturation_fraction": 0.9935455322265625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 2,
+      "tissue_score": 0.996185302734375,
+      "dark_fraction": 0.86627197265625,
+      "saturation_fraction": 0.9964447021484375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 2,
+      "tissue_score": 0.9960479736328125,
+      "dark_fraction": 0.885009765625,
+      "saturation_fraction": 0.9945068359375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 2,
+      "tissue_score": 0.9916839599609375,
+      "dark_fraction": 0.6713104248046875,
+      "saturation_fraction": 0.9913482666015625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 2,
+      "tissue_score": 0.9964141845703125,
+      "dark_fraction": 0.61669921875,
+      "saturation_fraction": 0.9965667724609375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 2,
+      "tissue_score": 0.998992919921875,
+      "dark_fraction": 0.895294189453125,
+      "saturation_fraction": 0.9991455078125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 0,
+      "cell_gy": 3,
+      "tissue_score": 0.99725341796875,
+      "dark_fraction": 0.811859130859375,
+      "saturation_fraction": 0.997283935546875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 3,
+      "tissue_score": 0.990203857421875,
+      "dark_fraction": 0.801544189453125,
+      "saturation_fraction": 0.9888458251953125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 3,
+      "tissue_score": 0.9918365478515625,
+      "dark_fraction": 0.833099365234375,
+      "saturation_fraction": 0.989410400390625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 3,
+      "tissue_score": 0.986846923828125,
+      "dark_fraction": 0.8392486572265625,
+      "saturation_fraction": 0.9869232177734375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 3,
+      "tissue_score": 0.992462158203125,
+      "dark_fraction": 0.871551513671875,
+      "saturation_fraction": 0.9916229248046875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 3,
+      "tissue_score": 0.9954833984375,
+      "dark_fraction": 0.7008056640625,
+      "saturation_fraction": 0.996246337890625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 3,
+      "tissue_score": 0.9892578125,
+      "dark_fraction": 0.700408935546875,
+      "saturation_fraction": 0.9894561767578125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 3,
+      "tissue_score": 0.9991302490234375,
+      "dark_fraction": 0.9159698486328125,
+      "saturation_fraction": 0.9990997314453125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 0,
+      "cell_gy": 4,
+      "tissue_score": 0.9873046875,
+      "dark_fraction": 0.827850341796875,
+      "saturation_fraction": 0.9815521240234375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 4,
+      "tissue_score": 0.981658935546875,
+      "dark_fraction": 0.839202880859375,
+      "saturation_fraction": 0.971435546875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 4,
+      "tissue_score": 0.9897918701171875,
+      "dark_fraction": 0.832122802734375,
+      "saturation_fraction": 0.9900054931640625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 4,
+      "tissue_score": 0.991180419921875,
+      "dark_fraction": 0.8121185302734375,
+      "saturation_fraction": 0.9887542724609375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 4,
+      "tissue_score": 0.990997314453125,
+      "dark_fraction": 0.8431396484375,
+      "saturation_fraction": 0.9898681640625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 4,
+      "tissue_score": 0.9959869384765625,
+      "dark_fraction": 0.65576171875,
+      "saturation_fraction": 0.996856689453125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 4,
+      "tissue_score": 0.9953460693359375,
+      "dark_fraction": 0.769378662109375,
+      "saturation_fraction": 0.995819091796875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 4,
+      "tissue_score": 0.99859619140625,
+      "dark_fraction": 0.9204559326171875,
+      "saturation_fraction": 0.9980010986328125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 0,
+      "cell_gy": 5,
+      "tissue_score": 0.9951019287109375,
+      "dark_fraction": 0.7598876953125,
+      "saturation_fraction": 0.993316650390625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 5,
+      "tissue_score": 0.9921722412109375,
+      "dark_fraction": 0.8448333740234375,
+      "saturation_fraction": 0.991302490234375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 5,
+      "tissue_score": 0.9910125732421875,
+      "dark_fraction": 0.779632568359375,
+      "saturation_fraction": 0.9873046875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 5,
+      "tissue_score": 0.9865264892578125,
+      "dark_fraction": 0.79449462890625,
+      "saturation_fraction": 0.9820404052734375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 5,
+      "tissue_score": 0.9954681396484375,
+      "dark_fraction": 0.7236328125,
+      "saturation_fraction": 0.9948883056640625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 5,
+      "tissue_score": 0.9927825927734375,
+      "dark_fraction": 0.6224822998046875,
+      "saturation_fraction": 0.992645263671875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 5,
+      "tissue_score": 0.995086669921875,
+      "dark_fraction": 0.7386932373046875,
+      "saturation_fraction": 0.9953155517578125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 5,
+      "tissue_score": 0.99658203125,
+      "dark_fraction": 0.8728179931640625,
+      "saturation_fraction": 0.9971923828125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 0,
+      "cell_gy": 6,
+      "tissue_score": 0.9701385498046875,
+      "dark_fraction": 0.718505859375,
+      "saturation_fraction": 0.955322265625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 6,
+      "tissue_score": 0.9970855712890625,
+      "dark_fraction": 0.8676300048828125,
+      "saturation_fraction": 0.99639892578125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 6,
+      "tissue_score": 0.9980926513671875,
+      "dark_fraction": 0.905426025390625,
+      "saturation_fraction": 0.9985809326171875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 6,
+      "tissue_score": 0.9982452392578125,
+      "dark_fraction": 0.8523101806640625,
+      "saturation_fraction": 0.9983673095703125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 6,
+      "tissue_score": 0.9887542724609375,
+      "dark_fraction": 0.6419525146484375,
+      "saturation_fraction": 0.9889678955078125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 6,
+      "tissue_score": 0.99566650390625,
+      "dark_fraction": 0.6433563232421875,
+      "saturation_fraction": 0.996734619140625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 6,
+      "tissue_score": 0.996917724609375,
+      "dark_fraction": 0.809906005859375,
+      "saturation_fraction": 0.996490478515625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 6,
+      "tissue_score": 0.99774169921875,
+      "dark_fraction": 0.8989410400390625,
+      "saturation_fraction": 0.9970550537109375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 0,
+      "cell_gy": 7,
+      "tissue_score": 0.99176025390625,
+      "dark_fraction": 0.853515625,
+      "saturation_fraction": 0.9883880615234375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 1,
+      "cell_gy": 7,
+      "tissue_score": 0.9936370849609375,
+      "dark_fraction": 0.85498046875,
+      "saturation_fraction": 0.992156982421875,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 2,
+      "cell_gy": 7,
+      "tissue_score": 0.9958648681640625,
+      "dark_fraction": 0.8580169677734375,
+      "saturation_fraction": 0.994903564453125,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 3,
+      "cell_gy": 7,
+      "tissue_score": 0.988555908203125,
+      "dark_fraction": 0.7387237548828125,
+      "saturation_fraction": 0.9859619140625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 4,
+      "cell_gy": 7,
+      "tissue_score": 0.998199462890625,
+      "dark_fraction": 0.6837615966796875,
+      "saturation_fraction": 0.998291015625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 5,
+      "cell_gy": 7,
+      "tissue_score": 0.9882659912109375,
+      "dark_fraction": 0.6913299560546875,
+      "saturation_fraction": 0.987945556640625,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 6,
+      "cell_gy": 7,
+      "tissue_score": 0.999359130859375,
+      "dark_fraction": 0.92877197265625,
+      "saturation_fraction": 0.9994964599609375,
+      "is_valid": true
+    },
+    {
+      "cell_gx": 7,
+      "cell_gy": 7,
+      "tissue_score": 0.99981689453125,
+      "dark_fraction": 0.9357452392578125,
+      "saturation_fraction": 0.9996795654296875,
+      "is_valid": true
+    }
+  ],
+  "backend_predictions": {
+    "clam": {
+      "pred": 1,
+      "prob_pos": 0.9752721190452576
+    }
+  },
+  "command": "/common/users/wq50/wsi_cf/scripts/run_region_image_tile_selector.py --region-image /common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png --out-dir /common/users/wq50/wsi_cf/artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_clean_sae_expand_attn_seed_p90 --region-id case_clean_sae_expand_attn_seed_p90 --label 1 --model-backend clam --grid-step-px 256 --attention-percentile 90 --sae-percentile 100 --combined-percentile 100 --sae-attention-gate-percentile 100 --attention-weight 1.0 --sae-weight 0.0 --target-importance-mass 0.45 --neighbor-similarity-space sae --neighbor-similarity-threshold 0.82 --neighbor-min-combined-importance 0.0 --max-expanded-cells 48 --connected-support-min-component 2 --connected-support-min-touching-neighbors 1 --gap-fill-min-neighbors 2 --gap-fill-max-iters 4 --min-selected-cells 6 --max-selected-cells 24 --device cuda:0 --no-fill-gaps"
+}
