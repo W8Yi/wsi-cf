@@ -183,20 +183,25 @@ It is explicitly constrained to the local center `2x2` support:
 
 So if a manifest target cannot land inside the center `2x2` of any valid window, the run is rejected.
 
-## Step 4: SAE Prototype Steering
+## Step 4: SAE Concept Steering
 
 ### Intuition
 
 We do **not** directly change pixels. We edit selected UNI feature vectors in **SAE latent space**.
 
-The current method uses a **full latent prototype vector**:
+There are now two implemented steering modes:
+
+- **full-code prototype steering**, used by the HNSCC HPV prototype workflow
+- **concept-card prototype steering**, used by the newer task-generic workflows such as LUAD/LUSC and KIRC low/high
+
+Both modes:
 
 - encode the UNI feature into SAE latent space
-- move the SAE code toward a prototype
+- modify only selected cells
 - decode back to UNI feature space
-- replace only the selected cells
+- use the decoded UNI feature grid as PixCell conditioning
 
-This is different from editing a single latent neuron.
+The difference is how the target prototype is obtained.
 
 ### SAE Encoding
 
@@ -208,7 +213,7 @@ Encode with the SAE:
 
 - `Z = SAE_enc(X_flat) in R^(N x L)`
 
-### Prototype Interpolation
+### Mode A: Full-Code Prototype Interpolation
 
 Let:
 
@@ -227,6 +232,58 @@ So:
 
 - `s = 0` means no latent edit
 - `s = 1` means fully replace the selected SAE code with the prototype
+
+This edits the **entire SAE code vector** for selected cells.
+
+### Mode B: Concept-Card Prototype Steering
+
+For task-generic concept runs, each concept card identifies one SAE latent `l` and representative tiles for the target class.
+
+The representative tiles are used to build a **full SAE-code prototype**, not only a single latent target.
+
+For the top representative tiles of a concept:
+
+- load the original UNI tile features from their H5 bags
+- encode each tile with the steering SAE
+- aggregate the full SAE latent codes by median, mean, 75th percentile, or max
+
+This gives:
+
+- `p_c in R^L`, the concept prototype vector
+
+By default, `p_c` is estimated from only the **top 5** representative tiles for that concept and ranking method:
+
+- `--concept-target-top-k = 5`
+
+We may still save 50 representative tiles per concept for inspection, but steering target estimation intentionally uses the top 5 so the target is driven by the cleanest concept exemplars rather than a broader review set.
+
+For selected cells `i in S_k`, the implementation does:
+
+- `Z_edit[i] = (1 - s) * Z[i] + s * p_c`
+
+This edits the **entire SAE code vector** toward the concept prototype. If multiple concept cards are supplied in one run, their prototype vectors are averaged into a single target vector. If we run “one concept per run,” each output uses exactly one concept prototype.
+
+The older ablation mode:
+
+- `--concept-steering-mode latent_target`
+
+only moves the listed latent activation:
+
+- `Z_edit[i,l] = (1 - s) * Z[i,l] + s * a_l`
+
+We keep that mode only for diagnostics. It is not the preferred paper/default steering path.
+
+This is the mode used by:
+
+- LUAD -> LUSC concept-card steering
+- KIRC low-grade -> high-grade concept-card steering
+
+The prototype metadata is recorded in each run manifest under:
+
+- `concept_steering.steering_mode`
+- `concept_steering.latent_ids`
+- `concept_steering.concept_prototypes`
+- `concept_steering.prototype_norm`
 
 ### Decode Back To UNI Space
 
@@ -256,7 +313,8 @@ Reshape back to grid form:
 
 `prototype_strength`
 
-- controls how far the selected SAE code moves toward the prototype
+- in full-code mode, controls how far the selected SAE code moves toward the prototype vector
+- in concept-card prototype mode, controls how far selected SAE codes move toward the representative-tile concept prototype
 
 `steer_blend`
 
@@ -266,6 +324,22 @@ Interpretation:
 
 - high `prototype_strength` + high `steer_blend` gives the strongest cell edit
 - low values give softer edits
+
+### Diagnostic Check: Are Concept UNI Features Different?
+
+The script:
+
+- `/common/users/wq50/wsi_cf/scripts/analyze_concept_uni_features.py`
+
+reconstructs the pre-diffusion concept edits and saves:
+
+- edited decoded UNI grids for each concept
+- selected-cell SAE latents before and after editing
+- UNI feature delta grids
+- pairwise distances between concept-specific UNI deltas
+- heatmaps showing where the decoded UNI conditioning changes
+
+This diagnostic is useful when generated images look visually similar. It checks whether the conditioning features are truly different before PixCell generation.
 
 ## Step 5: Diffusion Conditioning Schedule
 
@@ -325,8 +399,8 @@ Cosine schedule:
 
 If you want a delayed edit:
 
-- `mid_steer_start_ratio = 0.5`
-- `mid_steer_alpha_start = 0.5`
+- `mid_steer_start_ratio = 0.55`
+- `mid_steer_alpha_start = 0.4`
 - `mid_steer_alpha_end = 1.0`
 
 Then:
@@ -394,14 +468,18 @@ So:
 
 The canonical defaults are:
 
-- `preserve_edit_strength = 0.05`
-- `preserve_visited_strength = 0.95`
-- `preserve_fresh_context_strength = 0.35`
+- `prototype_strength = 0.90`
+- `preserve_edit_strength = 0.00`
+- `preserve_visited_strength = 0.84`
+- `preserve_fresh_context_strength = 0.22`
+- `mid_steer_start_ratio = 0.55`
+- `mid_steer_alpha_start = 0.40`
 
 This means:
 
-- the edit core is mostly free, but not completely unconstrained
-- previously visited overlap is strongly stabilized
+- the edit core is fully free from source-latent preservation
+- previously visited overlap is stabilized, but less rigid than the older conservative setting
+- fresh context can adapt to support the edited morphology
 - fresh context still has room to adapt and blend
 
 ### Interpretation
@@ -481,7 +559,7 @@ This is an important current limitation.
 
 The repo-local prototype bundle currently used by default was built from the SAE at:
 
-- `resources/models/sae/relu_sae_base/run_config.json`
+- `resources/models/sae/tcga_uni2_sae_relu_v1/run_config.json`
 
 That SAE was trained with:
 
@@ -505,7 +583,7 @@ This is a representation mismatch.
 
 There was also an older exploratory `10x_pool2x2` SAE run, but it is not part
 of the current self-contained repo bundle. The reproducible default is the
-repo-local `resources/models/sae/relu_sae_base` checkpoint.
+repo-local `resources/models/sae/tcga_uni2_sae_relu_v1` checkpoint.
 
 ## Honest Interpretation
 

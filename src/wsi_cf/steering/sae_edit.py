@@ -41,9 +41,11 @@ def edit_uni_z_grid_with_sae(
         raise ValueError("blend must be in [0,1].")
     if not (0.0 <= latent_strength <= 1.0):
         raise ValueError("latent_strength must be in [0,1].")
-    if not (0.0 <= target_latent_vector_strength <= 1.0):
-        raise ValueError("target_latent_vector_strength must be in [0,1].")
-    # Full-code delta mode is allowed to use negative / >1 scales.
+    if target_latent_vector_strength < 0.0:
+        raise ValueError("target_latent_vector_strength must be >= 0.")
+    # Full-code target interpolation allows values >1 for extrapolation past
+    # the prototype. Single-latent target_value edits remain bounded through
+    # latent_strength, which is validated above.
     if soft_mask_sigma < 0.0:
         raise ValueError("soft_mask_sigma must be >= 0.")
     if max_feature_delta_norm is not None and max_feature_delta_norm <= 0.0:

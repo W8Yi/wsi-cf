@@ -220,21 +220,24 @@ This means:
 
 Current defaults are:
 
-- `preserve_edit_strength = 0.05`
-- `preserve_visited_strength = 0.95`
-- `preserve_fresh_context_strength = 0.35`
-- `mid_steer_start_ratio = 0.5`
+- `prototype_strength = 0.90`
+- `preserve_edit_strength = 0.00`
+- `preserve_visited_strength = 0.84`
+- `preserve_fresh_context_strength = 0.22`
+- `mid_steer_start_ratio = 0.55`
 - `mid_steer_end_ratio = 1.0`
-- `mid_steer_alpha_start = 0.5`
+- `mid_steer_alpha_start = 0.40`
 - `mid_steer_alpha_end = 1.0`
 - `mid_steer_alpha_schedule = linear`
 
 So by default:
 
-- target edit cells are still mostly free to change, but no longer completely unconstrained
-- previously visited context is strongly anchored
+- target edit cells are fully free from source-latent preservation
+- previously visited context is still anchored, but less rigid than the older conservative preset
+- fresh context can adapt enough for the generated RGB image to express the steered condition
+- edited conditioning starts slightly after the midpoint with a softer initial alpha
 - untouched context can still move enough to make the transition smoother
-- the edited conditioning starts later and ramps from moderate to strong influence
+- the edited conditioning ramps from soft to strong influence
 
 ## 7. Minimal Example Command
 
@@ -264,14 +267,14 @@ This uses:
   --edit-manifest /common/users/wq50/wsi_cf/artifacts/edit_manifests/example_targets.json \
   --out-dir /common/users/wq50/wsi_cf/artifacts/progressive_edit_debug \
   --direction hpv_pos \
-  --prototype-strength 0.8 \
+  --prototype-strength 0.9 \
   --steer-blend 1.0 \
   --preserve-edit-strength 0.0 \
-  --preserve-visited-strength 0.98 \
-  --preserve-fresh-context-strength 0.30 \
-  --mid-steer-start-ratio 0.5 \
+  --preserve-visited-strength 0.84 \
+  --preserve-fresh-context-strength 0.22 \
+  --mid-steer-start-ratio 0.55 \
   --mid-steer-end-ratio 1.0 \
-  --mid-steer-alpha-start 1.0 \
+  --mid-steer-alpha-start 0.4 \
   --mid-steer-alpha-end 1.0 \
   --output-mode debug \
   --device cuda:0
@@ -456,7 +459,7 @@ This section explains **every argument** of the canonical runner.
 
 `--prototype-strength`
 
-- Default: `0.8`
+- Default: `0.9`
 - How strongly the SAE latent code moves toward the selected prototype.
 - Higher values produce stronger feature-space edits.
 
@@ -470,22 +473,22 @@ This section explains **every argument** of the canonical runner.
 
 `--preserve-edit-strength`
 
-- Default: `0.05`
+- Default: `0.0`
 - Preservation strength inside the current target edit cells.
 - `0.0` means the edit area is fully free.
 - Higher values make the edit itself more conservative.
-- The current default `0.05` gives a very light stabilizing pull without strongly suppressing the edit.
+- The current default uses no source-latent pull inside the edit cells, which was selected because small edit-cell pullback suppressed label flips in the showcase sweep.
 
 `--preserve-visited-strength`
 
-- Default: `0.95`
+- Default: `0.84`
 - Preservation strength for cells in the current window that were already visited by earlier windows.
 - This is the main overlap-stabilization control.
 - Increasing this helps keep previously generated context stable.
 
 `--preserve-fresh-context-strength`
 
-- Default: `0.35`
+- Default: `0.22`
 - Preservation strength for non-edit, not-yet-visited context inside the active window.
 - Lower values allow more adaptation and smoother transitions.
 - Higher values make untouched context more rigid.
@@ -494,10 +497,10 @@ This section explains **every argument** of the canonical runner.
 
 `--mid-steer-start-ratio`
 
-- Default: `0.5`
+- Default: `0.55`
 - Fraction of the diffusion trajectory where edited conditioning begins.
 - `0.0` means start using edited conditioning immediately.
-- The current default delays the edited conditioning until the midpoint of the trajectory.
+- The current default delays the edited conditioning until slightly after the midpoint of the trajectory.
 
 `--mid-steer-end-ratio`
 
@@ -507,10 +510,10 @@ This section explains **every argument** of the canonical runner.
 
 `--mid-steer-alpha-start`
 
-- Default: `0.5`
+- Default: `0.4`
 - Starting conditioning blend between base UNI grid and edited UNI grid.
 - `1.0` means fully edited conditioning from the start of the active schedule.
-- The current default starts with a moderate edit influence once the active schedule begins.
+- The current default starts with a soft edit influence once the active schedule begins.
 
 `--mid-steer-alpha-end`
 
@@ -526,15 +529,22 @@ This section explains **every argument** of the canonical runner.
 
 ### SAE / Prototype Inputs
 
+`--sae-variant`
+
+- Default: `tcga_uni2_sae_relu_v1`
+- Named SAE resource to use when `--sae-ckpt` and `--sae-cfg` are not provided.
+- Available ReLU variants are `tcga_uni2_sae_relu_v1` for the current default and
+  `relu_sae_base` for reproducing earlier experiments.
+
 `--sae-ckpt`
 
-- Default: `resources/models/sae/relu_sae_base/relu_final.pt`
-- Path to the SAE checkpoint used for latent editing.
+- Default: `resources/models/sae/tcga_uni2_sae_relu_v1/relu_final.pt`
+- Explicit path override for the SAE checkpoint used for latent editing.
 
 `--sae-cfg`
 
-- Default: `resources/models/sae/relu_sae_base/run_config.json`
-- Config used to reconstruct and load the SAE model correctly.
+- Default: `resources/models/sae/tcga_uni2_sae_relu_v1/run_config.json`
+- Explicit path override for the config used to reconstruct and load the SAE model correctly.
 
 `--prototype-npz`
 

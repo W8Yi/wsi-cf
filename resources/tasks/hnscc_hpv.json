@@ -15,8 +15,8 @@
     "to_negative": "hpv_neg"
   },
   "sae": {
-    "checkpoint": "resources/models/sae/relu_sae_base/relu_final.pt",
-    "config": "resources/models/sae/relu_sae_base/run_config.json",
+    "checkpoint": "resources/models/sae/tcga_uni2_sae_relu_v1/relu_final.pt",
+    "config": "resources/models/sae/tcga_uni2_sae_relu_v1/run_config.json",
     "pos_latent": 2645,
     "neg_latent": 7036
   },

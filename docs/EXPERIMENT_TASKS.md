@@ -224,8 +224,8 @@ Full association run for the main paper tasks:
 /common/users/wq50/envs/pace/bin/python /common/users/wq50/wsi_cf/scripts/prepare_concept_label_associations.py \
   --tasks paper \
   --out-dir /common/users/wq50/wsi_cf/artifacts/concept_label_associations_paper \
-  --sae-ckpt /common/users/wq50/wsi_cf/resources/models/sae/relu_sae_base/relu_final.pt \
-  --sae-cfg /common/users/wq50/wsi_cf/resources/models/sae/relu_sae_base/run_config.json \
+  --sae-ckpt /common/users/wq50/wsi_cf/resources/models/sae/tcga_uni2_sae_relu_v1/relu_final.pt \
+  --sae-cfg /common/users/wq50/wsi_cf/resources/models/sae/tcga_uni2_sae_relu_v1/run_config.json \
   --device cuda:0
 ```
 

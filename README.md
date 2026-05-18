@@ -41,12 +41,19 @@ Large raw slides and precomputed feature stores stay external. The repo stores o
 
 ## Default Resources
 
-- SAE checkpoint: `resources/models/sae/relu_sae_base/relu_final.pt`
-- SAE config: `resources/models/sae/relu_sae_base/run_config.json`
+- SAE checkpoint: `resources/models/sae/tcga_uni2_sae_relu_v1/relu_final.pt`
+- SAE config: `resources/models/sae/tcga_uni2_sae_relu_v1/run_config.json`
+- SAE variants: `tcga_uni2_sae_relu_v1` is the default; `relu_sae_base` is kept as a legacy
+  switchback option through `--sae-variant relu_sae_base`.
 - HNSCC HPV MIL checkpoint: `resources/models/classifiers/hnscc_hpv/mil_split0.pt`
 - HNSCC HPV CLAM checkpoint: `resources/models/classifiers/hnscc_hpv/clam_split0.pt`
 - HNSCC HPV prototypes: `resources/prototypes/hnscc_hpv/prototype_vectors_for_selected_sae.npz`
 - Task registry: `resources/tasks/hnscc_hpv.json`
+
+Note: the legacy HNSCC HPV prototype bundle records its own SAE provenance and was built
+with the older `relu_sae_base` checkpoint. Regenerate that bundle before using legacy
+prototype-file steering with the new default ReLU SAE. Concept-card steering builds
+prototypes dynamically with the active SAE and is the preferred path.
 
 ## Quick Demo
 

@@ -13,8 +13,21 @@ TASKS_ROOT = RESOURCES_ROOT / "tasks"
 DEFAULT_TASK = "hnscc_hpv"
 DEFAULT_TASK_CONFIG = TASKS_ROOT / f"{DEFAULT_TASK}.json"
 
-DEFAULT_SAE_CKPT = RESOURCES_ROOT / "models/sae/relu_sae_base/relu_final.pt"
-DEFAULT_SAE_CFG = RESOURCES_ROOT / "models/sae/relu_sae_base/run_config.json"
+DEFAULT_SAE_VARIANT = "tcga_uni2_sae_relu_v1"
+SAE_VARIANTS = {
+    "tcga_uni2_sae_relu_v1": {
+        "checkpoint": RESOURCES_ROOT / "models/sae/tcga_uni2_sae_relu_v1/relu_final.pt",
+        "config": RESOURCES_ROOT / "models/sae/tcga_uni2_sae_relu_v1/run_config.json",
+        "description": "Current default TCGA UNI2 ReLU SAE trained at 20x.",
+    },
+    "relu_sae_base": {
+        "checkpoint": RESOURCES_ROOT / "models/sae/relu_sae_base/relu_final.pt",
+        "config": RESOURCES_ROOT / "models/sae/relu_sae_base/run_config.json",
+        "description": "Legacy ReLU SAE kept for reproducing earlier experiments.",
+    },
+}
+DEFAULT_SAE_CKPT = SAE_VARIANTS[DEFAULT_SAE_VARIANT]["checkpoint"]
+DEFAULT_SAE_CFG = SAE_VARIANTS[DEFAULT_SAE_VARIANT]["config"]
 
 DEFAULT_HNSCC_SPLIT_TSV = RESOURCES_ROOT / "manifests/hnsc_hpv_5fold/split_0.tsv"
 DEFAULT_HNSCC_SPLIT_JSON = RESOURCES_ROOT / "manifests/hnsc_hpv_5fold/split_0.json"
@@ -47,6 +60,25 @@ def resource_path(relative: str | Path) -> Path:
     if path.is_absolute():
         return path
     return WSI_CF_ROOT / path
+
+
+def resolve_sae_paths(
+    variant: str | None = None,
+    checkpoint: str | Path | None = None,
+    config: str | Path | None = None,
+) -> tuple[Path, Path]:
+    """Resolve an SAE checkpoint/config pair from a named variant or explicit paths."""
+    if checkpoint is not None or config is not None:
+        if checkpoint is None or config is None:
+            raise ValueError("Both SAE checkpoint and config must be provided when overriding paths.")
+        return resource_path(checkpoint), resource_path(config)
+
+    variant_name = variant or DEFAULT_SAE_VARIANT
+    if variant_name not in SAE_VARIANTS:
+        choices = ", ".join(sorted(SAE_VARIANTS))
+        raise ValueError(f"Unknown SAE variant {variant_name!r}. Available variants: {choices}")
+    record = SAE_VARIANTS[variant_name]
+    return resource_path(record["checkpoint"]), resource_path(record["config"])
 
 
 def read_task_config(task: str | Path = DEFAULT_TASK) -> dict[str, Any]:

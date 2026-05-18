@@ -34,7 +34,10 @@ from wsi_cf.common.paths import (
     DEFAULT_HNSCC_SPLIT_TSV,
     DEFAULT_SAE_CFG,
     DEFAULT_SAE_CKPT,
+    DEFAULT_SAE_VARIANT,
     DEFAULT_SHOWCASE_REGION_IMAGE,
+    SAE_VARIANTS,
+    resolve_sae_paths,
 )
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.donor_pool import load_split_rows
@@ -62,6 +65,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-backend", type=str, default="clam", choices=["mil", "clam"])
     parser.add_argument("--features-root", type=Path, default=Path("/research/projects/mllab/WSI/TCGA_features/TCGA-HNSC/features_uni2"))
     parser.add_argument("--slides-dir", type=Path, default=Path("/common/users/wq50/HNSCC/test"))
+    parser.add_argument("--classifier-run-dir", type=Path, default=None, help="Generic classifier bundle; when set, use its task_manifest.csv and best_model.pt.")
+    parser.add_argument("--task-manifest-csv", type=Path, default=None)
+    parser.add_argument("--slides-root", type=Path, default=Path("/research/projects/mllab/WSI/TCGA_features"))
+    parser.add_argument("--source-label", type=str, default="")
+    parser.add_argument("--target-label", type=str, default="")
+    parser.add_argument("--max-regions", type=int, default=0, help="Generic classifier mode cap. 0 uses final-regions-per-label.")
     parser.add_argument("--out-dir", type=Path, default=WSI_CF_ROOT / "artifacts/pathology_aware_2048_regions")
     parser.add_argument("--mil-ckpt", type=Path, default=DEFAULT_HNSCC_MIL_CKPT)
     parser.add_argument("--clam-ckpt", type=Path, default=DEFAULT_HNSCC_CLAM_CKPT)
@@ -77,8 +86,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=True,
         help="For curated CLAM 40x tiles, aggregate raw 256px cells into target-magnification-equivalent supercells before region mining/export.",
     )
-    parser.add_argument("--sae-ckpt", type=Path, default=DEFAULT_SAE_CKPT)
-    parser.add_argument("--sae-cfg", type=Path, default=DEFAULT_SAE_CFG)
+    parser.add_argument("--sae-variant", type=str, default=DEFAULT_SAE_VARIANT, choices=sorted(SAE_VARIANTS))
+    parser.add_argument("--sae-ckpt", type=Path, default=None, help=f"Explicit SAE checkpoint override. Defaults to --sae-variant ({DEFAULT_SAE_CKPT}).")
+    parser.add_argument("--sae-cfg", type=Path, default=None, help=f"Explicit SAE config override. Defaults to --sae-variant ({DEFAULT_SAE_CFG}).")
     parser.add_argument("--prototype-npz", type=Path, default=DEFAULT_HNSCC_PROTOTYPE_NPZ)
     parser.add_argument("--prototype-key", type=str, default="prototype_median", choices=["prototype_mean", "prototype_median"])
     parser.add_argument("--pos-latent", type=int, default=2645)
@@ -787,8 +797,261 @@ def encode_local_cells(cells: Sequence[tuple[int, int]]) -> str:
     return ";".join(f"{int(gx)},{int(gy)}" for gx, gy in cells)
 
 
+@torch.no_grad()
+def run_generic_mil_attention(model: torch.nn.Module, features: np.ndarray, *, device: torch.device) -> tuple[np.ndarray, int, float]:
+    x = torch.as_tensor(features, dtype=torch.float32, device=device)
+    _, y_prob, y_hat, a_raw, _ = model(x)
+    attn = F.softmax(a_raw, dim=1).detach().cpu().numpy().reshape(-1).astype(np.float32)
+    pred = int(y_hat.detach().cpu().reshape(-1)[0].item())
+    probs = y_prob.detach().cpu().numpy().reshape(-1)
+    prob_pred = float(probs[pred]) if 0 <= pred < len(probs) else float(np.max(probs))
+    return attn, pred, prob_pred
+
+
+def load_classifier_manifest_rows(args: argparse.Namespace) -> list[dict[str, str]]:
+    manifest = args.task_manifest_csv or (args.classifier_run_dir / "task_manifest.csv" if args.classifier_run_dir is not None else None)
+    if manifest is None or not manifest.exists():
+        raise FileNotFoundError(f"Missing task manifest for generic classifier mode: {manifest}")
+    rows: list[dict[str, str]] = []
+    with manifest.open("r", newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            if args.source_label and str(row.get("label_name", "")) != str(args.source_label):
+                continue
+            h5_path = Path(str(row.get("h5_path", "")))
+            if not h5_path.exists():
+                continue
+            rows.append(dict(row))
+    rows.sort(key=lambda r: (str(r.get("split", "")) != "test", str(r.get("case_id", "")), str(r.get("slide_key", ""))))
+    return rows
+
+
+def find_generic_slide_path(slides_root: Path, project: str, slide_key: str) -> Path | None:
+    ready_root = slides_root / ".tmp/ready_buffer/slides" / project
+    if slides_root.name == "TCGA_features":
+        ready_root = slides_root.parent / ".tmp/ready_buffer/slides" / project
+    for base in (
+        slides_root / project / "slides",
+        ready_root,
+    ):
+        direct = find_slide_path(base, slide_key)
+        if direct is not None:
+            return direct
+        matches = sorted(base.glob(f"{slide_key}*/*.svs"))
+        if matches:
+            return matches[0]
+        matches = sorted(base.rglob(f"{slide_key}*.svs")) if base.exists() else []
+        if matches:
+            return matches[0]
+    return None
+
+
+def run_generic_classifier_mode(args: argparse.Namespace, *, device: torch.device) -> None:
+    if args.classifier_run_dir is None:
+        raise ValueError("--classifier-run-dir is required for generic classifier region finding")
+    model = build_mil_from_checkpoint(args.classifier_run_dir / "best_model.pt", device=device)
+    source_rows = load_classifier_manifest_rows(args)
+    if not source_rows:
+        raise RuntimeError(f"No source rows found for source_label={args.source_label!r}")
+    region_side = int(round(float(args.region_size) / float(args.grid_step_px)))
+    if region_side * int(args.grid_step_px) != int(args.region_size):
+        raise ValueError("region_size must be divisible by grid_step_px")
+    max_regions = int(args.max_regions) if int(args.max_regions) > 0 else int(args.final_regions_per_label)
+
+    candidate_rows: list[dict[str, Any]] = []
+    selected_rows: list[dict[str, Any]] = []
+    edit_manifest: list[dict[str, Any]] = []
+    seen_slides = 0
+    for row in source_rows:
+        if len(selected_rows) >= max_regions:
+            break
+        slide_key = str(row["slide_key"])
+        project = str(row["project_dir"])
+        slide_path = find_generic_slide_path(args.slides_root, project, slide_key)
+        if slide_path is None:
+            candidate_rows.append({**row, "eligible": False, "reason": "missing_slide"})
+            continue
+        h5_path = Path(str(row["h5_path"]))
+        try:
+            features, coords = read_h5_features_coords(h5_path)
+        except Exception as exc:
+            candidate_rows.append({**row, "eligible": False, "reason": f"h5_read_error:{exc}"})
+            continue
+        tile_size_level0 = infer_coord_tile_size(coords)
+        cell_to_index, index_to_cell, grid_w, grid_h = build_cell_maps(coords, tile_size_level0)
+        slide = open_slide(slide_path)
+        try:
+            objective_power = infer_objective_power(slide)
+            effective_step = effective_grid_step_at_target_magnification(
+                tile_size_level0=int(tile_size_level0),
+                objective_power=float(objective_power),
+                target_magnification=float(args.target_magnification),
+            )
+            if abs(float(effective_step) - float(args.grid_step_px)) > float(args.grid_step_tolerance_px):
+                candidate_rows.append(
+                    {
+                        **row,
+                        "eligible": False,
+                        "reason": "feature_grid_spacing_mismatch",
+                        "tile_size_level0": int(tile_size_level0),
+                        "objective_power": float(objective_power),
+                        "effective_grid_step": float(effective_step),
+                    }
+                )
+                continue
+            attention, pred, prob_pred = run_generic_mil_attention(model, features, device=device)
+            label_id = int(row.get("label_id", -1))
+            if bool(args.require_label_match) and pred != label_id:
+                candidate_rows.append({**row, "eligible": False, "reason": "prediction_mismatch", "pred": int(pred), "prob_pred": float(prob_pred)})
+                continue
+            seen_slides += 1
+            attn_norm = normalize_01(attention)
+            order = np.argsort(-attention)
+            tried_starts: set[tuple[int, int]] = set()
+            selected_this_slide = 0
+            for tile_idx in order[: max(int(args.max_candidates_per_slide) * 4, 16)].tolist():
+                if len(selected_rows) >= max_regions:
+                    break
+                if selected_this_slide >= int(args.max_candidates_per_slide):
+                    break
+                gx, gy = index_to_cell[int(tile_idx)]
+                gx0 = min(max(0, int(gx) - region_side // 2), max(0, int(grid_w) - region_side))
+                gy0 = min(max(0, int(gy) - region_side // 2), max(0, int(grid_h) - region_side))
+                if (gx0, gy0) in tried_starts:
+                    continue
+                tried_starts.add((gx0, gy0))
+                cells = region_cells(gx0, gy0, region_side)
+                valid_cells = [cell for cell in cells if cell in cell_to_index]
+                valid_fraction = float(len(valid_cells) / max(len(cells), 1))
+                if valid_fraction < float(args.min_valid_feature_fraction):
+                    continue
+                local_idxs = [cell_to_index[cell] for cell in valid_cells]
+                local_attention = np.asarray([attention[idx] for idx in local_idxs], dtype=np.float32)
+                importance_by_cell = {cell: float(attn_norm[cell_to_index[cell]]) for cell in valid_cells}
+                threshold = float(np.percentile(local_attention, float(args.attention_percentile)))
+                high_cells = [cell for cell in valid_cells if float(attention[cell_to_index[cell]]) >= threshold]
+                if len(high_cells) < int(args.min_selected_cells):
+                    continue
+                selected_global = select_cells_by_mass(
+                    high_cells,
+                    importance_by_cell,
+                    target_mass=float(args.target_importance_mass),
+                    min_cells=int(args.min_selected_cells),
+                    max_cells=int(args.max_selected_cells),
+                )
+                selected_local = [(int(x) - gx0, int(y) - gy0) for x, y in selected_global]
+                region_img, crop_w0, crop_h0 = read_region_rgb_at_magnification(
+                    slide,
+                    x0=int(gx0) * int(tile_size_level0),
+                    y0=int(gy0) * int(tile_size_level0),
+                    out_w=int(args.region_size),
+                    out_h=int(args.region_size),
+                    target_magnification=float(args.target_magnification),
+                )
+                quality = quick_region_quality_metrics(region_img)
+                if quality["tissue_score"] < float(args.min_tissue):
+                    continue
+                if quality["dark_fraction"] < float(args.min_dark_fraction):
+                    continue
+                if quality["saturation_fraction"] < float(args.min_saturation_fraction):
+                    continue
+                zgrid = np.zeros((region_side, region_side, int(features.shape[1])), dtype=np.float32)
+                valid_mask = np.zeros((region_side, region_side), dtype=np.uint8)
+                for ly in range(region_side):
+                    for lx in range(region_side):
+                        cell = (gx0 + lx, gy0 + ly)
+                        if cell in cell_to_index:
+                            zgrid[ly, lx] = features[cell_to_index[cell]]
+                            valid_mask[ly, lx] = 1
+                region_id = f"{slide_key}__{str(args.source_label).lower()}_to_{str(args.target_label).lower()}__mag_{str(args.target_magnification).replace('.', 'p')}__gx_{gx0}__gy_{gy0}"
+                region_dir = args.out_dir / f"label_{str(args.source_label)}" / region_id
+                region_dir.mkdir(parents=True, exist_ok=True)
+                image_path = region_dir / "region.png"
+                feature_grid_path = region_dir / "region_zgrid.npy"
+                valid_mask_path = region_dir / "valid_feature_mask.npy"
+                cells_path = region_dir / "region_cells.png"
+                overlay_path = region_dir / "importance_overlay.png"
+                save_png(region_img, image_path)
+                np.save(feature_grid_path, zgrid)
+                np.save(valid_mask_path, valid_mask)
+                save_png(make_region_cells_preview(region_img, grid_step_px=int(args.grid_step_px)), cells_path)
+                high_local = [(int(x) - gx0, int(y) - gy0) for x, y in high_cells]
+                save_png(
+                    draw_region_overlay(region_img, selected_cells=selected_local, seed_cells=selected_local, high_cells=high_local, grid_step_px=int(args.grid_step_px)),
+                    overlay_path,
+                )
+                public = {
+                    "region_id": region_id,
+                    "split": str(row.get("split", "")),
+                    "label": int(label_id),
+                    "hpv_status": str(args.source_label),
+                    "case_id": str(row.get("case_id", "")),
+                    "slide_key": slide_key,
+                    "slide_path": str(slide_path),
+                    "canonical_h5_path": str(h5_path),
+                    "region_x": int(gx0) * int(tile_size_level0),
+                    "region_y": int(gy0) * int(tile_size_level0),
+                    "region_w": int(args.region_size),
+                    "region_h": int(args.region_size),
+                    "grid_step_px": int(args.grid_step_px),
+                    "feature_dim": int(features.shape[1]),
+                    "tissue_score": float(quality["tissue_score"]),
+                    "seed": int(args.seed),
+                    "image_path": str(image_path),
+                    "feature_grid_path": str(feature_grid_path),
+                    "cell_preview_path": str(cells_path),
+                    "region_dir": str(region_dir),
+                    "project_dir": project,
+                    "source_label": str(args.source_label),
+                    "target_label": str(args.target_label),
+                    "pred": int(pred),
+                    "prob_pred": float(prob_pred),
+                    "region_gx0": int(gx0),
+                    "region_gy0": int(gy0),
+                    "selected_cells_local": encode_local_cells(selected_local),
+                    "high_importance_cells_local": encode_local_cells(high_local),
+                    "valid_feature_fraction": float(valid_fraction),
+                    "max_attention": float(local_attention.max()),
+                    "mean_attention": float(local_attention.mean()),
+                    "importance_overlay_path": str(overlay_path),
+                }
+                write_json(region_dir / "region_meta.json", public)
+                candidate_rows.append({**public, "eligible": True, "reason": "selected"})
+                selected_rows.append(public)
+                selected_this_slide += 1
+                edit_manifest.append(
+                    {
+                        "run_id": f"{region_id}__to_{str(args.target_label).lower()}_concepts",
+                        "region_id": region_id,
+                        "source_label": str(args.source_label),
+                        "target_label": str(args.target_label),
+                        "target_cells": [{"gx": int(x), "gy": int(y)} for x, y in selected_local],
+                        "selector": "classifier_attention",
+                    }
+                )
+        finally:
+            slide.close()
+
+    write_csv(args.out_dir / "candidate_scan.csv", candidate_rows)
+    write_csv(args.out_dir / "selected_regions.csv", selected_rows)
+    write_csv(args.out_dir / "region_bank.csv", selected_rows)
+    write_json(args.out_dir / "progressive_edit_manifest.json", edit_manifest)
+    summary = {
+        "mode": "generic_classifier",
+        "source_label": str(args.source_label),
+        "target_label": str(args.target_label),
+        "n_selected_rows": int(len(selected_rows)),
+        "slides_scanned": int(seen_slides),
+        "region_bank_csv": str(args.out_dir / "region_bank.csv"),
+        "progressive_edit_manifest": str(args.out_dir / "progressive_edit_manifest.json"),
+    }
+    write_json(args.out_dir / "summary.json", summary)
+    print(json.dumps(summary, indent=2), flush=True)
+
+
 def main() -> None:
     args = build_arg_parser().parse_args()
+    args.sae_ckpt, args.sae_cfg = resolve_sae_paths(args.sae_variant, args.sae_ckpt, args.sae_cfg)
     set_seed(int(args.seed))
     device = resolve_device(args.device)
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -804,6 +1067,9 @@ def main() -> None:
         return
     if str(args.mode) == "random":
         raise NotImplementedError("Random mode is reserved for the next region finder pass; use --mode attention or --mode manual.")
+    if args.classifier_run_dir is not None:
+        run_generic_classifier_mode(args, device=device)
+        return
 
     if str(args.model_backend) == "mil":
         source_rows = load_split_rows(args.split_tsv, split_filter=str(args.split))

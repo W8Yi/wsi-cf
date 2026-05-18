@@ -23,7 +23,7 @@ def build_mil_from_checkpoint(ckpt_path: Path, device: torch.device) -> torch.nn
         "embed_dim": int(saved_args.get("embed_dim", 1536)),
         "hidden_dim": int(saved_args.get("hidden_dim", 512)),
         "attn_dim": int(saved_args.get("attn_dim", 256)),
-        "n_classes": 2,
+        "n_classes": int(saved_args.get("n_classes", 2)),
         "dropout": float(saved_args.get("dropout", 0.25)),
     }
     if model_type == "gated":

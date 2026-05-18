@@ -307,7 +307,7 @@ Current default prototype bundle:
 
 This bundle was built from the default SAE:
 
-- SAE config: `resources/models/sae/relu_sae_base/run_config.json`
+- SAE config: `resources/models/sae/tcga_uni2_sae_relu_v1/run_config.json`
 - magnification: `20x`
 
 Current `10x` local-region runners:
@@ -328,7 +328,7 @@ Historical closer alternative:
 
 - an older `10x_pool2x2` SAE existed during exploration, but it is not part of
   the current self-contained repo bundle.
-- the current reproducible default is the vendored `relu_sae_base` checkpoint.
+- the current reproducible default is the vendored `tcga_uni2_sae_relu_v1` checkpoint.
 
 ## 10x Concept Bank Anchored On Current 20x Representative Tiles
 

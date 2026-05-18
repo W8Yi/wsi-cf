@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import json
 import shlex
 import sys
 from pathlib import Path
 
+import h5py
 import numpy as np
 import torch
 from diffusers import AutoencoderKL, DiffusionPipeline
@@ -22,10 +25,13 @@ from wsi_cf.common.paths import (
     DEFAULT_HNSCC_PROTOTYPE_NPZ,
     DEFAULT_SAE_CFG,
     DEFAULT_SAE_CKPT,
+    DEFAULT_SAE_VARIANT,
     DEFAULT_SHOWCASE_EDIT_MANIFEST,
     DEFAULT_SHOWCASE_OUT_DIR,
     DEFAULT_SHOWCASE_REGION_IMAGE,
     DEFAULT_TASK,
+    SAE_VARIANTS,
+    resolve_sae_paths,
 )
 from wsi_cf.common.runtime import resolve_device, set_seed
 from wsi_cf.data.region_bank import RegionBankRow, parse_region_bank_csv
@@ -51,7 +57,7 @@ from wsi_cf.steering.progressive import (
     preserve_map_preview,
     window_local_cells,
 )
-from wsi_cf.steering.sae_runtime import load_sae_from_config
+from wsi_cf.steering.sae_runtime import load_sae_from_config, sae_decode_latents, sae_encode_features
 
 
 def _jsonify(value):
@@ -94,18 +100,19 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--steps", type=int, default=30)
     parser.add_argument("--guidance", type=float, default=2.0)
     parser.add_argument("--patch-batch", type=int, default=256)
-    parser.add_argument("--prototype-strength", type=float, default=0.8)
+    parser.add_argument("--prototype-strength", type=float, default=0.9)
     parser.add_argument("--steer-blend", type=float, default=1.0)
-    parser.add_argument("--preserve-edit-strength", type=float, default=0.05)
-    parser.add_argument("--preserve-visited-strength", type=float, default=0.95)
-    parser.add_argument("--preserve-fresh-context-strength", type=float, default=0.35)
-    parser.add_argument("--mid-steer-start-ratio", type=float, default=0.5)
+    parser.add_argument("--preserve-edit-strength", type=float, default=0.0)
+    parser.add_argument("--preserve-visited-strength", type=float, default=0.84)
+    parser.add_argument("--preserve-fresh-context-strength", type=float, default=0.22)
+    parser.add_argument("--mid-steer-start-ratio", type=float, default=0.55)
     parser.add_argument("--mid-steer-end-ratio", type=float, default=1.0)
-    parser.add_argument("--mid-steer-alpha-start", type=float, default=0.5)
+    parser.add_argument("--mid-steer-alpha-start", type=float, default=0.4)
     parser.add_argument("--mid-steer-alpha-end", type=float, default=1.0)
     parser.add_argument("--mid-steer-alpha-schedule", type=str, default="linear", choices=["linear", "cosine"])
-    parser.add_argument("--sae-ckpt", type=Path, default=DEFAULT_SAE_CKPT)
-    parser.add_argument("--sae-cfg", type=Path, default=DEFAULT_SAE_CFG)
+    parser.add_argument("--sae-variant", type=str, default=DEFAULT_SAE_VARIANT, choices=sorted(SAE_VARIANTS))
+    parser.add_argument("--sae-ckpt", type=Path, default=None, help=f"Explicit SAE checkpoint override. Defaults to --sae-variant ({DEFAULT_SAE_CKPT}).")
+    parser.add_argument("--sae-cfg", type=Path, default=None, help=f"Explicit SAE config override. Defaults to --sae-variant ({DEFAULT_SAE_CFG}).")
     parser.add_argument(
         "--prototype-npz",
         type=Path,
@@ -114,6 +121,23 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--prototype-key", type=str, default="prototype_median", choices=["prototype_mean", "prototype_median"])
     parser.add_argument("--pos-latent", type=int, default=2645)
     parser.add_argument("--neg-latent", type=int, default=7036)
+    parser.add_argument("--concepts-json", type=Path, default=None, help="Optional selected_concepts.json for generic task concept steering.")
+    parser.add_argument("--representative-tiles-csv", type=Path, default=None, help="Representative tile CSV used to infer target activation values for --concepts-json.")
+    parser.add_argument("--concept-class-label", type=str, default="", help="Optional concept class label to keep from selected_concepts.json.")
+    parser.add_argument("--concept-ranking-method", type=str, default="attention_weighted", choices=["attention_weighted", "activation"])
+    parser.add_argument("--concept-target-stat", type=str, default="median", choices=["median", "mean", "q75", "max"])
+    parser.add_argument("--concept-target-top-k", type=int, default=5, help="Use only the top K representative tiles per concept to estimate steering target activation; 0 uses all rows.")
+    parser.add_argument(
+        "--concept-steering-mode",
+        type=str,
+        default="prototype_vector",
+        choices=["prototype_vector", "latent_target"],
+        help=(
+            "prototype_vector builds a full SAE-code prototype from representative tiles and steers selected cells toward it. "
+            "latent_target only clamps the listed concept latent activation and is kept for ablations."
+        ),
+    )
+    parser.add_argument("--max-concepts", type=int, default=0, help="0 means use all concepts in --concepts-json.")
     parser.add_argument(
         "--edit-support",
         type=str,
@@ -228,8 +252,230 @@ def update_full_zgrid_selected_cells(
     return out
 
 
+def read_csv_rows(path: Path) -> list[dict[str, str]]:
+    with path.open("r", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def load_concept_targets(
+    *,
+    concepts_json: Path,
+    representative_tiles_csv: Path | None,
+    class_label: str,
+    ranking_method: str,
+    target_stat: str,
+    target_top_k: int,
+    max_concepts: int,
+) -> tuple[list[int], dict[int, float], dict[str, object]]:
+    payload = json.loads(concepts_json.read_text())
+    concepts = list(payload.get("concepts", []))
+    if class_label:
+        concepts = [row for row in concepts if str(row.get("class_label", "")) == str(class_label)]
+    concepts.sort(key=lambda row: (int(row.get("concept_rank", 10**9)), -float(row.get("final_score", 0.0)), int(row["latent_idx"])))
+    if int(max_concepts) > 0:
+        concepts = concepts[: int(max_concepts)]
+    if not concepts:
+        raise ValueError(f"No concepts found in {concepts_json} for class_label={class_label!r}")
+    latent_ids = [int(row["latent_idx"]) for row in concepts]
+    values_by_latent: dict[int, list[float]] = {latent: [] for latent in latent_ids}
+    if representative_tiles_csv is not None and representative_tiles_csv.exists():
+        rows_by_latent: dict[int, list[dict[str, str]]] = {latent: [] for latent in latent_ids}
+        for row in read_csv_rows(representative_tiles_csv):
+            latent = int(row.get("latent_idx", -1))
+            if latent not in rows_by_latent:
+                continue
+            if str(row.get("ranking_method", "")) != str(ranking_method):
+                continue
+            rows_by_latent[latent].append(row)
+        for latent, rows in rows_by_latent.items():
+            rows.sort(key=lambda row: int(row.get("tile_rank", 10**9)))
+            if int(target_top_k) > 0:
+                rows = rows[: int(target_top_k)]
+            for row in rows:
+                activation = row.get("activation", "")
+                if str(activation).strip():
+                    values_by_latent[latent].append(float(activation))
+    target_values: dict[int, float] = {}
+    for concept in concepts:
+        latent = int(concept["latent_idx"])
+        vals = np.asarray(values_by_latent.get(latent, []), dtype=np.float32)
+        if vals.size:
+            if target_stat == "median":
+                target = float(np.median(vals))
+            elif target_stat == "mean":
+                target = float(np.mean(vals))
+            elif target_stat == "q75":
+                target = float(np.percentile(vals, 75.0))
+            else:
+                target = float(np.max(vals))
+        else:
+            # Fallback: association summaries from fraction metrics can be tiny,
+            # but this keeps the run defined if representative rows are absent.
+            target = float(concept.get("mean_class", concept.get("top_activation", 1.0)))
+        target_values[latent] = target
+    meta = {
+        "concepts_json": str(concepts_json),
+        "representative_tiles_csv": "" if representative_tiles_csv is None else str(representative_tiles_csv),
+        "class_label": class_label or str(payload.get("class_label", "")),
+        "ranking_method": str(ranking_method),
+        "target_stat": str(target_stat),
+        "target_top_k": int(target_top_k),
+        "latent_ids": latent_ids,
+        "target_tile_counts": {str(k): int(len(v)) for k, v in values_by_latent.items()},
+        "target_values": {str(k): float(v) for k, v in target_values.items()},
+    }
+    return latent_ids, target_values, meta
+
+
+def _read_h5_feature(path: Path, tile_index: int) -> np.ndarray:
+    with h5py.File(path, "r") as handle:
+        if "features" not in handle:
+            raise KeyError(f"{path}: missing dataset 'features'")
+        feats = handle["features"]
+        if feats.ndim == 3 and feats.shape[0] == 1:
+            arr = np.asarray(feats[0, int(tile_index)], dtype=np.float32)
+        elif feats.ndim == 2:
+            arr = np.asarray(feats[int(tile_index)], dtype=np.float32)
+        else:
+            raise ValueError(f"{path}: unsupported features shape {tuple(feats.shape)}")
+    return arr.astype(np.float32, copy=False)
+
+
+@torch.no_grad()
+def load_concept_prototype_vector(
+    *,
+    sae_model: torch.nn.Module,
+    concepts_json: Path,
+    representative_tiles_csv: Path | None,
+    class_label: str,
+    ranking_method: str,
+    target_stat: str,
+    target_top_k: int,
+    max_concepts: int,
+) -> tuple[torch.Tensor, dict[str, object]]:
+    if representative_tiles_csv is None or not representative_tiles_csv.exists():
+        raise FileNotFoundError(
+            "Full concept-prototype steering requires --representative-tiles-csv with source H5 tile references."
+        )
+    payload = json.loads(concepts_json.read_text())
+    concepts = list(payload.get("concepts", []))
+    if class_label:
+        concepts = [row for row in concepts if str(row.get("class_label", "")) == str(class_label)]
+    concepts.sort(key=lambda row: (int(row.get("concept_rank", 10**9)), -float(row.get("final_score", 0.0)), int(row["latent_idx"])))
+    if int(max_concepts) > 0:
+        concepts = concepts[: int(max_concepts)]
+    if not concepts:
+        raise ValueError(f"No concepts found in {concepts_json} for class_label={class_label!r}")
+
+    latent_ids = [int(row["latent_idx"]) for row in concepts]
+    rows_by_latent: dict[int, list[dict[str, str]]] = {latent: [] for latent in latent_ids}
+    for row in read_csv_rows(representative_tiles_csv):
+        latent = int(row.get("latent_idx", -1))
+        if latent not in rows_by_latent:
+            continue
+        if str(row.get("ranking_method", "")) != str(ranking_method):
+            continue
+        rows_by_latent[latent].append(row)
+
+    device = next(sae_model.parameters()).device
+    concept_vectors: list[torch.Tensor] = []
+    per_concept_meta: list[dict[str, object]] = []
+    for concept in concepts:
+        latent = int(concept["latent_idx"])
+        rows = rows_by_latent.get(latent, [])
+        rows.sort(key=lambda row: int(row.get("tile_rank", 10**9)))
+        if int(target_top_k) > 0:
+            rows = rows[: int(target_top_k)]
+        if not rows:
+            raise ValueError(
+                f"No representative rows for concept latent_idx={latent}, ranking_method={ranking_method!r}; "
+                "cannot build full-code concept prototype."
+            )
+
+        features = np.stack([_read_h5_feature(Path(str(row["h5_path"])), int(row["tile_index"])) for row in rows], axis=0)
+        x = torch.as_tensor(features, dtype=torch.float32, device=device)
+        z = sae_encode_features(sae_model, x).float()
+        if target_stat == "median":
+            proto = torch.median(z, dim=0).values
+        elif target_stat == "mean":
+            proto = torch.mean(z, dim=0)
+        elif target_stat == "q75":
+            proto = torch.quantile(z, q=0.75, dim=0)
+        else:
+            proto = torch.max(z, dim=0).values
+        concept_vectors.append(proto)
+        per_concept_meta.append(
+            {
+                "concept_rank": int(concept.get("concept_rank", len(per_concept_meta) + 1)),
+                "latent_idx": int(latent),
+                "source_latent_idx": int(concept.get("source_latent_idx", latent)),
+                "representative_tile_count": int(len(rows)),
+                "prototype_norm": float(proto.norm().detach().cpu()),
+                "prototype_target_activation_at_latent": float(proto[int(latent)].detach().cpu()),
+            }
+        )
+
+    stacked = torch.stack(concept_vectors, dim=0)
+    # Multiple concept cards in one run become a single target SAE-code
+    # prototype. Individual-concept scripts pass one concept at a time.
+    prototype = torch.mean(stacked, dim=0)
+    meta = {
+        "concepts_json": str(concepts_json),
+        "representative_tiles_csv": str(representative_tiles_csv),
+        "class_label": class_label or str(payload.get("class_label", "")),
+        "ranking_method": str(ranking_method),
+        "target_stat": str(target_stat),
+        "target_top_k": int(target_top_k),
+        "steering_mode": "prototype_vector",
+        "latent_ids": latent_ids,
+        "n_concepts": int(len(concepts)),
+        "prototype_aggregation": "mean_across_concepts",
+        "prototype_norm": float(prototype.norm().detach().cpu()),
+        "concept_prototypes": per_concept_meta,
+    }
+    return prototype.detach(), meta
+
+
+@torch.no_grad()
+def edit_uni_z_grid_with_concept_targets(
+    *,
+    sae_model: torch.nn.Module,
+    z_grid: torch.Tensor,
+    latent_target_values: dict[int, float],
+    target_strength: float,
+    tile_mask: np.ndarray,
+    blend: float,
+) -> torch.Tensor:
+    if z_grid.dim() != 3:
+        raise ValueError(f"Expected local z_grid [Gh,Gw,D], got {tuple(z_grid.shape)}")
+    gh, gw, d = z_grid.shape
+    device = next(sae_model.parameters()).device
+    x = z_grid.reshape(gh * gw, d).to(device=device, dtype=torch.float32)
+    z_lat = sae_encode_features(sae_model, x)
+    mask = np.asarray(tile_mask, dtype=np.float32)
+    if mask.shape != (gh, gw):
+        raise ValueError(f"tile_mask must be shape {(gh, gw)}, got {mask.shape}")
+    sel = np.flatnonzero(mask.reshape(-1) > 0.0)
+    if sel.size == 0:
+        return z_grid
+    sel_t = torch.as_tensor(sel, device=z_lat.device, dtype=torch.long)
+    z_edit = z_lat.clone()
+    for latent_idx, target_value in latent_target_values.items():
+        latent = int(latent_idx)
+        if latent < 0 or latent >= z_edit.shape[1]:
+            raise ValueError(f"Concept latent_idx={latent} outside SAE latent dim={z_edit.shape[1]}")
+        cur = z_edit[sel_t, latent]
+        tgt = torch.full_like(cur, float(target_value))
+        z_edit[sel_t, latent] = (1.0 - float(target_strength)) * cur + float(target_strength) * tgt
+    x_rec = sae_decode_latents(sae_model, z_edit)
+    w = torch.from_numpy(mask.reshape(gh * gw, 1)).to(device=device, dtype=torch.float32).clamp(0.0, 1.0)
+    x_new = x * (1.0 - float(blend) * w) + x_rec * (float(blend) * w)
+    return x_new.reshape(gh, gw, d).to(device=z_grid.device, dtype=z_grid.dtype)
+
+
 def main(argv: list[str] | None = None) -> None:
     args = build_arg_parser().parse_args(argv)
+    args.sae_ckpt, args.sae_cfg = resolve_sae_paths(args.sae_variant, args.sae_ckpt, args.sae_cfg)
     device = resolve_device(args.device)
     dtype = torch.float16 if args.dtype == "fp16" else torch.float32
     set_seed(int(args.seed))
@@ -270,10 +516,39 @@ def main(argv: list[str] | None = None) -> None:
     region_by_id = {str(row.region_id): row for row in region_rows}
 
     sae_model, _, _ = load_sae_from_config(args.sae_ckpt, args.sae_cfg, device=str(device))
-    proto_by_latent, direction_by_latent = load_prototypes(args.prototype_npz, args.prototype_key)
-    pos_latent = pick_prototype_latent(proto_by_latent, direction_by_latent, preferred=int(args.pos_latent), direction="hpv_pos")
-    neg_latent = pick_prototype_latent(proto_by_latent, direction_by_latent, preferred=int(args.neg_latent), direction="hpv_neg")
-    chosen_latent = int(pos_latent if str(args.direction) == "hpv_pos" else neg_latent)
+    concept_latent_targets: dict[int, float] | None = None
+    concept_prototype_vector: torch.Tensor | None = None
+    concept_meta: dict[str, object] | None = None
+    chosen_latent = -1
+    if args.concepts_json is not None:
+        if str(args.concept_steering_mode) == "prototype_vector":
+            concept_prototype_vector, concept_meta = load_concept_prototype_vector(
+                sae_model=sae_model,
+                concepts_json=args.concepts_json,
+                representative_tiles_csv=args.representative_tiles_csv,
+                class_label=str(args.concept_class_label),
+                ranking_method=str(args.concept_ranking_method),
+                target_stat=str(args.concept_target_stat),
+                target_top_k=int(args.concept_target_top_k),
+                max_concepts=int(args.max_concepts),
+            )
+        else:
+            _, concept_latent_targets, concept_meta = load_concept_targets(
+                concepts_json=args.concepts_json,
+                representative_tiles_csv=args.representative_tiles_csv,
+                class_label=str(args.concept_class_label),
+                ranking_method=str(args.concept_ranking_method),
+                target_stat=str(args.concept_target_stat),
+                target_top_k=int(args.concept_target_top_k),
+                max_concepts=int(args.max_concepts),
+            )
+            if concept_meta is not None:
+                concept_meta["steering_mode"] = "latent_target"
+    else:
+        proto_by_latent, direction_by_latent = load_prototypes(args.prototype_npz, args.prototype_key)
+        pos_latent = pick_prototype_latent(proto_by_latent, direction_by_latent, preferred=int(args.pos_latent), direction="hpv_pos")
+        neg_latent = pick_prototype_latent(proto_by_latent, direction_by_latent, preferred=int(args.neg_latent), direction="hpv_neg")
+        chosen_latent = int(pos_latent if str(args.direction) == "hpv_pos" else neg_latent)
 
     pipeline = DiffusionPipeline.from_pretrained(
         args.pix_model_id,
@@ -369,16 +644,37 @@ def main(argv: list[str] | None = None) -> None:
             tile_mask = np.zeros(local_base_zgrid.shape[:2], dtype=np.float32)
             for lx, ly in local_edit_cells:
                 tile_mask[int(ly), int(lx)] = 1.0
-            local_edit_t, _ = edit_uni_z_grid_with_sae(
-                sae_model=sae_model,
-                z_grid=local_edit_t,
-                target_latent_vector=proto_by_latent[int(chosen_latent)],
-                target_latent_vector_strength=float(args.prototype_strength),
-                tile_mask=tile_mask,
-                blend=float(args.steer_blend),
-                keep_non_selected=True,
-                return_debug=False,
-            )
+            if concept_prototype_vector is not None:
+                local_edit_t, _ = edit_uni_z_grid_with_sae(
+                    sae_model=sae_model,
+                    z_grid=local_edit_t,
+                    target_latent_vector=concept_prototype_vector,
+                    target_latent_vector_strength=float(args.prototype_strength),
+                    tile_mask=tile_mask,
+                    blend=float(args.steer_blend),
+                    keep_non_selected=True,
+                    return_debug=False,
+                )
+            elif concept_latent_targets is not None:
+                local_edit_t = edit_uni_z_grid_with_concept_targets(
+                    sae_model=sae_model,
+                    z_grid=local_edit_t,
+                    latent_target_values=concept_latent_targets,
+                    target_strength=float(args.prototype_strength),
+                    tile_mask=tile_mask,
+                    blend=float(args.steer_blend),
+                )
+            else:
+                local_edit_t, _ = edit_uni_z_grid_with_sae(
+                    sae_model=sae_model,
+                    z_grid=local_edit_t,
+                    target_latent_vector=proto_by_latent[int(chosen_latent)],
+                    target_latent_vector_strength=float(args.prototype_strength),
+                    tile_mask=tile_mask,
+                    blend=float(args.steer_blend),
+                    keep_non_selected=True,
+                    return_debug=False,
+                )
 
             source_np = np.asarray(local_source_img, dtype=np.float32) / 255.0
             source_img_t = torch.from_numpy(source_np).permute(2, 0, 1).unsqueeze(0).to(device=device, dtype=dtype)
@@ -516,6 +812,7 @@ def main(argv: list[str] | None = None) -> None:
             "prototype_direction": str(args.direction),
             "prototype_latent": int(chosen_latent),
             "prototype_key": str(args.prototype_key),
+            "concept_steering": concept_meta,
             "prototype_strength": float(args.prototype_strength),
             "steer_blend": float(args.steer_blend),
             "preserve_edit_strength": float(args.preserve_edit_strength),

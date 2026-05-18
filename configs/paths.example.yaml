@@ -25,5 +25,5 @@ artifacts:
 legacy:
   repo_root: /common/users/wq50/SAE_path
   mil_checkpoint: /common/users/wq50/SAE_path/runs/hnsc_hpv_attention_mil_5fold_filtered_uni2h_80/split_0/final.pt
-  sae_checkpoint: /common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt
-  sae_config: /common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json
+  sae_checkpoint: /common/users/wq50/wsi_cf/resources/models/sae/tcga_uni2_sae_relu_v1/relu_final.pt
+  sae_config: /common/users/wq50/wsi_cf/resources/models/sae/tcga_uni2_sae_relu_v1/run_config.json

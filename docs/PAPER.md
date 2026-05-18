@@ -439,7 +439,7 @@ That is a representation mismatch.
 
 We previously explored a closer `10x_pool2x2` SAE alternative, but it is not
 part of the current self-contained repo bundle. The reproducible default is the
-repo-local `resources/models/sae/relu_sae_base` checkpoint.
+repo-local `resources/models/sae/tcga_uni2_sae_relu_v1` checkpoint.
 
 Paper implication:
 
