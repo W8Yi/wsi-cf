@@ -1,0 +1,27 @@
+{
+  "policy_name": "previous_naive_on_smoothed28",
+  "description": "Previous figure4 naive-baseline settings applied to the new smoothed-28 showcase cells: no preservation, prototype strength 0.8, and delayed/ramped steering.",
+  "version": 1,
+  "generation": {
+    "steps": 30,
+    "guidance": 2.0,
+    "patch_batch": 128
+  },
+  "steering": {
+    "prototype_strength": 0.8,
+    "steer_blend": 1.0,
+    "mid_steer_start_ratio": 0.5,
+    "mid_steer_end_ratio": 1.0,
+    "mid_steer_alpha_start": 0.5,
+    "mid_steer_alpha_end": 1.0,
+    "mid_steer_alpha_schedule": "linear"
+  },
+  "preservation": {
+    "preserve_edit_strength": 0.0,
+    "preserve_visited_strength": 0.0,
+    "preserve_fresh_context_strength": 0.0
+  },
+  "planning": {
+    "edit_support": "border_relaxed"
+  }
+}

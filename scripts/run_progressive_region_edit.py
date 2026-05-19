@@ -44,6 +44,7 @@ from wsi_cf.generation.pixcell import (
     vae_encode_auto,
 )
 from wsi_cf.steering.sae_edit import edit_uni_z_grid_with_sae
+from wsi_cf.steering.edit_policy import add_edit_policy_args, apply_edit_policy
 from wsi_cf.steering.progressive import (
     CENTER_2X2_LOCAL_CELLS,
     EDIT_SUPPORT_CHOICES,
@@ -87,6 +88,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--region-bank-csv", type=Path, default=None)
     parser.add_argument("--edit-manifest", type=Path, default=DEFAULT_SHOWCASE_EDIT_MANIFEST)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_SHOWCASE_OUT_DIR)
+    add_edit_policy_args(parser)
     parser.add_argument("--target-magnification", type=float, default=20.0)
     parser.add_argument("--direction", type=str, default="hpv_pos", choices=["hpv_pos", "hpv_neg"])
     parser.add_argument("--max-runs", type=int, default=0, help="Optional cap on number of manifest runs to execute")
@@ -474,7 +476,10 @@ def edit_uni_z_grid_with_concept_targets(
 
 
 def main(argv: list[str] | None = None) -> None:
-    args = build_arg_parser().parse_args(argv)
+    raw_argv = list(argv) if argv is not None else list(sys.argv[1:])
+    parser = build_arg_parser()
+    args = parser.parse_args(raw_argv)
+    args = apply_edit_policy(args, parser=parser, argv=raw_argv, root=WSI_CF_ROOT)
     args.sae_ckpt, args.sae_cfg = resolve_sae_paths(args.sae_variant, args.sae_ckpt, args.sae_cfg)
     device = resolve_device(args.device)
     dtype = torch.float16 if args.dtype == "fp16" else torch.float32
@@ -482,8 +487,8 @@ def main(argv: list[str] | None = None) -> None:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     args_payload = {
         "cli_args": _serialize_args(args),
-        "argv": list(argv) if argv is not None else list(sys.argv[1:]),
-        "command": " ".join(shlex.quote(part) for part in ([sys.executable, __file__] + (list(argv) if argv is not None else list(sys.argv[1:])))),
+        "argv": raw_argv,
+        "command": " ".join(shlex.quote(part) for part in ([sys.executable, __file__] + raw_argv)),
         "cwd": str(Path.cwd()),
     }
     write_json(args.out_dir / "experiment_args.json", args_payload)

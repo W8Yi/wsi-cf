@@ -1,21 +1,34 @@
 # WSI Counterfactual Steering
 
-`wsi_cf` is organized around one smooth counterfactual workflow:
+`wsi_cf` is a research codebase for whole-slide image counterfactual steering.
+It links slide-level attention, SAE concept editing, PixCell region generation,
+and downstream classifier evaluation into one reproducible workflow.
+
+![Progressive edit window sequence](paper_example/showcase_smoothed28/progressive_stage_canvases/progressive_window_sequence_no_text.gif)
+
+The default task is HNSCC HPV status. The showcase above edits a selected
+`2048 x 2048` tissue region through overlapping PixCell windows: red marks the
+current cells to edit, grey marks current context, and blue marks cells already
+visited by the progressive editor.
+
+## Workflow
+
+The canonical workflow is:
 
 1. visualize attention on whole-slide feature bags,
-2. find useful `20x`-equivalent regions,
-3. run progressive region editing with SAE concept steering,
-4. optionally evaluate edited regions/features downstream.
-
-The default task is HNSCC HPV. The default progressive-edit demo starts from:
-
-`artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048/region_top_right_2048.png`
+2. find useful `20x`-equivalent tissue regions,
+3. select editable grid cells,
+4. steer selected UNI features in SAE latent space,
+5. generate the counterfactual region progressively with PixCell,
+6. re-encode and evaluate edited regions downstream.
 
 ## Canonical Scripts
 
 - `scripts/visualize_attention.py`: whole-slide attention heatmaps, CLAM-first.
 - `scripts/find_regions.py`: region discovery by attention/pathology-aware scoring.
-- `scripts/run_progressive_region_edit.py`: image-first or region-bank progressive editing.
+- `scripts/run_progressive_region_edit.py`: manifest-driven progressive region editing.
+- `scripts/select_attention_cells.py`: attention-only cell selection and smoothing.
+- `scripts/find_label_concepts.py`: label-relevant SAE concept discovery.
 
 Core HPV examples live in `examples/hnscc_hpv/`:
 
@@ -26,6 +39,15 @@ bash examples/hnscc_hpv/03_run_showcase_edit.sh
 bash examples/hnscc_hpv/04_run_region_eval.sh
 ```
 
+The current paper-style showcase tutorial lives in:
+
+```bash
+examples/hnscc_hpv_showcase_smoothed28/
+```
+
+It runs the progressive showcase, runs the matched naive baseline, and writes
+data-only comparison metrics.
+
 ## Project Layout
 
 - `src/wsi_cf/models/`: SAE, MIL, and CLAM model definitions maintained inside this repo.
@@ -35,6 +57,7 @@ bash examples/hnscc_hpv/04_run_region_eval.sh
 - `src/wsi_cf/eval/`: task-specific classifier/evaluation helpers.
 - `resources/`: versioned labels, manifests, model weights, prototypes, and task configs.
 - `examples/hnscc_hpv/`: minimal runnable HPV workflow scripts.
+- `examples/hnscc_hpv_showcase_smoothed28/`: end-to-end showcase tutorial.
 - `docs/`: paper, method, testing, and migration notes.
 
 Large raw slides and precomputed feature stores stay external. The repo stores only compact resources needed to reproduce the workflow configuration.
@@ -65,4 +88,17 @@ python scripts/run_progressive_region_edit.py \
   --out-dir artifacts/hnscc_hpv_showcase_progressive_edit
 ```
 
-This uses the default showcase image and the repo-provided default edit manifest, so no checkpoint/prototype paths are needed on the command line.
+This uses the default showcase image and the repo-provided default edit manifest,
+so no checkpoint or prototype paths are needed on the command line.
+
+For the full showcase comparison:
+
+```bash
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/run_all.sh
+```
+
+That tutorial produces classifier probabilities, progressive-stage trajectory
+metrics, and RGB perturbation summaries for progressive editing versus the naive
+baseline.

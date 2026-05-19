@@ -1,0 +1,27 @@
+{
+  "policy_name": "showcase_best",
+  "description": "Current best visual setting for HNSCC HPV showcase progressive editing.",
+  "version": 1,
+  "generation": {
+    "steps": 30,
+    "guidance": 2.0,
+    "patch_batch": 256
+  },
+  "steering": {
+    "prototype_strength": 0.9,
+    "steer_blend": 1.0,
+    "mid_steer_start_ratio": 0.55,
+    "mid_steer_end_ratio": 1.0,
+    "mid_steer_alpha_start": 0.4,
+    "mid_steer_alpha_end": 1.0,
+    "mid_steer_alpha_schedule": "linear"
+  },
+  "preservation": {
+    "preserve_edit_strength": 0.0,
+    "preserve_visited_strength": 0.84,
+    "preserve_fresh_context_strength": 0.22
+  },
+  "planning": {
+    "edit_support": "center_2x2"
+  }
+}

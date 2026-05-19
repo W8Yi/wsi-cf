@@ -22,6 +22,8 @@ bash examples/hnscc_hpv/02_find_regions.sh
 
 ### `scripts/run_progressive_region_edit.py`
 Runs the canonical progressive region editor from a region image, region bank, or edit manifest. Outputs source/final images and run metadata by default, with debug artifacts when requested.
+Supports reusable edit policies through `--edit-policy`, for example
+`configs/edit_policies/showcase_best.json`; explicit CLI flags override policy values.
 
 Example:
 ```bash

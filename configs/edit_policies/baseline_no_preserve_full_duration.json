@@ -1,0 +1,27 @@
+{
+  "policy_name": "baseline_no_preserve_full_duration",
+  "description": "Deliberately naive baseline: no source-latent preservation anywhere and edited conditioning is active at full strength for the entire diffusion trajectory.",
+  "version": 1,
+  "generation": {
+    "steps": 30,
+    "guidance": 2.0,
+    "patch_batch": 128
+  },
+  "steering": {
+    "prototype_strength": 0.9,
+    "steer_blend": 1.0,
+    "mid_steer_start_ratio": 0.0,
+    "mid_steer_end_ratio": 1.0,
+    "mid_steer_alpha_start": 1.0,
+    "mid_steer_alpha_end": 1.0,
+    "mid_steer_alpha_schedule": "linear"
+  },
+  "preservation": {
+    "preserve_edit_strength": 0.0,
+    "preserve_visited_strength": 0.0,
+    "preserve_fresh_context_strength": 0.0
+  },
+  "planning": {
+    "edit_support": "border_relaxed"
+  }
+}
