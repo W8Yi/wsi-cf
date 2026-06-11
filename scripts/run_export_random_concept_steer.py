@@ -688,6 +688,8 @@ def main(argv: list[str] | None = None) -> None:
                         str(args.patch_batch),
                         "--output-mode",
                         str(args.output_mode),
+                        "--seed",
+                        str(args.seed),
                         "--device",
                         str(args.device),
                     ]

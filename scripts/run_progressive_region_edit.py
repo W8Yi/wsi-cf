@@ -51,11 +51,14 @@ from wsi_cf.steering.progressive import (
     advance_progressive_state,
     build_history_aware_preserve_map,
     draw_cells_overlay,
+    draw_step_edit_area_zoom_4x4,
+    draw_step_region_overlay,
     load_progressive_edit_manifest,
     local_edit_support_global_cells,
     make_initial_progressive_state,
     plan_progressive_steps,
     preserve_map_preview,
+    split_cells_by_edit_support,
     window_local_cells,
 )
 from wsi_cf.steering.sae_runtime import load_sae_from_config, sae_decode_latents, sae_encode_features
@@ -590,8 +593,22 @@ def main(argv: list[str] | None = None) -> None:
             )
             continue
 
-        planned_steps = plan_progressive_steps(
+        supported_targets, unsupported_targets = split_cells_by_edit_support(
             target_cells=list(request.target_cells),
+            grid_w=int(grid_w),
+            grid_h=int(grid_h),
+            window_grid_side=4,
+            stride_cells=2,
+            grid_step_px=int(row.grid_step_px),
+            edit_support=str(args.edit_support),
+        )
+        if unsupported_targets and not supported_targets:
+            raise RuntimeError(
+                f"All requested target cells are outside edit_support={args.edit_support}: {list(unsupported_targets)}"
+            )
+        active_target_cells = tuple(supported_targets)
+        planned_steps = plan_progressive_steps(
+            target_cells=list(active_target_cells),
             grid_w=int(grid_w),
             grid_h=int(grid_h),
             window_grid_side=4,
@@ -601,13 +618,19 @@ def main(argv: list[str] | None = None) -> None:
         )
         current_canvas = np.asarray(source_img, dtype=np.float32) / 255.0
         current_zgrid = np.asarray(source_zgrid, dtype=np.float32).copy()
-        state = make_initial_progressive_state(target_cells=list(request.target_cells))
+        target_metadata = dict(request.metadata)
+        if unsupported_targets:
+            target_metadata["dropped_unsupported_target_cells"] = [
+                {"gx": int(gx), "gy": int(gy)} for gx, gy in unsupported_targets
+            ]
+            target_metadata["original_target_cell_count"] = int(len(request.target_cells))
+        state = make_initial_progressive_state(target_cells=list(active_target_cells))
         run_dir.mkdir(parents=True, exist_ok=True)
         save_png(source_img, run_dir / "source_region_actual.png")
 
         if str(args.output_mode) == "debug":
             save_png(
-                draw_cells_overlay(source_img, cells=list(request.target_cells), grid_step_px=int(row.grid_step_px)),
+                draw_cells_overlay(source_img, cells=list(active_target_cells), grid_step_px=int(row.grid_step_px)),
                 run_dir / "source_targets_overlay.png",
             )
 
@@ -631,14 +654,15 @@ def main(argv: list[str] | None = None) -> None:
             local_edit_t = local_base_t.clone()
 
             local_edit_cells = window_local_cells(window=window, global_cells=step.edit_cells_global)
+            allowed_global_cells = local_edit_support_global_cells(
+                window,
+                grid_w=int(grid_w),
+                grid_h=int(grid_h),
+                edit_support=str(args.edit_support),
+            )
             allowed_local_cells = window_local_cells(
                 window=window,
-                global_cells=local_edit_support_global_cells(
-                    window,
-                    grid_w=int(grid_w),
-                    grid_h=int(grid_h),
-                    edit_support=str(args.edit_support),
-                ),
+                global_cells=allowed_global_cells,
             )
             bad_local_cells = [cell for cell in local_edit_cells if cell not in set(allowed_local_cells)]
             if bad_local_cells:
@@ -779,10 +803,32 @@ def main(argv: list[str] | None = None) -> None:
                 step_dir.mkdir(parents=True, exist_ok=True)
                 save_png(local_source_img, step_dir / "source_window.png")
                 save_png(draw_cells_overlay(local_source_img, cells=local_edit_cells, grid_step_px=int(row.grid_step_px)), step_dir / "selected_cells_overlay.png")
+                save_png(
+                    draw_step_region_overlay(
+                        source_img,
+                        window=window,
+                        edit_cells_global=step.edit_cells_global,
+                        support_cells_global=allowed_global_cells,
+                        grid_step_px=int(row.grid_step_px),
+                    ),
+                    step_dir / "edit_area_on_region.png",
+                )
+                save_png(
+                    draw_step_edit_area_zoom_4x4(
+                        source_img,
+                        window=window,
+                        edit_cells_global=step.edit_cells_global,
+                        support_cells_global=allowed_global_cells,
+                        grid_step_px=int(row.grid_step_px),
+                    ),
+                    step_dir / "edit_area_zoom_4x4.png",
+                )
                 save_png(preserve_map_preview(preserve_map), step_dir / "preserve_map.png")
                 save_png(steered_img, step_dir / "steered_window.png")
                 step_record["source_window_path"] = str(step_dir / "source_window.png")
                 step_record["selected_overlay_path"] = str(step_dir / "selected_cells_overlay.png")
+                step_record["region_edit_area_overlay_path"] = str(step_dir / "edit_area_on_region.png")
+                step_record["edit_area_zoom_4x4_path"] = str(step_dir / "edit_area_zoom_4x4.png")
                 step_record["preserve_map_path"] = str(step_dir / "preserve_map.png")
                 step_record["steered_window_path"] = str(step_dir / "steered_window.png")
 
@@ -797,7 +843,7 @@ def main(argv: list[str] | None = None) -> None:
         save_png(final_img, final_out_path)
         if str(args.output_mode) == "debug":
             save_png(
-                draw_cells_overlay(final_img, cells=list(request.target_cells), grid_step_px=int(row.grid_step_px)),
+                draw_cells_overlay(final_img, cells=list(active_target_cells), grid_step_px=int(row.grid_step_px)),
                 run_dir / "generated_targets_overlay.png",
             )
 
@@ -809,11 +855,13 @@ def main(argv: list[str] | None = None) -> None:
             "region_size": [int(source_img.size[0]), int(source_img.size[1])],
             "grid_shape": [int(grid_h), int(grid_w)],
             "grid_step_px": int(row.grid_step_px),
-            "target_cells": [{"gx": int(gx), "gy": int(gy)} for gx, gy in request.target_cells],
+            "target_cells": [{"gx": int(gx), "gy": int(gy)} for gx, gy in active_target_cells],
+            "requested_target_cells": [{"gx": int(gx), "gy": int(gy)} for gx, gy in request.target_cells],
+            "dropped_unsupported_target_cells": [{"gx": int(gx), "gy": int(gy)} for gx, gy in unsupported_targets],
             "edited_cells": [{"gx": int(gx), "gy": int(gy)} for gx, gy in state.edited_cells],
             "visited_cells": [{"gx": int(gx), "gy": int(gy)} for gx, gy in state.visited_cells],
             "window_history": list(step_records),
-            "target_metadata": request.metadata,
+            "target_metadata": target_metadata,
             "prototype_direction": str(args.direction),
             "prototype_latent": int(chosen_latent),
             "prototype_key": str(args.prototype_key),
@@ -846,7 +894,9 @@ def main(argv: list[str] | None = None) -> None:
                 "run_id": str(request.run_id),
                 "region_id": str(request.region_id),
                 "output_path": str(final_out_path),
-                "num_targets": int(len(request.target_cells)),
+                "num_targets": int(len(active_target_cells)),
+                "num_requested_targets": int(len(request.target_cells)),
+                "num_dropped_unsupported_targets": int(len(unsupported_targets)),
                 "num_windows": int(len(step_records)),
             }
         )

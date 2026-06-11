@@ -67,6 +67,63 @@ What still needs work:
 
 ---
 
+## Failed But Useful Experiments
+
+### Random SAE Top-Concept Center-2x2 Probe
+
+Status:
+
+- failed as a showcase result; keep as a diagnostic control
+
+What was run:
+
+- wrapper: `examples/sae_concepts/02_random_region_center2x2_10_top_concepts.sh`
+- engine: `scripts/run_export_random_concept_steer.py`
+- output: `paper_example/random_sae_top_concepts_center2x2/`
+- source region: `TCGA-EA-A5O9-01Z-00-DX1__random1024__mag_20p0__gx_54__gy_41`
+- edit mask: fixed central `2x2` cells in a `4x4` UNI grid
+- SAE variant: `tcga_uni2_sae_relu_v1`
+- concepts: random distinct concepts from the exported top-concept pool
+- selected latents: `10832, 1256, 9686, 6778, 6334, 2911, 4689, 4250, 8831, 3499`
+- settings: `default`, `prototype_strength=0.9`, `prototype_top_k=5`, `steps=30`, `seed=7`
+
+Exact command:
+
+```bash
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+SEED=7 \
+OUT_DIR=paper_example/random_sae_top_concepts_center2x2 \
+examples/sae_concepts/02_random_region_center2x2_10_top_concepts.sh
+```
+
+Why it is retained:
+
+- it is a useful negative/control experiment for checking whether arbitrary
+  exported SAE concepts produce visually specific local edits
+- it should not be treated as the default steering showcase
+- PixCell emitted a model-load warning that `y_pos_embed.y_pos_embed` was newly
+  initialized, which should be kept in mind when interpreting these outputs
+
+Decision:
+
+- use `examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh` with
+  `configs/edit_policies/showcase_best.json` as the default HNSCC steering
+  example instead
+
+---
+
+## Default HNSCC Steering Reproduction
+
+- script: `examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh`
+- policy: `configs/edit_policies/showcase_best.json`
+- direction: `hpv_neg`
+- SAE/prototype provenance: legacy `relu_sae_base` checkpoint with the existing HNSCC prototype bundle
+- regenerated output: `paper_example/hnscc_hpv_showcase_smoothed28_default_regenerated_20260526/progressive/`
+- manifest behavior: 28 historical smoothed targets requested; 14 center-support cells edited in 5 windows; 14 unsupported border targets dropped and recorded
+
+---
+
 ## Experiment Timeline
 
 ### 1. PixCell Local Steering

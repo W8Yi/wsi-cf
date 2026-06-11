@@ -1,0 +1,16 @@
+{
+  "task_name": "prad_gleason_score",
+  "label_source": "artifacts/prad_gleason_inputs/slide_labels.csv",
+  "split_manifest": "resources/manifests/sae_manifests_tcga_patient_train_test_90_10.json",
+  "projects": ["TCGA-PRAD"],
+  "label_column": "gleason_score_label",
+  "include_labels": ["GS6", "GS7", "GS8", "GS9", "GS10"],
+  "concept_labels": ["GS6", "GS7", "GS8", "GS9", "GS10"],
+  "association_split": "train",
+  "representative_split": "all",
+  "sae_variant": "tcga_sae_batch_topk_20x_interp",
+  "ranking_mode": "labels_only",
+  "top_concepts": 20,
+  "candidate_latents": 150,
+  "top_tiles_per_concept": 50
+}

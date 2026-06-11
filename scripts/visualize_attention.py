@@ -119,7 +119,7 @@ def load_clam_mb(ckpt_path: Path, device: torch.device):
     from wsi_cf.models.clam import CLAM_MB
 
     model = CLAM_MB(gate=True, size_arg="small", n_classes=2, embed_dim=1536)
-    state = torch.load(ckpt_path, map_location=device)
+    state = torch.load(ckpt_path, map_location="cpu")
     model.load_state_dict(state, strict=False)
     model.to(device).eval()
     return model

@@ -1,0 +1,26 @@
+{
+  "task_name": "kirc_low_vs_high_grade",
+  "label_source": "resources/labels/master/slide_labels_master.tsv",
+  "split_manifest": "resources/manifests/sae_manifests_tcga_patient_train_test_90_10.json",
+  "projects": ["TCGA-KIRC"],
+  "label_column": "tumor_grade",
+  "label_map": {
+    "G1": "low",
+    "G2": "low",
+    "LOW GRADE": "low",
+    "G3": "high",
+    "G4": "high",
+    "HIGH GRADE": "high"
+  },
+  "exclude_raw_labels": ["GX", "GB", "Unknown", "UNKNOWN"],
+  "include_labels": ["low", "high"],
+  "concept_labels": ["low", "high"],
+  "association_split": "train",
+  "representative_split": "all",
+  "sae_variant": "tcga_sae_batch_topk_20x_interp",
+  "ranking_mode": "attention_aware_optional",
+  "classifier_run_dir": "artifacts/classifier_training/kirc_low_vs_high_grade",
+  "top_concepts": 20,
+  "candidate_latents": 150,
+  "top_tiles_per_concept": 50
+}

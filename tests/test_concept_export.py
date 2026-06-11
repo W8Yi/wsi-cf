@@ -248,4 +248,4 @@ def test_find_label_concepts_source_wires_portable_export() -> None:
 
     assert "from export_concept_package import export_concept_package" in source
     assert "--no-export-concept-package" in source
-    assert "maybe_export_concept_package(args, out_dir)" in source
+    assert "export_concept_package(export_args)" in source

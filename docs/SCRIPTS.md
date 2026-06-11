@@ -14,6 +14,31 @@ bash examples/hnscc_hpv/01_visualize_attention.sh
 
 ### `scripts/find_regions.py`
 Finds manual or attention-guided regions for progressive editing. Outputs region images, feature grids, overlays, region metadata, edit manifests, and `region_bank.csv`.
+For paper-style balanced sampling, use `--final-slides-per-label N` with
+`--final-regions-per-slide K`; set `--final-slides-per-label 0` with
+`--final-regions-per-slide K` to export K regions for every eligible slide. When
+both are unset, the older `--final-regions-per-label` selection is preserved.
+
+Current paper region-selection default for HNSCC HPV is available through
+`--region-selection-mode borderline`. It ranks tissue-passing 2048 regions by a
+score combining moderate whole-slide attention, local region classifier
+target-probability around 0.55, tissue score, and valid feature density, then
+uses per-slide non-maximum suppression before exporting the top regions.
+
+Current paper cell-selection default:
+`configs/edit_cell_selection/attention_percentile_smooth.json`. This selects
+target cells by the local attention percentile calibrated from the successful
+showcase top-23 seed selection, then applies one 4-neighbor smoothing pass. In
+the 8x8 showcase region, top-23 corresponds to percentile `64.0625`. The number
+of edited cells in future regions is determined by the attention distribution,
+not by a fixed top-N or target count.
+`find_regions.py` defaults to this through
+`--edit-cell-selection-mode attention_percentile_smooth`; use
+`--edit-cell-selection-mode showcase_smoothed28` only for exact reproduction of
+the historical fixed top-23/prune-28 showcase artifact, or
+`--edit-cell-selection-mode importance_mass_sae_neighbors` to recover the older
+attention+SAE mass selector. Pair the default selector with
+`configs/edit_policies/showcase_best.json`.
 
 Example:
 ```bash
@@ -25,10 +50,20 @@ Runs the canonical progressive region editor from a region image, region bank, o
 Supports reusable edit policies through `--edit-policy`, for example
 `configs/edit_policies/showcase_best.json`; explicit CLI flags override policy values.
 
-Example:
+Default HNSCC steering example:
 ```bash
-bash examples/hnscc_hpv/03_run_showcase_edit.sh
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh
 ```
+
+This default example uses the fixed smoothed-28 showcase manifest,
+`configs/edit_policies/showcase_best.json`, `--direction hpv_neg`, and the
+legacy `relu_sae_base` paths matching the current HNSCC prototype bundle.
+Because the policy enforces `center_2x2` edit support, the historical 28-cell
+request executes on 14 coverable cells over 5 windows and records the 14
+unsupported border cells in `run_manifest.json`.
+`examples/hnscc_hpv/03_run_showcase_edit.sh` delegates to the same command.
 
 ### `scripts/analyze_concept_uni_features.py`
 Reconstructs task concept steering before diffusion and compares the decoded UNI conditioning features across concepts. Use this when generated images look similar and we want to verify whether SAE latent edits and decoded UNI grids are actually different.
@@ -56,10 +91,55 @@ Example:
   --device cuda:0
 ```
 
+### `scripts/run_hnscc_hpv_policy_benchmark.py`
+Runs or reuses matched HNSCC HPV progressive-edit outputs for multiple edit
+policies and writes comparison metrics. The default policy set compares the
+current `showcase_best` policy against `naive_no_preserve` and
+`baseline_no_preserve_full_duration`. With `--bidirectional`, it splits the
+input manifest into HPV+->HPV- and HPV-->HPV+ direction manifests and runs each
+policy in both directions.
+
+Typical outputs:
+- `benchmark_predictions.csv`
+- `benchmark_metrics_by_run.csv`
+- `benchmark_summary_by_method.csv`
+- `benchmark_per_cell_metrics.csv`
+- `benchmark_concept_fidelity.csv`
+- `benchmark_window_consistency.csv`
+- `benchmark_summary.json`
+
+Example:
+```bash
+/common/users/wq50/envs/pace/bin/python scripts/run_hnscc_hpv_policy_benchmark.py \
+  --run-edits \
+  --skip-existing \
+  --device cuda:3 \
+  --generation-device cuda:3
+```
+
+Paper showcase wrapper:
+```bash
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/04_run_paper_policy_benchmark.sh
+```
+
+Full bidirectional HNSCC HPV paper benchmark wrapper:
+```bash
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+examples/hnscc_hpv/06_run_paper_benchmark.sh
+```
+
+Dry-run the full wrapper without launching generation:
+```bash
+DRY_RUN=1 examples/hnscc_hpv/06_run_paper_benchmark.sh
+```
+
 ## Concept Discovery
 
 ### `scripts/prepare_classifier_concept_associations.py`
-Builds `latent_label_associations.csv` from a trained classifier bundle. This is the bridge from a newly trained task classifier to concept discovery: it uses that classifier's `task_manifest.csv`, scans only the slides for that task, computes slide-level SAE summaries, and writes association artifacts in the same format consumed by `find_label_concepts.py`.
+Legacy helper for building `latent_label_associations.csv` from a trained classifier bundle. New concept discovery runs should prefer the JSON-driven `find_label_concepts.py` workflow below, which builds the cohort, associations, and concept cards in one command.
 
 Typical outputs:
 - `latent_label_associations.csv`
@@ -78,49 +158,118 @@ Example:
 ```
 
 ### `scripts/find_label_concepts.py`
-Selects label-relevant SAE concepts and representative tiles. It supports `labels_only` ranking from `latent_label_associations.csv` and `attention_aware` ranking when a classifier is available.
+Builds label-relevant SAE concepts from a task JSON. The JSON defines the cohort, label column/map, requested concept labels, SAE variant, and optional classifier attention. The script builds the cohort from `resources/labels/master/slide_labels_master.tsv`, computes slide-level SAE associations, then writes per-label concept cards and representative tiles.
 
 Typical outputs:
-- `concept_cards.csv`
-- `representative_tiles.csv`
-- `selected_concepts.json`
-- `summary.json`
-- `concept_export/` portable local-PC package with `manifest.json`, compact CSVs,
+- `cohort_slides.csv`
+- `latent_label_associations.csv`
+- `slide_sae_summary.npz`
+- `labels/<label>/concept_cards.csv`
+- `labels/<label>/representative_tiles.csv`
+- `labels/<label>/selected_concepts.json`
+- `labels/<label>/summary.json`
+- `labels/<label>/concept_export/` portable local-PC package with `manifest.json`, compact CSVs,
   `slide_path_map.template.csv`, and `FORMAT.md`
 
 Example:
 ```bash
 /common/users/wq50/envs/pace/bin/python scripts/find_label_concepts.py \
-  --task luad_lusc \
-  --association-root artifacts/concept_label_associations_classifier \
-  --class-label LUAD \
-  --mode attention_aware \
-  --backend mil \
-  --classifier-run-dir artifacts/classifier_training/luad_lusc \
-  --top-concepts 10 \
-  --top-tiles-per-concept 50 \
-  --out-dir artifacts/classifier_label_concepts \
+  --task-json configs/concept_tasks/luad_lusc.json \
+  --out-root artifacts/concept_discovery_json \
   --device cuda:0
 ```
+
+Curated JSON task examples live in `configs/concept_tasks/`:
+- `luad_lusc.json`
+- `kirc_low_vs_high_grade.json`
+- `tumor_purity_low_high.json`
+- `hnsc_hpv.json`
+- `prad_gleason_score.json`
+- `prad_low_vs_high_grade.json`
 
 End-to-end classifier concept discovery:
 ```bash
 bash examples/concept_discovery/01_run_all_classifier_concepts.sh
 ```
 
-This example runs association preparation and attention-aware concept-card generation for every trained classifier task by default:
-- `kirc_grade`
-- `kirc_low_vs_high_grade`
-- `msi_coad_stad`
+This example runs the curated JSON tasks by default:
 - `luad_lusc`
-- `cancer_type_all_tcga`
+- `kirc_low_vs_high_grade`
+- `tumor_purity_low_high`
+- `hnsc_hpv`
 
 Useful overrides:
 ```bash
-TASKS=luad_lusc,msi_coad_stad \
-MAX_SLIDES_PER_CLASS=100 \
-MAX_TILES_PER_SLIDE=4096 \
+TASK_JSONS=configs/concept_tasks/luad_lusc.json,configs/concept_tasks/hnsc_hpv.json \
+CONCEPT_OUT=artifacts/concept_discovery_json_batch_topk \
 bash examples/concept_discovery/01_run_all_classifier_concepts.sh
+```
+
+Prepare TCGA-PRAD Gleason labels from GDC and mine both score-specific and
+low/high-grade concepts from existing UNI2 bags:
+```bash
+DEVICE=cuda:0 bash examples/concept_discovery/05_run_prad_gleason_concepts.sh
+```
+
+The score task uses `GS6`, `GS7`, `GS8`, `GS9`, and `GS10`. The steering
+task maps ISUP Grade Groups `GG1-GG2` to `low` and `GG3-GG5` to `high`.
+
+Train the matching PRAD low/high attention MIL classifier:
+```bash
+DEVICE=cuda:0 bash examples/classifier_training/12_train_prad_low_vs_high_grade.sh
+```
+
+After this classifier exists, `prad_low_vs_high_grade.json` uses it for
+attention-aware concept ranking.
+
+Prepare normal-versus-tumor TCGA tasks from the GDC slide inventory:
+```bash
+bash examples/concept_discovery/02_prepare_normal_tumor_tasks.sh
+```
+
+This writes normal SVS download manifests and concept task JSON files for
+LUAD, COAD, BRCA, and KIRC. The steering labels are `normal` and `tumor`;
+for normal-to-tumor steering, `tumor` is the target concept label. Normal
+UNI2 feature bags must be generated from the downloaded SVS files before
+`find_label_concepts.py` can mine those concepts.
+
+Download a starter set of 20 GDC normal SVS files into this repository:
+```bash
+TASK=kirc_normal_tumor \
+bash examples/concept_discovery/03_download_normal_tumor_normal_slides.sh
+```
+
+Set `TASK` to `luad_normal_tumor`, `coad_normal_tumor`,
+`brca_normal_tumor`, or `kirc_normal_tumor`. Set `ALL=1` to download the
+complete normal inventory for the task; this can require tens to over one
+hundred GB depending on cohort.
+
+Extract UNI2 normal-slide feature bags after the SVS downloads are complete:
+```bash
+DEVICE=cuda:0 \
+bash examples/concept_discovery/04_extract_normal_tumor_uni2_features.sh
+```
+
+The extractor is resumable: it processes only downloaded normal slides that
+do not already have an H5 bag under `artifacts/normal_tumor_features/`.
+Set `TASKS="kirc_normal_tumor"` to encode a single cohort.
+
+### `scripts/overlay_sae_concepts_on_wsi.py`
+Recomputes SAE latent activations on supplied or randomly sampled TCGA WSIs and
+overlays only feature-backed tiles on WSI thumbnails. By default, every latent
+in the selected SAE is eligible. The combined panel colors each tile by its
+strongest SAE concept, while
+`tile_winner_concepts.csv` records the winning concept, latent, raw activation,
+normalized activation, and thumbnail bounds for every feature tile. By default
+it samples 10 matched slide/H5 pairs from `/research/projects/mllab/WSI/TCGA/store`
+and `/research/projects/mllab/WSI/TCGA_features`.
+
+Example:
+```bash
+PYTHON=/common/users/wq50/envs/pace/bin/python
+$PYTHON scripts/overlay_sae_concepts_on_wsi.py \
+  --sample-random-slides 10 \
+  --out-dir paper_example/sae_concept_wsi_overlay
 ```
 
 Tumor purity low/high concepts:
@@ -193,8 +342,13 @@ Implemented classifier task presets:
 | LUAD vs LUSC | `03_train_luad_lusc.sh` | `project_dir`, `LUAD/LUSC` | Binary lung cancer-type task. |
 | All TCGA cancer type | `04_train_cancer_type_all_tcga.sh` | `project_dir`, all projects with at least 30 slides | Multiclass pan-cancer classifier. |
 | KIRC low vs high grade | `05_train_kirc_low_vs_high_grade.sh` | `G1,G2 -> low`; `G3,G4 -> high` | Recommended KIRC grade classifier for more stable evaluation. |
+| KIRC continuous grade risk | `06_train_kirc_continuous_grade_risk.sh` | `G1=0.00`, `G2=0.33`, `G3=0.66`, `G4=1.00` | Continuous endpoint for measuring risk-score movement after steering. |
+| KIRC ordinal grade risk | `07_train_kirc_ordinal_grade_risk.sh` | Cumulative `>=G2`, `>=G3`, `>=G4` targets | Ordered endpoint with grade-balanced loss and pairwise ranking loss. |
+| KIRC SAE ordinal grade risk | `08_train_kirc_sae_ordinal_grade_risk.sh` | Batch-TopK SAE concept aggregates -> cumulative grade risk | Concept-only linear ordinal endpoint with interpretable coefficients. |
+| KIRC SAE case-level ordinal risk | `09_train_kirc_sae_case_continuous_grade_risk.sh` | Patient-averaged Batch-TopK SAE concept aggregates -> continuous ordinal risk | Uses stable concept selection and an auxiliary low/high boundary loss for sparse G1 robustness. |
+| LUAD/COAD/BRCA/KIRC normal vs tumor | `10_train_all_normal_tumor.sh` | `normal` vs `tumor` per organ | Requires downloaded normal slides and extracted UNI2 bags from the normal/tumor preparation workflow. |
 
-All classifier presets are thin wrappers around `scripts/train_attention_classifier.py`, so they can accept extra overrides. For example:
+Classifier presets `01` through `05` are thin wrappers around `scripts/train_attention_classifier.py`, so they can accept extra overrides. For example:
 
 ```bash
 bash examples/classifier_training/05_train_kirc_low_vs_high_grade.sh \
@@ -217,7 +371,108 @@ Dry-run manifest check:
   --dry-run
 ```
 
-Tumor-vs-normal is intentionally not included yet because the current master label table and TCGA feature store do not contain true normal-slide feature bags. For now, use `04_train_cancer_type_all_tcga.sh` as the broad multi-cohort classifier.
+After normal SVS extraction, train all four organ-specific normal-versus-tumor classifiers:
+```bash
+DEVICE=cuda:0 \
+bash examples/classifier_training/10_train_all_normal_tumor.sh
+```
+
+The wrapper checks that all normal H5 bags in each task are available before
+training, so a partially extracted normal cohort is not used accidentally.
+
+Run preparation, downloaded-slide validation, resumable UNI2 extraction, and
+all four classifier trainings in one command:
+```bash
+DEVICE=cuda:0 \
+bash examples/classifier_training/11_encode_and_train_all_normal_tumor.sh
+```
+
+Set `SLIDE_ROOT=/path/to/downloads` if the normal SVS files were downloaded
+outside `artifacts/normal_tumor_slides/`.
+Use `CHECK_ONLY=1` to validate that all expected downloaded slides are visible
+before starting UNI2 extraction.
+
+LUAD-to-LUSC top-1 steering cell-budget classifier test:
+```bash
+DEVICE=cuda:0 \
+bash examples/morphology_label_concept_review/03_luad_to_lusc_cell_budget_classifier_test.sh
+```
+
+This reuses the ten LUAD source regions from
+`artifacts/morphology_label_concept_review_top1_showcase_best_10slides`,
+regenerates LUSC-directed edits for `1`, `4`, `16`, `32`, and `64` cells, and
+reports whole-slide `P(LUSC)` shifts using `artifacts/classifier_training/luad_lusc`.
+Cells are ranked by classifier attention within those compatible with the
+`showcase_best` center-support policy for the first four budgets. The `64`-cell
+(`100%`) condition edits the entire 8x8 region with `border_relaxed` support;
+classifier scoring reports how many of those cells are represented in the
+source UNI2 feature bag.
+
+### `scripts/train_grade_risk_regressor.py`
+Trains a bounded slide-level MIL regression score for ordinal KIRC grade. It
+holds a validation subset out of the original training cases for checkpoint
+selection and evaluates the original patient-level test split only after
+selecting the best checkpoint.
+
+```bash
+DEVICE=cuda:0 bash examples/classifier_training/06_train_kirc_continuous_grade_risk.sh
+```
+
+Ordinal model for sharper grade ordering:
+```bash
+DEVICE=cuda:0 bash examples/classifier_training/07_train_kirc_ordinal_grade_risk.sh
+```
+
+The ordinal preset predicts three cumulative grade thresholds and defines its
+risk score as their mean, yielding the same `0.00`, `0.33`, `0.66`, `1.00`
+scale while directly supervising the grade ordering. It enables grade-balanced
+loss and a pairwise ranking loss by default.
+
+### `scripts/train_sae_concept_grade_risk.py`
+Trains a concept-only linear ordinal predictor using Batch-TopK SAE summaries
+rather than raw UNI2 tile embeddings. For each slide it caches mean activation,
+active-tile fraction, and top-5%-tile mean activation, selects the top 100
+latents on training slides only, and writes interpretable model coefficients.
+
+```bash
+DEVICE=cuda:0 bash examples/classifier_training/08_train_kirc_sae_ordinal_grade_risk.sh
+```
+
+When the SAE feature cache has already been computed with the same settings:
+```bash
+DEVICE=cuda:0 REUSE_FEATURE_CACHE=1 \
+bash examples/classifier_training/08_train_kirc_sae_ordinal_grade_risk.sh
+```
+
+Case-level continuous endpoint for the sparse-G1 KIRC setting:
+```bash
+DEVICE=cuda:0 bash examples/classifier_training/09_train_kirc_sae_case_continuous_grade_risk.sh
+```
+
+This preset reuses the `08` Batch-TopK feature cache, averages slide-level
+SAE summaries within patients, retains 30 concepts using five-fold
+training-only stability selection, and adds an auxiliary `G1/G2` versus
+`G3/G4` boundary loss while preserving the continuous ordinal risk score.
+
+### `scripts/evaluate_kirc_grade_risk_edits.py`
+Re-encodes generated KIRC regions with UNI2, replaces their corresponding cells
+in each original whole-slide feature bag, and measures continuous grade-risk
+movement. The primary endpoint is `full_region_risk_delta`; positive movement
+supports low-to-high edits, while negative movement is the reverse-direction
+control. A `target_cells_risk_delta` is also written as a focused diagnostic.
+
+```bash
+DEVICE=cuda:0 bash examples/kirc_grade/06_evaluate_top1_grade_risk_shift.sh
+```
+
+### `scripts/evaluate_kirc_sae_grade_risk_edits.py`
+Scores generated KIRC edits with the concept-only ordinal predictor by
+recomputing SAE slide summaries after feature replacement. Existing generated
+edits are marked as binary-classifier-selected retrospective evaluations.
+
+```bash
+DEVICE=cuda:0 bash examples/kirc_grade/07_evaluate_sae_ordinal_grade_risk_shift.sh
+```
 
 ## HPV Examples
 

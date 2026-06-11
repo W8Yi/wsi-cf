@@ -1,0 +1,30 @@
+{
+  "selection_name": "attention_percentile_smooth",
+  "description": "Default paper benchmark edit-cell selector. It uses the attention percentile calibrated from the good showcase top-23 seed selection, then applies a small connectivity smoothing pass. The number of edit cells is data-dependent, not fixed.",
+  "version": 1,
+  "selector": {
+    "score_source": "region_clam_attention",
+    "selection": "attention_percentile",
+    "attention_percentile": 64.0625,
+    "smooth_fill_holes": true,
+    "smooth_neighborhood": 4,
+    "smooth_min_neighbors": 3,
+    "smooth_border_relax": 1,
+    "smooth_iterations": 1,
+    "target_count": null,
+    "top_n": null
+  },
+  "showcase_calibration": {
+    "source_attention_cells_csv": "artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_attention_only_top23_smooth4_prune28/attention_cells.csv",
+    "source_grid_cell_count": 64,
+    "source_top_seed_count": 23,
+    "percentile_below_rank_23": 64.0625,
+    "rank_23_attention_threshold": 0.01801639050245285,
+    "rank_24_attention": 0.017729850485920906
+  },
+  "paired_edit_policy": "configs/edit_policies/showcase_best.json",
+  "notes": [
+    "Use this as the default for future paper-style HNSCC HPV region mining.",
+    "The historical smoothed-28 showcase selector is preserved in configs/edit_cell_selection/showcase_smoothed28.json for exact reproduction only."
+  ]
+}

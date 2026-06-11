@@ -1,0 +1,35 @@
+{
+  "selection_name": "showcase_smoothed28",
+  "description": "Historical HNSCC HPV smoothed-28 showcase edit-cell selection. Kept for exact reproduction only; the current paper default is attention_percentile_smooth.",
+  "version": 1,
+  "source_artifacts": {
+    "selection_summary": "paper_example/showcase_smoothed28/selection_summary.json",
+    "selection_manifest": "paper_example/showcase_smoothed28/selection_progressive_edit_manifest.json",
+    "region_bank": "artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_attention_only_top23_smooth4_prune28/region_bank.csv",
+    "progressive_edit_manifest": "artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_attention_only_top23_smooth4_prune28/progressive_edit_manifest.json"
+  },
+  "selector": {
+    "score_source": "region_image_clam_attention",
+    "selection": "top_n",
+    "top_n": 23,
+    "smooth_fill_holes": true,
+    "smooth_neighborhood": 4,
+    "smooth_min_neighbors": 3,
+    "smooth_border_relax": 1,
+    "smooth_iterations": 1,
+    "target_count": 28,
+    "prune_strategy": "low_support"
+  },
+  "observed_counts": {
+    "initial_selected_count": 23,
+    "smooth_added_count": 6,
+    "pruned_count": 1,
+    "selected_count": 28
+  },
+  "paired_edit_policy": "configs/edit_policies/showcase_best.json",
+  "notes": [
+    "This selector is attention-only for the showcase region: it does not add SAE-similarity filtering at selection time.",
+    "This selector intentionally uses fixed top_n and target_count values because it records the original showcase artifact.",
+    "For future paper-style region mining, prefer configs/edit_cell_selection/attention_percentile_smooth.json."
+  ]
+}

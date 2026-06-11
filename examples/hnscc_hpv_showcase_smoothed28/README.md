@@ -5,12 +5,27 @@ case. It starts from the selected 2048 px HNSCC region and smoothed-28 cell
 manifest, runs our progressive steering method, runs a matched naive baseline,
 and writes data-only metrics for comparing the two outputs.
 
-The example uses the smoothed-28 selection:
+This example reproduces the historical smoothed-28 selection:
 
 - attention-only top-23 seed cells,
 - one 4-neighbor smoothing pass with border relaxation,
 - pruning back to 28 selected cells,
 - no SAE-similarity filtering in the selector.
+
+That fixed-count selector is recorded for exact reproduction in:
+
+```text
+configs/edit_cell_selection/showcase_smoothed28.json
+```
+
+For future paper benchmark region mining, use the non-fixed default:
+
+```text
+configs/edit_cell_selection/attention_percentile_smooth.json
+```
+
+That default uses the percentile equivalent of the showcase top-23 seed cutoff:
+`64.0625` on an 8x8 grid.
 
 ## 1. Run Progressive Steering
 
@@ -29,11 +44,14 @@ artifacts/hnscc_hpv_showcase_smoothed28_tutorial/progressive/
 Policy:
 
 ```text
-configs/edit_policies/original28_flip.json
+configs/edit_policies/showcase_best.json
 ```
 
 This is the paper showcase setting: progressive PixCell windows with
 history-aware latent preservation for visited and fresh-context regions.
+The manifest retains all 28 historical requested cells. With this policy's
+`center_2x2` support constraint, the runnable default edits the 14 coverable
+cells in 5 windows and records 14 unsupported border requests as dropped.
 
 ## 2. Run Naive Baseline
 
@@ -121,3 +139,38 @@ examples/hnscc_hpv_showcase_smoothed28/compute_metrics.py \
 
 Use `--stage-mode none` when only final classifier and perturbation metrics are
 needed.
+
+## Paper Policy Benchmark
+
+For the comprehensive paper-style policy comparison, run:
+
+```bash
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/04_run_paper_policy_benchmark.sh
+```
+
+This compares:
+
+- `ours`: `configs/edit_policies/showcase_best.json`
+- `naive_no_preserve`: `configs/edit_policies/naive_no_preserve.json`
+- `naive_full_duration`: `configs/edit_policies/baseline_no_preserve_full_duration.json`
+
+Output root:
+
+```text
+artifacts/hnscc_hpv_showcase_best_paper_policy_benchmark/
+```
+
+Main metric files:
+
+```text
+metrics/benchmark_summary_by_method.csv
+metrics/benchmark_metrics_by_run.csv
+metrics/benchmark_predictions.csv
+metrics/benchmark_per_cell_metrics.csv
+metrics/benchmark_summary.json
+```
+
+Use `DRY_RUN=1` to print the commands without launching generation, or
+`RUN_EDITS=0` to recompute metrics from existing policy outputs.

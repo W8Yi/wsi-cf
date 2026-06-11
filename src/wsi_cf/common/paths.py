@@ -20,6 +20,11 @@ SAE_VARIANTS = {
         "config": RESOURCES_ROOT / "models/sae/tcga_uni2_sae_relu_v1/run_config.json",
         "description": "Current default TCGA UNI2 ReLU SAE trained at 20x.",
     },
+    "tcga_sae_batch_topk_20x_interp": {
+        "checkpoint": RESOURCES_ROOT / "models/sae/tcga_sae_batch_topk_20x_interp/batch_topk_final.pt",
+        "config": RESOURCES_ROOT / "models/sae/tcga_sae_batch_topk_20x_interp/run_config.json",
+        "description": "TCGA UNI2 BatchTopK SAE trained at 20x for interpretability/concept extraction.",
+    },
     "relu_sae_base": {
         "checkpoint": RESOURCES_ROOT / "models/sae/relu_sae_base/relu_final.pt",
         "config": RESOURCES_ROOT / "models/sae/relu_sae_base/run_config.json",

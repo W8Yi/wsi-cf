@@ -203,6 +203,46 @@ def local_edit_support_global_cells(
     return allowed
 
 
+def split_cells_by_edit_support(
+    *,
+    target_cells: Sequence[tuple[int, int]],
+    grid_w: int,
+    grid_h: int,
+    window_grid_side: int = 4,
+    stride_cells: int = 2,
+    grid_step_px: int = 256,
+    edit_support: str = EDIT_SUPPORT_CENTER_2X2,
+) -> tuple[tuple[tuple[int, int], ...], tuple[tuple[int, int], ...]]:
+    if str(edit_support) not in EDIT_SUPPORT_CHOICES:
+        raise ValueError(f"Unsupported edit_support: {edit_support}")
+    validated_targets = validate_cells(list(target_cells), grid_w=int(grid_w), grid_h=int(grid_h))
+    windows = enumerate_progressive_windows(
+        grid_w=int(grid_w),
+        grid_h=int(grid_h),
+        window_grid_side=int(window_grid_side),
+        stride_cells=int(stride_cells),
+        grid_step_px=int(grid_step_px),
+    )
+    support: set[tuple[int, int]] = set()
+    for window in windows:
+        support.update(
+            local_edit_support_global_cells(
+                window,
+                grid_w=int(grid_w),
+                grid_h=int(grid_h),
+                edit_support=str(edit_support),
+            )
+        )
+    supported: list[tuple[int, int]] = []
+    unsupported: list[tuple[int, int]] = []
+    for cell in sorted(set(validated_targets), key=lambda item: (int(item[1]), int(item[0]))):
+        if cell in support:
+            supported.append((int(cell[0]), int(cell[1])))
+        else:
+            unsupported.append((int(cell[0]), int(cell[1])))
+    return tuple(supported), tuple(unsupported)
+
+
 def plan_progressive_steps(
     *,
     target_cells: Sequence[tuple[int, int]],
@@ -241,6 +281,13 @@ def plan_progressive_steps(
     if not candidate_windows:
         raise RuntimeError(
             f"No progressive windows cover the requested target cells using edit_support={edit_support}"
+        )
+    covered_targets = set().union(*(window_targets[window.window_id] for window in candidate_windows))
+    unsupported_targets = sorted(target_set - covered_targets, key=lambda item: (int(item[1]), int(item[0])))
+    if unsupported_targets:
+        raise RuntimeError(
+            f"Some target cells are outside edit_support={edit_support}: {unsupported_targets}. "
+            "Filter target_cells to supported cells or use edit_support=border_relaxed."
         )
 
     remaining = set(target_set)
@@ -398,8 +445,11 @@ def preserve_map_preview(preserve_map: torch.Tensor) -> Image.Image:
     else:
         raise ValueError("preserve_map must have shape [1,1,H,W] or [H,W]")
     arr01 = np.clip(arr.astype(np.float32), 0.0, 1.0)
-    rgb = np.stack([arr01, arr01, arr01], axis=-1)
-    return Image.fromarray((rgb * 255.0).astype(np.uint8), mode="RGB")
+    grey = 208.0 + 42.0 * arr01
+    rgb = np.stack([grey, grey, grey], axis=-1)
+    edit_mask = arr01 <= 1e-6
+    rgb[edit_mask] = np.asarray([252.0, 68.0, 68.0], dtype=np.float32)
+    return Image.fromarray(np.clip(rgb, 0.0, 255.0).astype(np.uint8), mode="RGB")
 
 
 def draw_cells_overlay(
@@ -408,14 +458,141 @@ def draw_cells_overlay(
     cells: Sequence[tuple[int, int]],
     grid_step_px: int,
     outline: tuple[int, int, int] = (255, 0, 0),
+    outline_width: int = 6,
 ) -> Image.Image:
     canvas = img.copy().convert("RGB")
     draw = ImageDraw.Draw(canvas)
+    drawn_edges: set[tuple[str, int, int, int]] = set()
     for idx, (gx, gy) in enumerate(cells, start=1):
         x0 = int(gx) * int(grid_step_px)
         y0 = int(gy) * int(grid_step_px)
-        x1 = min(canvas.size[0] - 1, x0 + int(grid_step_px) - 1)
-        y1 = min(canvas.size[1] - 1, y0 + int(grid_step_px) - 1)
-        draw.rectangle([x0, y0, x1, y1], outline=outline, width=6)
+        x1 = min(canvas.size[0] - 1, x0 + int(grid_step_px))
+        y1 = min(canvas.size[1] - 1, y0 + int(grid_step_px))
+        edges = (
+            (("h", y0, x0, x1), ((x0, y0), (x1, y0))),
+            (("v", x1, y0, y1), ((x1, y0), (x1, y1))),
+            (("h", y1, x0, x1), ((x0, y1), (x1, y1))),
+            (("v", x0, y0, y1), ((x0, y0), (x0, y1))),
+        )
+        for edge_key, edge_points in edges:
+            if edge_key not in drawn_edges:
+                draw.line(edge_points, fill=outline, width=int(outline_width))
+                drawn_edges.add(edge_key)
         draw.text((x0 + 8, y0 + 8), str(idx), fill=(255, 255, 0))
     return canvas
+
+
+def draw_step_region_overlay(
+    img: Image.Image,
+    *,
+    window: ProgressiveWindow,
+    edit_cells_global: Sequence[tuple[int, int]],
+    support_cells_global: Sequence[tuple[int, int]] | None = None,
+    grid_step_px: int,
+    grid_outline: tuple[int, int, int, int] = (0, 0, 0, 190),
+    window_outline: tuple[int, int, int, int] = (255, 0, 0, 255),
+    context_fill: tuple[int, int, int, int] = (235, 235, 235, 88),
+    support_fill: tuple[int, int, int, int] = (255, 0, 0, 48),
+    edit_fill: tuple[int, int, int, int] = (255, 0, 0, 92),
+) -> Image.Image:
+    canvas = img.copy().convert("RGBA")
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay, "RGBA")
+    width, height = canvas.size
+    step = int(grid_step_px)
+
+    edit_cells = {(int(gx), int(gy)) for gx, gy in edit_cells_global}
+    support_cells = tuple(support_cells_global) if support_cells_global is not None else tuple(edit_cells_global)
+    support_cell_set = {(int(gx), int(gy)) for gx, gy in support_cells}
+    for gx, gy in window.global_cells():
+        if (int(gx), int(gy)) in support_cell_set:
+            continue
+        x0 = int(gx) * step
+        y0 = int(gy) * step
+        x1 = min(width - 1, (int(gx) + 1) * step)
+        y1 = min(height - 1, (int(gy) + 1) * step)
+        draw.rectangle([x0, y0, x1, y1], fill=context_fill)
+
+    for gx, gy in support_cells:
+        x0 = int(gx) * step
+        y0 = int(gy) * step
+        x1 = min(width - 1, (int(gx) + 1) * step)
+        y1 = min(height - 1, (int(gy) + 1) * step)
+        fill = edit_fill if (int(gx), int(gy)) in edit_cells else support_fill
+        draw.rectangle([x0, y0, x1, y1], fill=fill)
+
+    for x in range(0, width + 1, step):
+        grid_x = min(width - 1, int(x))
+        draw.line([(grid_x, 0), (grid_x, height - 1)], fill=grid_outline, width=4)
+    for y in range(0, height + 1, step):
+        grid_y = min(height - 1, int(y))
+        draw.line([(0, grid_y), (width - 1, grid_y)], fill=grid_outline, width=4)
+
+    drawn_edges: set[tuple[str, int, int, int]] = set()
+    for gx, gy in support_cells:
+        x0 = int(gx) * step
+        y0 = int(gy) * step
+        x1 = min(width - 1, (int(gx) + 1) * step)
+        y1 = min(height - 1, (int(gy) + 1) * step)
+        edges = (
+            (("h", y0, x0, x1), ((x0, y0), (x1, y0))),
+            (("v", x1, y0, y1), ((x1, y0), (x1, y1))),
+            (("h", y1, x0, x1), ((x0, y1), (x1, y1))),
+            (("v", x0, y0, y1), ((x0, y0), (x0, y1))),
+        )
+        for edge_key, edge_points in edges:
+            if edge_key not in drawn_edges:
+                draw.line(edge_points, fill=window_outline, width=6)
+                drawn_edges.add(edge_key)
+
+    x0 = int(window.left)
+    y0 = int(window.top)
+    x1 = min(width - 1, x0 + int(window.grid_w) * step)
+    y1 = min(height - 1, y0 + int(window.grid_h) * step)
+    dash_length = 88
+    dash_gap = 52
+    dash_width = 16
+    radius = dash_width // 2
+
+    def draw_rounded_dash(start: tuple[int, int], end: tuple[int, int]) -> None:
+        draw.line([start, end], fill=window_outline, width=dash_width)
+        for x, y in (start, end):
+            draw.ellipse([x - radius, y - radius, x + radius, y + radius], fill=window_outline)
+
+    for x in range(x0, x1 + 1, dash_length + dash_gap):
+        x_end = min(x + dash_length, x1)
+        draw_rounded_dash((x, y0), (x_end, y0))
+        draw_rounded_dash((x, y1), (x_end, y1))
+    for y in range(y0, y1 + 1, dash_length + dash_gap):
+        y_end = min(y + dash_length, y1)
+        draw_rounded_dash((x0, y), (x0, y_end))
+        draw_rounded_dash((x1, y), (x1, y_end))
+
+    canvas.alpha_composite(overlay)
+    return canvas.convert("RGB")
+
+
+def draw_step_edit_area_zoom_4x4(
+    img: Image.Image,
+    *,
+    window: ProgressiveWindow,
+    edit_cells_global: Sequence[tuple[int, int]],
+    support_cells_global: Sequence[tuple[int, int]],
+    grid_step_px: int,
+) -> Image.Image:
+    full_overlay = draw_step_region_overlay(
+        img,
+        window=window,
+        edit_cells_global=edit_cells_global,
+        support_cells_global=support_cells_global,
+        grid_step_px=int(grid_step_px),
+    )
+    step = int(grid_step_px)
+    return full_overlay.crop(
+        (
+            int(window.gx0) * step,
+            int(window.gy0) * step,
+            (int(window.gx0) + int(window.grid_w)) * step,
+            (int(window.gy0) + int(window.grid_h)) * step,
+        )
+    )

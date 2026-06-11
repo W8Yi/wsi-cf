@@ -44,6 +44,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--label-column", type=str, required=True)
     parser.add_argument("--include-labels", type=str, default="")
     parser.add_argument("--label-map", type=str, default="", help="Optional comma list like raw:new,raw2:new2.")
+    parser.add_argument("--label-order", type=str, default="", help="Optional comma list fixing class id order, e.g. low,high.")
     parser.add_argument("--features-root", type=Path, default=DEFAULT_FEATURES_ROOT)
     parser.add_argument("--split-manifest", type=Path, default=DEFAULT_SPLIT_MANIFEST)
     parser.add_argument("--out-dir", type=Path, default=WSI_CF_ROOT / "artifacts/classifier_training")
@@ -167,15 +168,14 @@ def load_label_rows(args: argparse.Namespace) -> tuple[list[dict[str, Any]], lis
 
     rows: list[dict[str, Any]] = []
     skipped_features: list[dict[str, Any]] = []
+    delimiter = "\t" if args.label_source.suffix.lower() in {".tsv", ".tab"} else ","
     with args.label_source.open("r", newline="") as handle:
-        reader = csv.DictReader(handle, delimiter="\t")
+        reader = csv.DictReader(handle, delimiter=delimiter)
         if args.label_column not in (reader.fieldnames or []):
             raise ValueError(f"Label column '{args.label_column}' not found in {args.label_source}")
         for row in reader:
             project = str(row.get("project_dir", ""))
             if not all_projects and project not in set(projects_arg):
-                continue
-            if all_projects and not project_has_features(args.features_root, project):
                 continue
             slide_key = str(row.get("slide_key", ""))
             case_id = str(row.get("case_id", "")) or case_id_from_slide_key(slide_key)
@@ -188,7 +188,13 @@ def load_label_rows(args: argparse.Namespace) -> tuple[list[dict[str, Any]], lis
                 continue
             if include_labels and label_name not in include_labels:
                 continue
-            h5_path = args.features_root / project / "features_uni2" / f"{slide_key}.h5"
+            fallback_h5 = args.features_root / project / "features_uni2" / f"{slide_key}.h5"
+            explicit_h5 = str(row.get("h5_path", "")).strip()
+            h5_path = Path(explicit_h5) if explicit_h5 else fallback_h5
+            if not h5_path.exists() and fallback_h5.exists():
+                h5_path = fallback_h5
+            if all_projects and not explicit_h5 and not project_has_features(args.features_root, project):
+                continue
             if not h5_path.exists():
                 skipped_features.append(
                     {
@@ -241,11 +247,21 @@ def filter_and_encode_labels(
     max_train_slides: int,
     max_test_slides: int,
     seed: int,
+    label_order: list[str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, int]]:
     class_counts = Counter(str(row["label_name"]) for row in rows)
     keep_labels = {label for label, count in class_counts.items() if int(count) >= int(min_slides_per_class)}
     rows = [row for row in rows if str(row["label_name"]) in keep_labels]
-    label_names = sorted({str(row["label_name"]) for row in rows})
+    discovered_labels = {str(row["label_name"]) for row in rows}
+    if label_order:
+        ordered = [str(label) for label in label_order]
+        missing = sorted(discovered_labels - set(ordered))
+        unknown = sorted(set(ordered) - discovered_labels)
+        if missing or unknown:
+            raise ValueError(f"--label-order mismatch: missing={missing}, unknown={unknown}")
+        label_names = ordered
+    else:
+        label_names = sorted(discovered_labels)
     label_to_id = {label: idx for idx, label in enumerate(label_names)}
     for row in rows:
         row["label_id"] = int(label_to_id[str(row["label_name"])])
@@ -479,6 +495,7 @@ def main(argv: list[str] | None = None) -> None:
         max_train_slides=int(args.max_train_slides),
         max_test_slides=int(args.max_test_slides),
         seed=int(args.seed),
+        label_order=parse_csv_list(args.label_order),
     )
     train_rows = [row for row in rows if row["split"] == "train"]
     test_rows = [row for row in rows if row["split"] == "test"]

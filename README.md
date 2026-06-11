@@ -26,7 +26,7 @@ The canonical workflow is:
 
 - `scripts/visualize_attention.py`: whole-slide attention heatmaps, CLAM-first.
 - `scripts/find_regions.py`: region discovery by attention/pathology-aware scoring.
-- `scripts/run_progressive_region_edit.py`: manifest-driven progressive region editing.
+- `scripts/run_progressive_region_edit.py`: manifest-driven progressive region editing engine.
 - `scripts/select_attention_cells.py`: attention-only cell selection and smoothing.
 - `scripts/find_label_concepts.py`: label-relevant SAE concept discovery.
 
@@ -39,14 +39,21 @@ bash examples/hnscc_hpv/03_run_showcase_edit.sh
 bash examples/hnscc_hpv/04_run_region_eval.sh
 ```
 
-The current paper-style showcase tutorial lives in:
+The default HNSCC steering example is the current paper-style showcase:
 
 ```bash
-examples/hnscc_hpv_showcase_smoothed28/
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh
 ```
 
-It runs the progressive showcase, runs the matched naive baseline, and writes
-data-only comparison metrics.
+It uses `configs/edit_policies/showcase_best.json`, the smoothed-28 edit
+manifest, and the legacy `relu_sae_base` checkpoint required by the existing
+HNSCC prototype bundle. The containing folder also includes the matched naive
+baseline and comparison metrics workflow. Under the canonical `center_2x2`
+support constraint, the 28-cell historical request yields 14 coverable edited
+cells across 5 progressive windows; the dropped border targets remain recorded
+in the run manifest.
 
 ## Project Layout
 
@@ -81,15 +88,14 @@ prototypes dynamically with the active SAE and is the preferred path.
 ## Quick Demo
 
 ```bash
-python scripts/run_progressive_region_edit.py \
-  --task hnscc_hpv \
-  --direction hpv_neg \
-  --output-mode debug \
-  --out-dir artifacts/hnscc_hpv_showcase_progressive_edit
+PYTHON=/common/users/wq50/envs/pace/bin/python \
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh
 ```
 
-This uses the default showcase image and the repo-provided default edit manifest,
-so no checkpoint or prototype paths are needed on the command line.
+This is the default steering script for the repository. It runs the HNSCC
+HPV-positive to HPV-negative showcase using `showcase_best` and writes debug
+outputs under `artifacts/hnscc_hpv_showcase_smoothed28_tutorial/progressive/`.
 
 For the full showcase comparison:
 

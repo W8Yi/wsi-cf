@@ -40,11 +40,18 @@ from wsi_cf.common.paths import (
     resolve_sae_paths,
 )
 from wsi_cf.common.runtime import resolve_device, set_seed
+from wsi_cf.data.borderline_selection import (
+    borderline_region_score,
+    select_nonoverlapping_regions,
+    source_target_probabilities,
+)
 from wsi_cf.data.donor_pool import load_split_rows
 from wsi_cf.data.region_bank import make_region_cells_preview
+from wsi_cf.data.region_selection import select_final_region_candidates
 from wsi_cf.data.slides import find_slide_path, infer_objective_power, open_slide, quick_region_quality_metrics, read_region_rgb_at_magnification
 from wsi_cf.eval.hnsc_hpv import build_mil_from_checkpoint, load_prototypes, pick_prototype_latent, run_mil_attention
 from wsi_cf.generation.pixcell import build_uni_grid_from_image, load_uni2
+from wsi_cf.steering.progressive import split_cells_by_edit_support
 from wsi_cf.steering.sae_runtime import load_sae_from_config, sae_encode_features
 
 
@@ -79,6 +86,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--clam-features-pt-dir", type=Path, default=DEFAULT_HNSCC_CLAM_FEATURES_PT_DIR)
     parser.add_argument("--clam-coords-h5-dir", type=Path, default=DEFAULT_HNSCC_CLAM_COORDS_H5_DIR)
     parser.add_argument("--clam-split", type=str, default="test", choices=["train", "val", "test"])
+    parser.add_argument(
+        "--clam-source-from-task-split",
+        action="store_true",
+        help="For CLAM attention, use --split-tsv/--split source slides instead of the CLAM split CSV.",
+    )
     parser.add_argument("--clam-attn-class", type=str, default="pred", choices=["pred", "pos", "neg"])
     parser.add_argument(
         "--clam-use-target-mag-equivalent",
@@ -102,6 +114,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-candidates-per-slide", type=int, default=24)
     parser.add_argument("--image-qc-topk-per-slide", type=int, default=32, help="Only crop/quality-check the top N cheap-scored regions per slide.")
     parser.add_argument("--final-regions-per-label", type=int, default=10)
+    parser.add_argument("--final-slides-per-label", type=int, default=0, help="When set with --final-regions-per-slide, export this many slides per HPV label. 0 means all eligible slides.")
+    parser.add_argument("--final-regions-per-slide", type=int, default=0, help="Export this many regions from each selected slide. With --final-slides-per-label 0, exports this many for every eligible slide.")
+    parser.add_argument("--region-selection-mode", type=str, default="attention_sae", choices=["attention_sae", "borderline"])
+    parser.add_argument("--borderline-attention-seed-fraction", type=float, default=0.359375)
+    parser.add_argument("--borderline-attention-fraction-width", type=float, default=0.30)
+    parser.add_argument("--borderline-target-prob-peak", type=float, default=0.55)
+    parser.add_argument("--borderline-target-prob-width", type=float, default=0.45)
+    parser.add_argument("--borderline-nms-overlap", type=float, default=0.50)
     parser.add_argument("--attention-percentile", type=float, default=90.0)
     parser.add_argument("--sae-percentile", type=float, default=90.0)
     parser.add_argument("--combined-percentile", type=float, default=90.0)
@@ -121,6 +141,26 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-selected-cells", type=int, default=2)
     parser.add_argument("--max-selected-cells", type=int, default=12)
     parser.add_argument("--target-importance-mass", type=float, default=0.35)
+    parser.add_argument(
+        "--edit-cell-selection-mode",
+        type=str,
+        default="attention_percentile_smooth",
+        choices=["attention_percentile_smooth", "showcase_smoothed28", "importance_mass_sae_neighbors"],
+        help=(
+            "How to choose target edit cells inside an eligible 2048 region. "
+            "attention_percentile_smooth thresholds local attention scores and smooths the mask without a fixed tile count. "
+            "showcase_smoothed28 is the historical fixed top-23/prune-28 selector."
+        ),
+    )
+    parser.add_argument("--edit-cell-attention-percentile", type=float, default=64.0625)
+    parser.add_argument("--edit-cell-smooth-min-neighbors", type=int, default=3)
+    parser.add_argument("--edit-cell-smooth-border-relax", type=int, default=1)
+    parser.add_argument("--edit-cell-smooth-iterations", type=int, default=1)
+    parser.add_argument("--showcase-selection-top-n", type=int, default=23)
+    parser.add_argument("--showcase-selection-target-count", type=int, default=28)
+    parser.add_argument("--showcase-selection-smooth-min-neighbors", type=int, default=3)
+    parser.add_argument("--showcase-selection-smooth-border-relax", type=int, default=1)
+    parser.add_argument("--showcase-selection-smooth-iterations", type=int, default=1)
     parser.add_argument(
         "--expand-selected-by-sae-neighbors",
         action=argparse.BooleanOptionalAction,
@@ -252,6 +292,14 @@ def read_pt_features(pt_path: Path) -> np.ndarray:
     if not isinstance(feats, torch.Tensor):
         raise TypeError(f"Unexpected pt payload in {pt_path}: {type(feats)}")
     return feats.detach().cpu().float().numpy().astype(np.float32, copy=False)
+
+
+def find_prefixed_file(root: Path, slide_key: str, suffix: str) -> Path | None:
+    exact = root / f"{slide_key}{suffix}"
+    if exact.exists():
+        return exact
+    matches = sorted(root.glob(f"{slide_key}*{suffix}"))
+    return matches[0] if matches else None
 
 
 def read_coord_h5(h5_path: Path) -> tuple[np.ndarray, int]:
@@ -542,7 +590,7 @@ def load_clam_model(ckpt_path: Path, *, device: torch.device):
     from wsi_cf.models.clam import CLAM_MB
 
     model = CLAM_MB(gate=True, size_arg="small", n_classes=2, embed_dim=1536)
-    state = torch.load(ckpt_path, map_location=device)
+    state = torch.load(ckpt_path, map_location="cpu")
     model.load_state_dict(state, strict=False)
     model.to(device).eval()
     return model
@@ -562,6 +610,26 @@ def run_clam_attention(model: Any, features: np.ndarray, *, device: torch.device
     else:
         row = 0
     return attn[row].detach().cpu().numpy().astype(np.float32, copy=False).reshape(-1), pred, prob_pos
+
+
+def run_local_region_classifier(
+    model: Any,
+    features: np.ndarray,
+    *,
+    model_backend: str,
+    device: torch.device,
+    clam_attn_class: str,
+) -> tuple[int, float]:
+    if str(model_backend) == "mil":
+        _, pred, prob_pos = run_mil_attention(model, np.asarray(features, dtype=np.float32), device=device)
+    else:
+        _, pred, prob_pos = run_clam_attention(
+            model,
+            np.asarray(features, dtype=np.float32),
+            device=device,
+            attn_class=str(clam_attn_class),
+        )
+    return int(pred), float(prob_pos)
 
 
 def iter_region_starts(grid_w: int, grid_h: int, side: int, stride: int) -> list[tuple[int, int]]:
@@ -689,6 +757,167 @@ def select_cells_by_mass(
         if len(selected) >= int(min_cells) and (total <= 0.0 or mass / total >= float(target_mass)):
             break
     return selected
+
+
+def local_support_count(cells: set[tuple[int, int]], cell: tuple[int, int]) -> int:
+    gx, gy = int(cell[0]), int(cell[1])
+    return sum(1 for nb in iter_neighbor_cells((gx, gy)) if nb in cells)
+
+
+def smooth_fill_local_holes(
+    cells: Sequence[tuple[int, int]],
+    *,
+    valid_cells: Sequence[tuple[int, int]],
+    grid_w: int,
+    grid_h: int,
+    min_neighbors: int,
+    border_relax: int,
+    iterations: int,
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
+    selected = {(int(gx), int(gy)) for gx, gy in cells}
+    valid = {(int(gx), int(gy)) for gx, gy in valid_cells}
+    added: list[tuple[int, int]] = []
+    for _ in range(max(1, int(iterations))):
+        to_add: list[tuple[int, int]] = []
+        for gx, gy in sorted(valid, key=lambda item: (int(item[1]), int(item[0]))):
+            cell = (int(gx), int(gy))
+            if cell in selected:
+                continue
+            support = local_support_count(selected, cell)
+            touches_border = int(gx) in {0, int(grid_w) - 1} or int(gy) in {0, int(grid_h) - 1}
+            required = max(1, int(min_neighbors) - (int(border_relax) if touches_border else 0))
+            if int(support) >= int(required):
+                to_add.append(cell)
+        if not to_add:
+            break
+        for cell in to_add:
+            selected.add(cell)
+            added.append(cell)
+    return sorted(selected, key=lambda cell: (int(cell[1]), int(cell[0]))), added
+
+
+def prune_selection_to_count(
+    cells: Sequence[tuple[int, int]],
+    score_by_cell: dict[tuple[int, int], float],
+    *,
+    target_count: int,
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
+    selected = {(int(gx), int(gy)) for gx, gy in cells}
+    pruned: list[tuple[int, int]] = []
+    if int(target_count) <= 0 or len(selected) <= int(target_count):
+        return sorted(selected, key=lambda cell: (int(cell[1]), int(cell[0]))), pruned
+    while len(selected) > int(target_count):
+        drop = min(
+            selected,
+            key=lambda cell: (
+                local_support_count(selected, cell),
+                float(score_by_cell.get(cell, 0.0)),
+                int(cell[1]),
+                int(cell[0]),
+            ),
+        )
+        selected.remove(drop)
+        pruned.append(drop)
+    return sorted(selected, key=lambda cell: (int(cell[1]), int(cell[0]))), pruned
+
+
+def select_showcase_smoothed28_cells(
+    *,
+    valid_cells: Sequence[tuple[int, int]],
+    score_by_cell: dict[tuple[int, int], float],
+    grid_w: int,
+    grid_h: int,
+    top_n: int,
+    target_count: int,
+    smooth_min_neighbors: int,
+    smooth_border_relax: int,
+    smooth_iterations: int,
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]], list[tuple[int, int]], list[tuple[int, int]]]:
+    valid = sorted({(int(gx), int(gy)) for gx, gy in valid_cells}, key=lambda cell: (-float(score_by_cell.get(cell, 0.0)), int(cell[1]), int(cell[0])))
+    seed = valid[: max(0, min(int(top_n), len(valid)))]
+    smoothed, added = smooth_fill_local_holes(
+        seed,
+        valid_cells=valid_cells,
+        grid_w=int(grid_w),
+        grid_h=int(grid_h),
+        min_neighbors=int(smooth_min_neighbors),
+        border_relax=int(smooth_border_relax),
+        iterations=int(smooth_iterations),
+    )
+    selected, pruned = prune_selection_to_count(
+        smoothed,
+        score_by_cell,
+        target_count=int(target_count),
+    )
+    return selected, sorted(seed, key=lambda cell: (int(cell[1]), int(cell[0]))), added, pruned
+
+
+def select_attention_percentile_smooth_cells(
+    *,
+    valid_cells: Sequence[tuple[int, int]],
+    score_by_cell: dict[tuple[int, int], float],
+    grid_w: int,
+    grid_h: int,
+    percentile: float,
+    smooth_min_neighbors: int,
+    smooth_border_relax: int,
+    smooth_iterations: int,
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]], list[tuple[int, int]], float]:
+    valid = sorted({(int(gx), int(gy)) for gx, gy in valid_cells}, key=lambda cell: (int(cell[1]), int(cell[0])))
+    if not valid:
+        return [], [], [], float("nan")
+    scores = np.asarray([float(score_by_cell.get(cell, 0.0)) for cell in valid], dtype=np.float32)
+    threshold = float(np.percentile(scores, float(percentile)))
+    seed = [
+        cell
+        for cell in valid
+        if float(score_by_cell.get(cell, 0.0)) >= float(threshold)
+    ]
+    if not seed:
+        best = max(valid, key=lambda cell: (float(score_by_cell.get(cell, 0.0)), -int(cell[1]), -int(cell[0])))
+        seed = [best]
+    selected, added = smooth_fill_local_holes(
+        seed,
+        valid_cells=valid,
+        grid_w=int(grid_w),
+        grid_h=int(grid_h),
+        min_neighbors=int(smooth_min_neighbors),
+        border_relax=int(smooth_border_relax),
+        iterations=int(smooth_iterations),
+    )
+    return selected, sorted(seed, key=lambda cell: (int(cell[1]), int(cell[0]))), added, threshold
+
+
+def select_attention_threshold_smooth_cells(
+    *,
+    valid_cells: Sequence[tuple[int, int]],
+    score_by_cell: dict[tuple[int, int], float],
+    grid_w: int,
+    grid_h: int,
+    threshold: float,
+    smooth_min_neighbors: int,
+    smooth_border_relax: int,
+    smooth_iterations: int,
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]], list[tuple[int, int]]]:
+    valid = sorted({(int(gx), int(gy)) for gx, gy in valid_cells}, key=lambda cell: (int(cell[1]), int(cell[0])))
+    seed = [
+        cell
+        for cell in valid
+        if float(score_by_cell.get(cell, 0.0)) >= float(threshold)
+    ]
+    if not seed and valid:
+        best = max(valid, key=lambda cell: (float(score_by_cell.get(cell, 0.0)), -int(cell[1]), -int(cell[0])))
+        seed = [best]
+    selected, added = smooth_fill_local_holes(
+        seed,
+        valid_cells=valid,
+        grid_w=int(grid_w),
+        grid_h=int(grid_h),
+        min_neighbors=int(smooth_min_neighbors),
+        border_relax=int(smooth_border_relax),
+        iterations=int(smooth_iterations),
+    )
+    return selected, sorted(seed, key=lambda cell: (int(cell[1]), int(cell[0]))), added
 
 
 def iter_neighbor_cells(cell: tuple[int, int]) -> tuple[tuple[int, int], ...]:
@@ -1075,22 +1304,39 @@ def main() -> None:
         source_rows = load_split_rows(args.split_tsv, split_filter=str(args.split))
     else:
         source_rows = []
-        labels_by_slide = load_clam_dataset_labels(args.clam_dataset_csv)
-        for slide_id in read_clam_split_slide_ids(args.clam_splits_csv, str(args.clam_split)):
-            meta = labels_by_slide.get(str(slide_id))
-            if meta is None:
-                continue
-            source_rows.append(
-                {
-                    "split": str(args.clam_split),
-                    "case_id": str(meta["case_id"]),
-                    "slide_key": str(meta["slide_key"]),
-                    "label": int(meta["label"]),
-                    "hpv_status": str(meta["hpv_status"]),
-                    "feature_path": str(args.clam_features_pt_dir / f"{slide_id}.pt"),
-                    "coords_path": str(args.clam_coords_h5_dir / f"{slide_id}.h5"),
-                }
-            )
+        if bool(args.clam_source_from_task_split):
+            for row in load_split_rows(args.split_tsv, split_filter=str(args.split)):
+                slide_key = str(row["slide_key"])
+                feature_path = find_prefixed_file(args.clam_features_pt_dir, slide_key, ".pt")
+                coords_path = find_prefixed_file(args.clam_coords_h5_dir, slide_key, ".h5")
+                source_rows.append(
+                    {
+                        "split": str(row["split"]),
+                        "case_id": str(row["case_id"]),
+                        "slide_key": slide_key,
+                        "label": int(row["label"]),
+                        "hpv_status": str(row["hpv_status"]),
+                        "feature_path": "" if feature_path is None else str(feature_path),
+                        "coords_path": "" if coords_path is None else str(coords_path),
+                    }
+                )
+        else:
+            labels_by_slide = load_clam_dataset_labels(args.clam_dataset_csv)
+            for slide_id in read_clam_split_slide_ids(args.clam_splits_csv, str(args.clam_split)):
+                meta = labels_by_slide.get(str(slide_id))
+                if meta is None:
+                    continue
+                source_rows.append(
+                    {
+                        "split": str(args.clam_split),
+                        "case_id": str(meta["case_id"]),
+                        "slide_key": str(meta["slide_key"]),
+                        "label": int(meta["label"]),
+                        "hpv_status": str(meta["hpv_status"]),
+                        "feature_path": str(args.clam_features_pt_dir / f"{slide_id}.pt"),
+                        "coords_path": str(args.clam_coords_h5_dir / f"{slide_id}.h5"),
+                    }
+                )
     by_label_seen = {0: 0, 1: 0}
     scan_rows: list[dict[str, Any]] = []
     selected_rows: list[dict[str, Any]] = []
@@ -1272,6 +1518,7 @@ def main() -> None:
         attn_threshold = float(np.percentile(attention, float(args.attention_percentile)))
         sae_threshold = float(np.percentile(sae_match, float(args.sae_percentile)))
         combined_threshold = float(np.percentile(combined, float(args.combined_percentile)))
+        slide_edit_attention_threshold = float(np.percentile(attention, float(args.edit_cell_attention_percentile)))
         importance_by_cell = {index_to_cell[idx]: float(combined[idx]) for idx in range(len(combined))}
         seed_cells = [
             index_to_cell[idx]
@@ -1281,14 +1528,24 @@ def main() -> None:
             or float(combined[idx]) >= combined_threshold
         ]
 
+        if str(args.region_selection_mode) == "borderline":
+            candidate_starts = iter_region_starts(
+                grid_w=int(grid_w),
+                grid_h=int(grid_h),
+                side=int(region_side),
+                stride=int(args.window_stride_cells),
+            )
+        else:
+            candidate_starts = candidate_region_starts_from_seed_cells(
+                seed_cells=seed_cells,
+                grid_w=int(grid_w),
+                grid_h=int(grid_h),
+                side=int(region_side),
+                stride=int(args.window_stride_cells),
+            )
+
         cheap_candidates: list[dict[str, Any]] = []
-        for gx0, gy0 in candidate_region_starts_from_seed_cells(
-            seed_cells=seed_cells,
-            grid_w=int(grid_w),
-            grid_h=int(grid_h),
-            side=int(region_side),
-            stride=int(args.window_stride_cells),
-        ):
+        for gx0, gy0 in candidate_starts:
             cells = region_cells(gx0, gy0, region_side)
             valid_cells = [cell for cell in cells if cell in cell_to_index]
             valid_fraction = float(len(valid_cells) / float(len(cells)))
@@ -1298,13 +1555,20 @@ def main() -> None:
             local_attention = np.asarray([attention[idx] for idx in local_idxs], dtype=np.float32)
             local_sae = np.asarray([sae_match[idx] for idx in local_idxs], dtype=np.float32)
             local_combined = np.asarray([combined[idx] for idx in local_idxs], dtype=np.float32)
-            high_cells = [
-                cell
-                for cell, idx in zip(valid_cells, local_idxs)
-                if float(attention[idx]) >= attn_threshold
-                or float(sae_match[idx]) >= sae_threshold
-                or float(combined[idx]) >= combined_threshold
-            ]
+            if str(args.region_selection_mode) == "borderline":
+                high_cells = [
+                    cell
+                    for cell, idx in zip(valid_cells, local_idxs)
+                    if float(attention[idx]) >= float(slide_edit_attention_threshold)
+                ]
+            else:
+                high_cells = [
+                    cell
+                    for cell, idx in zip(valid_cells, local_idxs)
+                    if float(attention[idx]) >= attn_threshold
+                    or float(sae_match[idx]) >= sae_threshold
+                    or float(combined[idx]) >= combined_threshold
+                ]
             high_count = int(len(high_cells))
             high_fraction = float(high_count / float(len(cells)))
             largest_component = largest_4connected_component_size(high_cells)
@@ -1315,45 +1579,148 @@ def main() -> None:
                 side=int(region_side),
                 central_fraction=float(args.central_fraction),
             )
-            if high_count < int(args.min_high_importance_cells):
-                continue
-            if high_count > int(args.max_high_importance_cells):
-                continue
-            if high_fraction > float(args.max_high_importance_fraction):
-                continue
-            if int(largest_component) < int(args.min_largest_high_component):
-                continue
-            if float(central_high_fraction) < float(args.min_central_high_importance_fraction):
-                continue
+            if str(args.region_selection_mode) != "borderline":
+                if high_count < int(args.min_high_importance_cells):
+                    continue
+                if high_count > int(args.max_high_importance_cells):
+                    continue
+                if high_fraction > float(args.max_high_importance_fraction):
+                    continue
+                if int(largest_component) < int(args.min_largest_high_component):
+                    continue
+                if float(central_high_fraction) < float(args.min_central_high_importance_fraction):
+                    continue
 
-            selected_global = select_cells_by_mass(
-                high_cells,
-                importance_by_cell,
-                target_mass=float(args.target_importance_mass),
-                min_cells=int(args.min_selected_cells),
-                max_cells=int(args.max_selected_cells),
-            )
-            if not (int(args.min_selected_cells) <= len(selected_global) <= int(args.max_selected_cells)):
-                continue
-            seed_selected_global = list(selected_global)
-            expansion_budget = int(args.max_expanded_cells)
-            if expansion_budget <= 0:
-                expansion_budget = max(int(args.max_selected_cells) * 2, int(args.min_selected_cells))
-            if bool(args.expand_selected_by_sae_neighbors) and seed_selected_global:
-                region_features = np.asarray(features[local_idxs], dtype=np.float32)
-                selected_global = expand_selected_cells_by_sae_neighbors(
-                    seed_cells=seed_selected_global,
-                    valid_cells=valid_cells,
-                    region_features=region_features,
-                    sae_model=sae_model,
-                    device=device,
-                    combined_by_cell=importance_by_cell,
-                    similarity_threshold=float(args.neighbor_similarity_threshold),
-                    min_combined_importance=float(args.neighbor_min_combined_importance),
-                    max_cells=int(expansion_budget),
+            smoothing_added_local: list[tuple[int, int]] = []
+            pruned_local: list[tuple[int, int]] = []
+            selection_threshold = float("nan")
+            if str(args.region_selection_mode) == "borderline":
+                valid_local = [(int(x) - int(gx0), int(y) - int(gy0)) for x, y in valid_cells]
+                local_attention_by_cell = {
+                    (int(x) - int(gx0), int(y) - int(gy0)): float(attention[cell_to_index[(int(x), int(y))]])
+                    for x, y in valid_cells
+                }
+                selected_local, seed_selected_local, smoothing_added_local = select_attention_threshold_smooth_cells(
+                    valid_cells=valid_local,
+                    score_by_cell=local_attention_by_cell,
+                    grid_w=int(region_side),
+                    grid_h=int(region_side),
+                    threshold=float(slide_edit_attention_threshold),
+                    smooth_min_neighbors=int(args.edit_cell_smooth_min_neighbors),
+                    smooth_border_relax=int(args.edit_cell_smooth_border_relax),
+                    smooth_iterations=int(args.edit_cell_smooth_iterations),
                 )
+                selection_threshold = float(slide_edit_attention_threshold)
+                selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in selected_local]
+                seed_selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in seed_selected_local]
+            elif str(args.edit_cell_selection_mode) == "attention_percentile_smooth":
+                valid_local = [(int(x) - int(gx0), int(y) - int(gy0)) for x, y in valid_cells]
+                local_attention_by_cell = {
+                    (int(x) - int(gx0), int(y) - int(gy0)): float(attention[cell_to_index[(int(x), int(y))]])
+                    for x, y in valid_cells
+                }
+                selected_local, seed_selected_local, smoothing_added_local, selection_threshold = select_attention_percentile_smooth_cells(
+                    valid_cells=valid_local,
+                    score_by_cell=local_attention_by_cell,
+                    grid_w=int(region_side),
+                    grid_h=int(region_side),
+                    percentile=float(args.edit_cell_attention_percentile),
+                    smooth_min_neighbors=int(args.edit_cell_smooth_min_neighbors),
+                    smooth_border_relax=int(args.edit_cell_smooth_border_relax),
+                    smooth_iterations=int(args.edit_cell_smooth_iterations),
+                )
+                selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in selected_local]
+                seed_selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in seed_selected_local]
+            elif str(args.edit_cell_selection_mode) == "showcase_smoothed28":
+                valid_local = [(int(x) - int(gx0), int(y) - int(gy0)) for x, y in valid_cells]
+                local_attention_by_cell = {
+                    (int(x) - int(gx0), int(y) - int(gy0)): float(attention[cell_to_index[(int(x), int(y))]])
+                    for x, y in valid_cells
+                }
+                selected_local, seed_selected_local, smoothing_added_local, pruned_local = select_showcase_smoothed28_cells(
+                    valid_cells=valid_local,
+                    score_by_cell=local_attention_by_cell,
+                    grid_w=int(region_side),
+                    grid_h=int(region_side),
+                    top_n=int(args.showcase_selection_top_n),
+                    target_count=int(args.showcase_selection_target_count),
+                    smooth_min_neighbors=int(args.showcase_selection_smooth_min_neighbors),
+                    smooth_border_relax=int(args.showcase_selection_smooth_border_relax),
+                    smooth_iterations=int(args.showcase_selection_smooth_iterations),
+                )
+                selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in selected_local]
+                seed_selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in seed_selected_local]
+            else:
+                selected_global = select_cells_by_mass(
+                    high_cells,
+                    importance_by_cell,
+                    target_mass=float(args.target_importance_mass),
+                    min_cells=int(args.min_selected_cells),
+                    max_cells=int(args.max_selected_cells),
+                )
+                if not (int(args.min_selected_cells) <= len(selected_global) <= int(args.max_selected_cells)):
+                    continue
+                seed_selected_global = list(selected_global)
+                expansion_budget = int(args.max_expanded_cells)
+                if expansion_budget <= 0:
+                    expansion_budget = max(int(args.max_selected_cells) * 2, int(args.min_selected_cells))
+                if bool(args.expand_selected_by_sae_neighbors) and seed_selected_global:
+                    region_features = np.asarray(features[local_idxs], dtype=np.float32)
+                    selected_global = expand_selected_cells_by_sae_neighbors(
+                        seed_cells=seed_selected_global,
+                        valid_cells=valid_cells,
+                        region_features=region_features,
+                        sae_model=sae_model,
+                        device=device,
+                        combined_by_cell=importance_by_cell,
+                        similarity_threshold=float(args.neighbor_similarity_threshold),
+                        min_combined_importance=float(args.neighbor_min_combined_importance),
+                        max_cells=int(expansion_budget),
+                    )
             selected_local = [(int(gx) - int(gx0), int(gy) - int(gy0)) for gx, gy in selected_global]
             seed_selected_local = [(int(gx) - int(gx0), int(gy) - int(gy0)) for gx, gy in seed_selected_global]
+            supported_selected_local, unsupported_selected_local = split_cells_by_edit_support(
+                target_cells=selected_local,
+                grid_w=int(region_side),
+                grid_h=int(region_side),
+                window_grid_side=4,
+                stride_cells=2,
+                grid_step_px=int(args.grid_step_px),
+                edit_support="center_2x2",
+            )
+            if str(args.region_selection_mode) == "borderline":
+                if not supported_selected_local:
+                    continue
+                selected_local = list(supported_selected_local)
+                selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in selected_local]
+                supported_seed_local = [cell for cell in seed_selected_local if cell in set(supported_selected_local)]
+                seed_selected_local = supported_seed_local or list(selected_local)
+                seed_selected_global = [(int(gx0) + int(x), int(gy0) + int(y)) for x, y in seed_selected_local]
+            local_region_features = np.asarray(features[local_idxs], dtype=np.float32)
+            if str(args.region_selection_mode) == "borderline":
+                region_pred, region_prob_pos = run_local_region_classifier(
+                    attention_model,
+                    local_region_features,
+                    model_backend=str(args.model_backend),
+                    device=device,
+                    clam_attn_class=str(args.clam_attn_class),
+                )
+            else:
+                region_pred, region_prob_pos = int(pred), float(prob_pos)
+            region_source_prob, region_target_prob = source_target_probabilities(
+                label=int(label),
+                prob_pos=float(region_prob_pos),
+            )
+            borderline_scores = borderline_region_score(
+                attention_seed_fraction=float(high_fraction),
+                region_target_prob=float(region_target_prob),
+                tissue_score=0.0,
+                valid_feature_fraction=float(valid_fraction),
+                attention_center=float(args.borderline_attention_seed_fraction),
+                attention_width=float(args.borderline_attention_fraction_width),
+                target_prob_peak=float(args.borderline_target_prob_peak),
+                target_prob_width=float(args.borderline_target_prob_width),
+            )
             cheap_candidates.append(
                 {
                     "slide_key": slide_key,
@@ -1366,6 +1733,10 @@ def main() -> None:
                     "pred": int(pred),
                     "prob_pos": float(prob_pos),
                     "label_prob": float(label_prob),
+                    "region_pred": int(region_pred),
+                    "region_prob_pos": float(region_prob_pos),
+                    "region_source_prob": float(region_source_prob),
+                    "region_target_prob": float(region_target_prob),
                     "raw_coord_tile_size_level0": int(raw_tile_size_level0),
                     "selection_tile_size_level0": int(tile_size_level0),
                     "clam_aggregate_ratio": int(agg_ratio),
@@ -1379,16 +1750,21 @@ def main() -> None:
                     "saturation_fraction": -1.0,
                     "high_importance_cell_count": int(high_count),
                     "high_importance_fraction": float(high_fraction),
+                    "attention_seed_fraction": float(high_fraction),
+                    "slide_attention_seed_threshold": float(slide_edit_attention_threshold),
                     "largest_high_component": int(largest_component),
                     "central_high_importance_fraction": float(central_high_fraction),
                     "selected_cell_count": int(len(selected_global)),
                     "seed_selected_cell_count": int(len(seed_selected_global)),
+                    "unsupported_center2x2_cell_count": int(len(unsupported_selected_local)),
+                    "unsupported_center2x2_cells_local": encode_local_cells(unsupported_selected_local),
                     "mean_attention": float(local_attention.mean()),
                     "max_attention": float(local_attention.max()),
                     "mean_sae_match": float(local_sae.mean()),
                     "max_sae_match": float(local_sae.max()),
                     "mean_combined_importance": float(local_combined.mean()),
                     "max_combined_importance": float(local_combined.max()),
+                    **borderline_scores,
                     "cheap_rank_score": float(
                         3.0 * float(local_combined.mean())
                         + 1.5 * float(local_combined.max())
@@ -1403,18 +1779,34 @@ def main() -> None:
                     "selected_cells_local": encode_local_cells(selected_local),
                     "seed_selected_cells_global": encode_local_cells(seed_selected_global),
                     "seed_selected_cells_local": encode_local_cells(seed_selected_local),
+                    "smoothing_added_cells_local": encode_local_cells(smoothing_added_local),
+                    "pruned_cells_local": encode_local_cells(pruned_local),
+                    "edit_cell_selection_mode": str(args.edit_cell_selection_mode),
+                    "edit_cell_attention_threshold": selection_threshold,
+                    "region_selection_mode": str(args.region_selection_mode),
                 }
             )
 
-        cheap_candidates.sort(
-            key=lambda row: (
-                -float(row["cheap_rank_score"]),
-                int(row["high_importance_cell_count"]),
-                str(row["slide_key"]),
-                int(row["region_y"]),
-                int(row["region_x"]),
+        if str(args.region_selection_mode) == "borderline":
+            cheap_candidates.sort(
+                key=lambda row: (
+                    -float(row["borderline_region_score"]),
+                    float(row["region_source_prob"]),
+                    str(row["slide_key"]),
+                    int(row["region_y"]),
+                    int(row["region_x"]),
+                )
             )
-        )
+        else:
+            cheap_candidates.sort(
+                key=lambda row: (
+                    -float(row["cheap_rank_score"]),
+                    int(row["high_importance_cell_count"]),
+                    str(row["slide_key"]),
+                    int(row["region_y"]),
+                    int(row["region_x"]),
+                )
+            )
         image_checked_candidates: list[dict[str, Any]] = []
         if cheap_candidates:
             slide = open_slide(slide_path)
@@ -1441,27 +1833,74 @@ def main() -> None:
                     checked["tissue_score"] = float(quality["tissue_score"])
                     checked["dark_fraction"] = float(quality["dark_fraction"])
                     checked["saturation_fraction"] = float(quality["saturation_fraction"])
+                    if str(args.region_selection_mode) == "borderline":
+                        checked.update(
+                            borderline_region_score(
+                                attention_seed_fraction=float(checked["attention_seed_fraction"]),
+                                region_target_prob=float(checked["region_target_prob"]),
+                                tissue_score=float(checked["tissue_score"]),
+                                valid_feature_fraction=float(checked["valid_feature_fraction"]),
+                                attention_center=float(args.borderline_attention_seed_fraction),
+                                attention_width=float(args.borderline_attention_fraction_width),
+                                target_prob_peak=float(args.borderline_target_prob_peak),
+                                target_prob_width=float(args.borderline_target_prob_width),
+                            )
+                        )
                     image_checked_candidates.append(checked)
             finally:
                 slide.close()
 
-        image_checked_candidates.sort(
-            key=lambda row: (
-                -float(row["mean_combined_importance"]),
-                -float(row["tissue_score"]),
-                int(row["high_importance_cell_count"]),
-                str(row["slide_key"]),
-                int(row["region_y"]),
-                int(row["region_x"]),
+        if str(args.region_selection_mode) == "borderline":
+            image_checked_candidates.sort(
+                key=lambda row: (
+                    -float(row["borderline_region_score"]),
+                    float(row["region_source_prob"]),
+                    -float(row["tissue_score"]),
+                    str(row["slide_key"]),
+                    int(row["region_y"]),
+                    int(row["region_x"]),
+                )
             )
-        )
-        for cand_rank, cand in enumerate(image_checked_candidates[: int(args.max_candidates_per_slide)], start=1):
-            public = dict(cand)
-            public["candidate_rank_in_slide"] = int(cand_rank)
-            public["eligible"] = True
-            public["reason"] = "eligible"
-            public["sae_gate_tile_count"] = int(np.count_nonzero(sae_gate_mask))
-            scan_rows.append(public)
+            selected_candidates = select_nonoverlapping_regions(
+                image_checked_candidates,
+                side=int(region_side),
+                max_regions=int(args.max_candidates_per_slide),
+                max_overlap_fraction=float(args.borderline_nms_overlap),
+            )
+            selected_keys = {
+                (int(row["region_gx0"]), int(row["region_gy0"]))
+                for row in selected_candidates
+            }
+            selected_rank = 0
+            for cand_rank, cand in enumerate(image_checked_candidates, start=1):
+                public = dict(cand)
+                is_selected = (int(cand["region_gx0"]), int(cand["region_gy0"])) in selected_keys
+                if is_selected:
+                    selected_rank += 1
+                public["candidate_rank_in_slide"] = int(selected_rank if is_selected else cand_rank)
+                public["candidate_raw_rank_in_slide"] = int(cand_rank)
+                public["eligible"] = bool(is_selected)
+                public["reason"] = "eligible" if is_selected else "borderline_nms_or_rank_filtered"
+                public["sae_gate_tile_count"] = int(np.count_nonzero(sae_gate_mask))
+                scan_rows.append(public)
+        else:
+            image_checked_candidates.sort(
+                key=lambda row: (
+                    -float(row["mean_combined_importance"]),
+                    -float(row["tissue_score"]),
+                    int(row["high_importance_cell_count"]),
+                    str(row["slide_key"]),
+                    int(row["region_y"]),
+                    int(row["region_x"]),
+                )
+            )
+            for cand_rank, cand in enumerate(image_checked_candidates[: int(args.max_candidates_per_slide)], start=1):
+                public = dict(cand)
+                public["candidate_rank_in_slide"] = int(cand_rank)
+                public["eligible"] = True
+                public["reason"] = "eligible"
+                public["sae_gate_tile_count"] = int(np.count_nonzero(sae_gate_mask))
+                scan_rows.append(public)
 
     write_csv(args.out_dir / "candidate_scan.csv", scan_rows)
 
@@ -1471,22 +1910,33 @@ def main() -> None:
         if bool(row.get("eligible")):
             eligible_by_label[int(row["label"])].append(row)
     for label in (0, 1):
-        eligible_by_label[label].sort(
-            key=lambda row: (
-                -float(row["mean_combined_importance"]),
-                -float(row["tissue_score"]),
-                str(row["slide_key"]),
-                int(row["region_y"]),
-                int(row["region_x"]),
+        if str(args.region_selection_mode) == "borderline":
+            eligible_by_label[label].sort(
+                key=lambda row: (
+                    str(row["slide_key"]),
+                    int(row.get("candidate_rank_in_slide", 0)),
+                    -float(row["borderline_region_score"]),
+                    int(row["region_y"]),
+                    int(row["region_x"]),
+                )
             )
-        )
+        else:
+            eligible_by_label[label].sort(
+                key=lambda row: (
+                    -float(row["mean_combined_importance"]),
+                    -float(row["tissue_score"]),
+                    str(row["slide_key"]),
+                    int(row["region_y"]),
+                    int(row["region_x"]),
+                )
+            )
 
-    final_rows_to_export: list[dict[str, Any]] = []
-    for label in (0, 1):
-        for rank, row in enumerate(eligible_by_label[label][: int(args.final_regions_per_label)], start=1):
-            picked = dict(row)
-            picked["selection_rank_in_label"] = int(rank)
-            final_rows_to_export.append(picked)
+    final_rows_to_export = select_final_region_candidates(
+        eligible_by_label,
+        final_regions_per_label=int(args.final_regions_per_label),
+        final_slides_per_label=int(args.final_slides_per_label),
+        final_regions_per_slide=int(args.final_regions_per_slide),
+    )
 
     rows_by_slide: dict[str, list[dict[str, Any]]] = {}
     for row in final_rows_to_export:
@@ -1610,7 +2060,21 @@ def main() -> None:
                         "cell_preview_path": str(cells_path),
                         "importance_overlay_path": str(overlay_path),
                         "region_dir": str(region_dir),
-                        "selection_mode": "importance_mass_plus_sae_neighbor_expansion" if bool(args.expand_selected_by_sae_neighbors) else "importance_mass_only",
+                        "selection_mode": (
+                            f"attention_percentile_smooth_p{str(float(args.edit_cell_attention_percentile)).replace('.', 'p')}"
+                            if str(row.get("edit_cell_selection_mode", args.edit_cell_selection_mode)) == "attention_percentile_smooth"
+                            else (
+                                f"showcase_smoothed28_attention_top{int(args.showcase_selection_top_n)}"
+                                f"_smooth4_prune{int(args.showcase_selection_target_count)}"
+                                if str(row.get("edit_cell_selection_mode", args.edit_cell_selection_mode)) == "showcase_smoothed28"
+                                else (
+                                    "importance_mass_plus_sae_neighbor_expansion"
+                                    if bool(args.expand_selected_by_sae_neighbors)
+                                    else "importance_mass_only"
+                                )
+                            )
+                        ),
+                        "edit_cell_attention_percentile": float(args.edit_cell_attention_percentile),
                     }
                 )
                 write_json(meta_path, public)
@@ -1637,7 +2101,11 @@ def main() -> None:
                 for cell in str(row.get("seed_selected_cells_local", "")).split(";")
                 if cell
             ],
-            "selector": "mil_attention_plus_sae_current_label_prototype",
+            "selector": (
+                "borderline_wsi_attention_plus_region_probability"
+                if str(row.get("region_selection_mode", args.region_selection_mode)) == "borderline"
+                else "mil_attention_plus_sae_current_label_prototype"
+            ),
             "label": int(row["label"]),
             "direction_recommendation": "hpv_neg" if int(row["label"]) == 1 else "hpv_pos",
         }
@@ -1654,9 +2122,26 @@ def main() -> None:
         "target_magnification": float(args.target_magnification),
         "grid_step_px": int(args.grid_step_px),
         "region_grid_side": int(region_side),
+        "final_regions_per_label": int(args.final_regions_per_label),
+        "final_slides_per_label": int(args.final_slides_per_label),
+        "final_regions_per_slide": int(args.final_regions_per_slide),
+        "seed": int(args.seed),
         "model_backend": str(args.model_backend),
+        "region_selection_mode": str(args.region_selection_mode),
+        "borderline_attention_seed_fraction": float(args.borderline_attention_seed_fraction),
+        "borderline_attention_fraction_width": float(args.borderline_attention_fraction_width),
+        "borderline_target_prob_peak": float(args.borderline_target_prob_peak),
+        "borderline_target_prob_width": float(args.borderline_target_prob_width),
+        "borderline_nms_overlap": float(args.borderline_nms_overlap),
         "attention_weight": float(args.attention_weight),
         "sae_weight": float(args.sae_weight),
+        "edit_cell_selection_mode": str(args.edit_cell_selection_mode),
+        "edit_cell_attention_percentile": float(args.edit_cell_attention_percentile),
+        "edit_cell_smooth_min_neighbors": int(args.edit_cell_smooth_min_neighbors),
+        "edit_cell_smooth_border_relax": int(args.edit_cell_smooth_border_relax),
+        "edit_cell_smooth_iterations": int(args.edit_cell_smooth_iterations),
+        "showcase_selection_top_n": int(args.showcase_selection_top_n),
+        "showcase_selection_target_count": int(args.showcase_selection_target_count),
         "pos_latent": int(pos_latent),
         "neg_latent": int(neg_latent),
         "candidate_scan_csv": str(args.out_dir / "candidate_scan.csv"),

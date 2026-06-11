@@ -3,15 +3,22 @@ from __future__ import annotations
 from pathlib import Path
 
 import torch
+from PIL import Image
 
 from wsi_cf.common.io import write_json
 from wsi_cf.steering.progressive import (
     CENTER_2X2_LOCAL_CELLS,
     advance_progressive_state,
     build_history_aware_preserve_map,
+    draw_cells_overlay,
+    draw_step_edit_area_zoom_4x4,
+    draw_step_region_overlay,
     load_progressive_edit_manifest,
     make_initial_progressive_state,
     plan_progressive_steps,
+    ProgressiveWindow,
+    preserve_map_preview,
+    split_cells_by_edit_support,
     window_local_cells,
 )
 
@@ -77,6 +84,107 @@ def test_progressive_planner_rejects_targets_outside_center_support() -> None:
         assert "edit_support=center_2x2" in str(exc)
     else:
         raise AssertionError("Expected planner to reject a target outside the center 2x2 support")
+
+
+def test_split_cells_by_edit_support_separates_unsupported_cells() -> None:
+    supported, unsupported = split_cells_by_edit_support(
+        target_cells=[(0, 0), (1, 1), (6, 6), (7, 7)],
+        grid_w=8,
+        grid_h=8,
+        window_grid_side=4,
+        stride_cells=2,
+        grid_step_px=256,
+        edit_support="center_2x2",
+    )
+
+    assert supported == ((1, 1), (6, 6))
+    assert unsupported == ((0, 0), (7, 7))
+
+
+def test_draw_cells_overlay_draws_one_clean_shared_boundary_between_selected_cells() -> None:
+    base = Image.new("RGB", (96, 48), color=(0, 0, 0))
+    overlay = draw_cells_overlay(base, cells=[(0, 0), (1, 0)], grid_step_px=32)
+
+    assert overlay.getpixel((0, 24)) == (255, 0, 0)
+    assert overlay.getpixel((64, 24)) == (255, 0, 0)
+    assert overlay.getpixel((32, 24)) == (255, 0, 0)
+    assert overlay.getpixel((27, 24)) == (0, 0, 0)
+    assert overlay.getpixel((37, 24)) == (0, 0, 0)
+
+
+def test_draw_step_region_overlay_shows_grid_window_and_transparent_edit_cells() -> None:
+    base = Image.new("RGB", (192, 192), color=(255, 255, 255))
+    window = ProgressiveWindow(
+        window_id="r1_c1",
+        row_index=1,
+        col_index=1,
+        gx0=1,
+        gy0=1,
+        grid_w=4,
+        grid_h=4,
+        left=32,
+        top=32,
+    )
+    overlay = draw_step_region_overlay(
+        base,
+        window=window,
+        edit_cells_global=[(2, 2), (3, 2)],
+        support_cells_global=[(2, 2), (3, 2), (2, 3), (3, 3)],
+        grid_step_px=32,
+    )
+
+    assert overlay.getpixel((0, 16))[0] < 100
+    assert overlay.getpixel((32, 32)) == (255, 0, 0)
+    selected_center = overlay.getpixel((80, 80))
+    assert selected_center[0] > selected_center[1]
+    assert selected_center[1] > 100
+    support_center = overlay.getpixel((80, 112))
+    assert support_center[0] > support_center[1] > selected_center[1]
+    assert overlay.getpixel((96, 80)) == (255, 0, 0)
+    context_center = overlay.getpixel((48, 48))
+    assert context_center[0] == context_center[1] == context_center[2]
+    assert context_center[0] > 245
+
+
+def test_preserve_map_preview_uses_red_for_editable_region_and_grey_elsewhere() -> None:
+    preserve_map = torch.tensor([[0.0, 0.22, 0.84]], dtype=torch.float32)
+    preview = preserve_map_preview(preserve_map)
+
+    editable = preview.getpixel((0, 0))
+    fresh_context = preview.getpixel((1, 0))
+    visited = preview.getpixel((2, 0))
+    assert editable[0] > editable[1] == editable[2]
+    assert fresh_context[0] == fresh_context[1] == fresh_context[2]
+    assert visited[0] == visited[1] == visited[2]
+    assert fresh_context[0] < visited[0]
+
+
+def test_draw_step_edit_area_zoom_crops_full_window() -> None:
+    base = Image.new("RGB", (192, 192), color=(255, 255, 255))
+    window = ProgressiveWindow(
+        window_id="r1_c1",
+        row_index=1,
+        col_index=1,
+        gx0=1,
+        gy0=1,
+        grid_w=4,
+        grid_h=4,
+        left=32,
+        top=32,
+    )
+    zoom = draw_step_edit_area_zoom_4x4(
+        base,
+        window=window,
+        edit_cells_global=[(2, 2)],
+        support_cells_global=[(2, 2), (3, 2), (2, 3), (3, 3)],
+        grid_step_px=32,
+    )
+
+    assert zoom.size == (128, 128)
+    assert zoom.getpixel((16, 16))[0] == zoom.getpixel((16, 16))[1]
+    assert zoom.getpixel((48, 48))[0] > zoom.getpixel((48, 48))[1]
+    assert zoom.getpixel((80, 48))[1] > zoom.getpixel((48, 48))[1]
+    assert zoom.getpixel((64, 48)) == (255, 0, 0)
 
 
 def test_progressive_planner_border_relaxed_covers_region_edge_targets() -> None:

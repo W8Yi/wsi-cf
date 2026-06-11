@@ -16,7 +16,7 @@ from wsi_cf.steering.sae_runtime import load_sae_from_config
 
 
 def build_mil_from_checkpoint(ckpt_path: Path, device: torch.device) -> torch.nn.Module:
-    ckpt = torch.load(ckpt_path, map_location=device)
+    ckpt = torch.load(ckpt_path, map_location="cpu")
     saved_args = ckpt.get("args", {})
     model_type = saved_args.get("model", "attention")
     common = {
