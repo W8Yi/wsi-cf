@@ -24,6 +24,14 @@ def test_isup_grade_group_mapping() -> None:
     assert script.isup_grade_group(4, 5) == 5
 
 
+def test_morphology_group_uses_highest_pattern() -> None:
+    script = load_script()
+
+    assert script.morphology_group_from_patterns(3, 3)[0] == "pattern_1_3_well_formed"
+    assert script.morphology_group_from_patterns(3, 4)[0] == "pattern_4_cribriform_poorly_formed_fused"
+    assert script.morphology_group_from_patterns(4, 5)[0] == "pattern_5_solid_single_necrosis"
+
+
 def test_build_case_labels_derives_score_and_binary_target() -> None:
     script = load_script()
     cases = [
@@ -54,5 +62,7 @@ def test_build_case_labels_derives_score_and_binary_target() -> None:
     assert labels["TCGA-AA-0001"]["gleason_score_label"] == "GS7"
     assert labels["TCGA-AA-0001"]["grade_group"] == "GG2"
     assert labels["TCGA-AA-0001"]["low_high_grade"] == "low"
+    assert labels["TCGA-AA-0001"]["morphology_group"] == "pattern_4_cribriform_poorly_formed_fused"
     assert labels["TCGA-AA-0002"]["grade_group"] == "GG3"
     assert labels["TCGA-AA-0002"]["low_high_grade"] == "high"
+    assert labels["TCGA-AA-0002"]["morphology_group"] == "pattern_4_cribriform_poorly_formed_fused"

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /common/users/wq50/wsi_cf
+
+PY="${PY:-/common/users/wq50/envs/pace/bin/python}"
+DEVICE="${DEVICE:-cuda:0}"
+EDIT_ROOT="${EDIT_ROOT:-paper_outputs/prad_gleason_low_high_steering}"
+OUT_DIR="${OUT_DIR:-${EDIT_ROOT}/classifier_shift_eval}"
+
+"${PY}" scripts/evaluate_prad_classifier_edits.py \
+  --edit-root "${EDIT_ROOT}" \
+  --out-dir "${OUT_DIR}" \
+  --device "${DEVICE}" \
+  "$@"
+
+echo "[ok] PRAD classifier-shift eval: ${OUT_DIR}" >&2

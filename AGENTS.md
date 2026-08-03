@@ -80,6 +80,15 @@ Tests live in `tests/`.
 They add `src/` to `sys.path` through `tests/conftest.py`; this repo does not
 currently rely on a package install for tests.
 
+Use the project `pace` conda environment for this repo. It has the expected
+ML/CUDA/OpenSlide/PixCell dependencies:
+
+```bash
+conda activate pace
+# or call it directly when activation is inconvenient:
+/common/users/wq50/envs/pace/bin/python
+```
+
 Common commands:
 
 ```bash
@@ -90,7 +99,9 @@ pytest tests/test_progressive_region_runner.py -q
 
 Some tests import `torch` and require the correct ML/CUDA environment. If test
 collection fails with `libcusparseLt.so.0`, switch to the project environment
-that has a compatible PyTorch/CUDA stack before treating it as a code failure.
+above before treating it as a code failure. If CUDA is not visible inside the
+agent shell, run GPU generation from a GPU-visible shell with the same `pace`
+environment, for example `CUDA_VISIBLE_DEVICES=3 DEVICE=cuda:0 ...`.
 
 ## Working Tree Conventions
 

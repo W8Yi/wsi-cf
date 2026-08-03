@@ -177,6 +177,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--require-label-match", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--min-label-confidence", type=float, default=0.65)
+    parser.add_argument(
+        "--max-label-confidence",
+        type=float,
+        default=1.0,
+        help="For generic classifier mode, optionally skip source slides whose predicted-label confidence is above this value.",
+    )
     parser.add_argument("--save-candidate-images", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--cache-slide-scores", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--seed", type=int, default=7)
@@ -1041,10 +1047,13 @@ def load_classifier_manifest_rows(args: argparse.Namespace) -> list[dict[str, st
     manifest = args.task_manifest_csv or (args.classifier_run_dir / "task_manifest.csv" if args.classifier_run_dir is not None else None)
     if manifest is None or not manifest.exists():
         raise FileNotFoundError(f"Missing task manifest for generic classifier mode: {manifest}")
+    split_filter = str(args.split or "all")
     rows: list[dict[str, str]] = []
     with manifest.open("r", newline="") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
+            if split_filter != "all" and str(row.get("split", "")) != split_filter:
+                continue
             if args.source_label and str(row.get("label_name", "")) != str(args.source_label):
                 continue
             h5_path = Path(str(row.get("h5_path", "")))
@@ -1132,6 +1141,30 @@ def run_generic_classifier_mode(args: argparse.Namespace, *, device: torch.devic
             label_id = int(row.get("label_id", -1))
             if bool(args.require_label_match) and pred != label_id:
                 candidate_rows.append({**row, "eligible": False, "reason": "prediction_mismatch", "pred": int(pred), "prob_pred": float(prob_pred)})
+                continue
+            if float(prob_pred) < float(args.min_label_confidence):
+                candidate_rows.append(
+                    {
+                        **row,
+                        "eligible": False,
+                        "reason": "label_confidence_low",
+                        "pred": int(pred),
+                        "prob_pred": float(prob_pred),
+                        "min_label_confidence": float(args.min_label_confidence),
+                    }
+                )
+                continue
+            if float(prob_pred) > float(args.max_label_confidence):
+                candidate_rows.append(
+                    {
+                        **row,
+                        "eligible": False,
+                        "reason": "label_confidence_high",
+                        "pred": int(pred),
+                        "prob_pred": float(prob_pred),
+                        "max_label_confidence": float(args.max_label_confidence),
+                    }
+                )
                 continue
             seen_slides += 1
             attn_norm = normalize_01(attention)
@@ -1269,6 +1302,8 @@ def run_generic_classifier_mode(args: argparse.Namespace, *, device: torch.devic
         "mode": "generic_classifier",
         "source_label": str(args.source_label),
         "target_label": str(args.target_label),
+        "min_label_confidence": float(args.min_label_confidence),
+        "max_label_confidence": float(args.max_label_confidence),
         "n_selected_rows": int(len(selected_rows)),
         "slides_scanned": int(seen_slides),
         "region_bank_csv": str(args.out_dir / "region_bank.csv"),

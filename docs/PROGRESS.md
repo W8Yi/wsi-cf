@@ -108,7 +108,8 @@ Why it is retained:
 Decision:
 
 - use `examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh` with
-  `configs/edit_policies/showcase_best.json` as the default HNSCC steering
+  `configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json`
+  as the default HNSCC steering
   example instead
 
 ---
@@ -116,7 +117,7 @@ Decision:
 ## Default HNSCC Steering Reproduction
 
 - script: `examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh`
-- policy: `configs/edit_policies/showcase_best.json`
+- policy: `configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json`
 - direction: `hpv_neg`
 - SAE/prototype provenance: legacy `relu_sae_base` checkpoint with the existing HNSCC prototype bundle
 - regenerated output: `paper_example/hnscc_hpv_showcase_smoothed28_default_regenerated_20260526/progressive/`

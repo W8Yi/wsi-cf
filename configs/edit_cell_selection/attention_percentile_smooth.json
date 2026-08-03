@@ -22,7 +22,7 @@
     "rank_23_attention_threshold": 0.01801639050245285,
     "rank_24_attention": 0.017729850485920906
   },
-  "paired_edit_policy": "configs/edit_policies/showcase_best.json",
+  "paired_edit_policy": "configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json",
   "notes": [
     "Use this as the default for future paper-style HNSCC HPV region mining.",
     "The historical smoothed-28 showcase selector is preserved in configs/edit_cell_selection/showcase_smoothed28.json for exact reproduction only."

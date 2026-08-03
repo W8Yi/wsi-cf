@@ -12,11 +12,11 @@ OUT_ROOT="${OUT_ROOT:-artifacts/hnscc_hpv_showcase_smoothed28_tutorial}"
 SAE_CKPT="${SAE_CKPT:-/common/users/wq50/SAE_path/runs/relu_sae_base/relu_final.pt}"
 SAE_CFG="${SAE_CFG:-/common/users/wq50/SAE_path/runs/relu_sae_base/run_config.json}"
 
-printf '[default HNSCC steer] policy: %s\n' "configs/edit_policies/showcase_best.json"
+printf '[default HNSCC steer] policy: %s\n' "configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json"
 printf '[default HNSCC steer] output: %s\n' "${OUT_ROOT}/progressive"
 
 "${PYTHON_BIN}" scripts/run_progressive_region_edit.py \
-  --edit-policy configs/edit_policies/showcase_best.json \
+  --edit-policy configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json \
   --region-bank-csv artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_attention_only_top23_smooth4_prune28/region_bank.csv \
   --edit-manifest artifacts/showcase_regions/TCGA-P3-A5QE-01Z-00-DX1_top_right_2048_attention_only_top23_smooth4_prune28/progressive_edit_manifest.json \
   --direction hpv_neg \

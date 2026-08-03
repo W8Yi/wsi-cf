@@ -20,6 +20,7 @@ for TASK in ${TASKS}; do
     coad_normal_tumor) PROJECT="TCGA-COAD" ;;
     brca_normal_tumor) PROJECT="TCGA-BRCA" ;;
     kirc_normal_tumor) PROJECT="TCGA-KIRC" ;;
+    lusc_normal_tumor) PROJECT="TCGA-LUSC" ;;
     *) echo "[error] unknown task: ${TASK}" >&2; exit 2 ;;
   esac
 

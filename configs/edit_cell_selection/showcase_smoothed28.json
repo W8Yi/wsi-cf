@@ -26,7 +26,7 @@
     "pruned_count": 1,
     "selected_count": 28
   },
-  "paired_edit_policy": "configs/edit_policies/showcase_best.json",
+  "paired_edit_policy": "configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json",
   "notes": [
     "This selector is attention-only for the showcase region: it does not add SAE-similarity filtering at selection time.",
     "This selector intentionally uses fixed top_n and target_count values because it records the original showcase artifact.",

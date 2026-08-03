@@ -6,6 +6,11 @@ from pathlib import Path
 from typing import Any
 
 
+DEFAULT_EDIT_POLICY = Path(
+    "configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json"
+)
+
+
 EDIT_POLICY_FIELDS: dict[str, dict[str, str]] = {
     "generation": {
         "steps": "steps",
@@ -20,6 +25,8 @@ EDIT_POLICY_FIELDS: dict[str, dict[str, str]] = {
         "mid_steer_alpha_start": "mid_steer_alpha_start",
         "mid_steer_alpha_end": "mid_steer_alpha_end",
         "mid_steer_alpha_schedule": "mid_steer_alpha_schedule",
+        "steer_context_halo_weight": "steer_context_halo_weight",
+        "steer_context_halo_radius_cells": "steer_context_halo_radius_cells",
     },
     "preservation": {
         "preserve_edit_strength": "preserve_edit_strength",
@@ -28,17 +35,42 @@ EDIT_POLICY_FIELDS: dict[str, dict[str, str]] = {
     },
     "planning": {
         "edit_support": "edit_support",
+        "context_halo_cells": "context_halo_cells",
+        "window_stride_cells": "window_stride_cells",
+        "window_selection_mode": "window_selection_mode",
+        "steer_full_support": "steer_full_support",
+        "preserve_full_support": "preserve_full_support",
+        "commit_mode": "commit_mode",
+        "commit_feather_px": "commit_feather_px",
+        "commit_halo_cells": "commit_halo_cells",
+        "commit_halo_alpha": "commit_halo_alpha",
     },
 }
 
 
-def add_edit_policy_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
+def add_edit_policy_args(
+    parser: argparse.ArgumentParser,
+    *,
+    default: Path | None = DEFAULT_EDIT_POLICY,
+) -> None:
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         "--edit-policy",
         type=Path,
-        default=None,
-        help="Optional JSON edit policy. CLI flags explicitly provided after/before this option override policy values.",
+        dest="edit_policy",
+        help=(
+            f"JSON edit policy (default: {DEFAULT_EDIT_POLICY}). "
+            "CLI flags explicitly provided after/before this option override policy values."
+        ),
     )
+    group.add_argument(
+        "--no-edit-policy",
+        action="store_const",
+        const=None,
+        dest="edit_policy",
+        help="Disable the repository default edit policy and use raw CLI defaults.",
+    )
+    parser.set_defaults(edit_policy=default)
 
 
 def explicit_cli_dests(parser: argparse.ArgumentParser, argv: list[str]) -> set[str]:

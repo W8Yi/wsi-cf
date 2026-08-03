@@ -55,6 +55,29 @@ def isup_grade_group(primary: int, secondary: int) -> int:
     return 5
 
 
+def morphology_group_from_patterns(primary: int, secondary: int) -> tuple[str, str]:
+    """Map slide-level Gleason patterns to a three-class morphology label.
+
+    The class is assigned by the highest pattern present, so a 4+5 or 5+4
+    diagnosis is treated as pattern 5 morphology.
+    """
+    highest = max(int(primary), int(secondary))
+    if highest <= 3:
+        return (
+            "pattern_1_3_well_formed",
+            "DISCRETE WELL-FORMED GLANDS (GLEASON PATTERNS 1-3)",
+        )
+    if highest == 4:
+        return (
+            "pattern_4_cribriform_poorly_formed_fused",
+            "CRIBRIFORM/POORLY-FORMED/FUSED GLANDS (GLEASON PATTERN 4)",
+        )
+    return (
+        "pattern_5_solid_single_necrosis",
+        "SHEETS/CORDS/SINGLE CELLS/SOLID NESTS/NECROSIS (GLEASON PATTERN 5)",
+    )
+
+
 def select_prostate_diagnosis(case: dict[str, Any]) -> dict[str, Any] | None:
     diagnoses = list(case.get("diagnoses") or [])
     with_patterns = [
@@ -127,6 +150,7 @@ def build_case_labels(cases: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             continue
         score = int(primary) + int(secondary)
         grade_group = isup_grade_group(primary, secondary)
+        morphology_group, morphology_group_description = morphology_group_from_patterns(primary, secondary)
         labels[case_id] = {
             "case_id": case_id,
             "gleason_primary": int(primary),
@@ -136,6 +160,8 @@ def build_case_labels(cases: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "gleason_score_label": f"GS{score}",
             "grade_group": f"GG{grade_group}",
             "low_high_grade": "low" if grade_group <= 2 else "high",
+            "morphology_group": morphology_group,
+            "morphology_group_description": morphology_group_description,
         }
     return labels
 
@@ -155,6 +181,8 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "gleason_score_label",
         "grade_group",
         "low_high_grade",
+        "morphology_group",
+        "morphology_group_description",
         "label_source",
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -218,12 +246,14 @@ def main() -> None:
         "gleason_score_slide_counts": counter_by(rows, "gleason_score_label"),
         "grade_group_slide_counts": counter_by(rows, "grade_group"),
         "low_high_slide_counts": counter_by(rows, "low_high_grade"),
+        "morphology_group_slide_counts": counter_by(rows, "morphology_group"),
         "split_counts": {
             split: {
                 "slides": int(len(split_rows)),
                 "patients": int(len({row["case_id"] for row in split_rows})),
                 "gleason_score": counter_by(split_rows, "gleason_score_label"),
                 "low_high_grade": counter_by(split_rows, "low_high_grade"),
+                "morphology_group": counter_by(split_rows, "morphology_group"),
             }
             for split, split_rows in sorted(by_split.items())
         },

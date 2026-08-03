@@ -47,13 +47,19 @@ DEVICE=cuda:3 \
 examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh
 ```
 
-It uses `configs/edit_policies/showcase_best.json`, the smoothed-28 edit
+It uses
+`configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json`,
+the smoothed-28 edit
 manifest, and the legacy `relu_sae_base` checkpoint required by the existing
 HNSCC prototype bundle. The containing folder also includes the matched naive
 baseline and comparison metrics workflow. Under the canonical `center_2x2`
 support constraint, the 28-cell historical request yields 14 coverable edited
 cells across 5 progressive windows; the dropped border targets remain recorded
 in the run manifest.
+
+Policy 09 is also the repository-wide default for
+`scripts/run_progressive_region_edit.py`. Pass a different `--edit-policy`
+for an ablation, or `--no-edit-policy` to use the runner's raw CLI defaults.
 
 ## Project Layout
 

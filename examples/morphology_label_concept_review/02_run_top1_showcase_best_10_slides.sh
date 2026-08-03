@@ -5,7 +5,7 @@ cd /common/users/wq50/wsi_cf
 
 PY="${PY:-/common/users/wq50/envs/pace/bin/python}"
 DEVICE="${DEVICE:-cuda:0}"
-EDIT_POLICY="${EDIT_POLICY:-configs/edit_policies/showcase_best.json}"
+EDIT_POLICY="${EDIT_POLICY:-configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json}"
 SAE_VARIANT="${SAE_VARIANT:-relu_sae_base}"
 SLIDES_PER_LABEL="${SLIDES_PER_LABEL:-10}"
 CANDIDATE_REGIONS_PER_LABEL="${CANDIDATE_REGIONS_PER_LABEL:-20}"
@@ -16,6 +16,7 @@ REFRESH_REGIONS="${REFRESH_REGIONS:-0}"
 OUTPUT_MODE="${OUTPUT_MODE:-debug}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
 CONCEPT_TARGET_TOP_K="${CONCEPT_TARGET_TOP_K:-5}"
+EDIT_SUPPORT="${EDIT_SUPPORT:-padded_center_2x2}"
 
 SLIDES_ROOT="${SLIDES_ROOT:-/research/projects/mllab/WSI/TCGA_features}"
 REVIEW_ROOT="${REVIEW_ROOT:-artifacts/morphology_label_concept_review/selected}"
@@ -132,7 +133,7 @@ write_policy_manifest() {
   local region_dir="$1"
   local out_manifest="$2"
 
-  PYTHONPATH=src "$PY" - "${region_dir}/region_bank.csv" "${region_dir}/progressive_edit_manifest.json" "${out_manifest}" "${SLIDES_PER_LABEL}" <<'PY'
+  PYTHONPATH=src "$PY" - "${region_dir}/region_bank.csv" "${region_dir}/progressive_edit_manifest.json" "${out_manifest}" "${SLIDES_PER_LABEL}" "${EDIT_SUPPORT}" <<'PY'
 import csv
 import json
 import sys
@@ -146,6 +147,7 @@ bank_path = Path(sys.argv[1])
 manifest_path = Path(sys.argv[2])
 out_path = Path(sys.argv[3])
 n_needed = int(sys.argv[4])
+edit_support = str(sys.argv[5])
 
 bank_rows = {row["region_id"]: row for row in csv.DictReader(bank_path.open())}
 requests = json.loads(manifest_path.read_text())
@@ -168,13 +170,13 @@ for request in requests:
         window_grid_side=4,
         stride_cells=2,
         grid_step_px=int(row["grid_step_px"]),
-        edit_support="center_2x2",
+        edit_support=edit_support,
     )
     if not supported:
         continue
     kept = dict(request)
     kept["target_cells"] = [{"gx": int(gx), "gy": int(gy)} for gx, gy in supported]
-    kept["selector"] = f"{kept.get('selector', 'classifier_attention')}__center_2x2_policy"
+    kept["selector"] = f"{kept.get('selector', 'classifier_attention')}__{edit_support}_policy"
     selected.append(kept)
     seen_slides.add(slide_key)
     if len(selected) >= n_needed:
@@ -182,7 +184,7 @@ for request in requests:
 
 if len(selected) < n_needed:
     raise SystemExit(
-        f"Only {len(selected)} distinct-slide edit requests are compatible with center_2x2; "
+        f"Only {len(selected)} distinct-slide edit requests are compatible with {edit_support}; "
         f"needed {n_needed}. Increase CANDIDATE_REGIONS_PER_LABEL and DOWNLOAD_SLIDE_COUNT."
     )
 out_path.parent.mkdir(parents=True, exist_ok=True)

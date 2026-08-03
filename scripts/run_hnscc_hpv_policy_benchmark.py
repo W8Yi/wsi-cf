@@ -32,7 +32,7 @@ DEFAULT_EDIT_MANIFEST = WSI_CF_ROOT / "artifacts/hnscc_hpv_paper_benchmark/regio
 DEFAULT_SPLIT_TSV = WSI_CF_ROOT / "resources/manifests/hnsc_hpv_5fold/split_0.tsv"
 DEFAULT_TCGA_FEATURES_ROOT = Path("/research/projects/mllab/WSI/TCGA_features")
 DEFAULT_POLICIES = [
-    "ours=configs/edit_policies/showcase_best.json",
+    "ours=configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json",
     "naive_no_preserve=configs/edit_policies/naive_no_preserve.json",
     "naive_full_duration=configs/edit_policies/baseline_no_preserve_full_duration.json",
 ]

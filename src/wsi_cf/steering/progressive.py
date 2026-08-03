@@ -20,7 +20,14 @@ CENTER_2X2_LOCAL_CELLS: tuple[tuple[int, int], ...] = (
 )
 EDIT_SUPPORT_CENTER_2X2 = "center_2x2"
 EDIT_SUPPORT_BORDER_RELAXED = "border_relaxed"
-EDIT_SUPPORT_CHOICES: tuple[str, ...] = (EDIT_SUPPORT_CENTER_2X2, EDIT_SUPPORT_BORDER_RELAXED)
+EDIT_SUPPORT_PADDED_CENTER_2X2 = "padded_center_2x2"
+EDIT_SUPPORT_FULL_WINDOW = "full_window"
+EDIT_SUPPORT_CHOICES: tuple[str, ...] = (
+    EDIT_SUPPORT_CENTER_2X2,
+    EDIT_SUPPORT_PADDED_CENTER_2X2,
+    EDIT_SUPPORT_BORDER_RELAXED,
+    EDIT_SUPPORT_FULL_WINDOW,
+)
 
 
 @dataclass(frozen=True)
@@ -196,6 +203,10 @@ def local_edit_support_global_cells(
     if str(edit_support) not in EDIT_SUPPORT_CHOICES:
         raise ValueError(f"Unsupported edit_support: {edit_support}")
     allowed = set(center_support_global_cells(window))
+    if str(edit_support) == EDIT_SUPPORT_FULL_WINDOW:
+        return {(int(gx), int(gy)) for gx, gy in window.global_cells()}
+    if str(edit_support) == EDIT_SUPPORT_PADDED_CENTER_2X2:
+        return allowed
     if str(edit_support) == EDIT_SUPPORT_BORDER_RELAXED:
         for gx, gy in window.global_cells():
             if int(gx) in {0, int(grid_w) - 1} or int(gy) in {0, int(grid_h) - 1}:
@@ -216,6 +227,31 @@ def split_cells_by_edit_support(
     if str(edit_support) not in EDIT_SUPPORT_CHOICES:
         raise ValueError(f"Unsupported edit_support: {edit_support}")
     validated_targets = validate_cells(list(target_cells), grid_w=int(grid_w), grid_h=int(grid_h))
+    if str(edit_support) == EDIT_SUPPORT_PADDED_CENTER_2X2:
+        halo = 1
+        shifted = [(int(gx) + halo, int(gy) + halo) for gx, gy in validated_targets]
+        shifted_supported, shifted_unsupported = split_cells_by_edit_support(
+            target_cells=shifted,
+            grid_w=int(grid_w) + 2 * halo,
+            grid_h=int(grid_h) + 2 * halo,
+            window_grid_side=int(window_grid_side),
+            stride_cells=int(stride_cells),
+            grid_step_px=int(grid_step_px),
+            edit_support=EDIT_SUPPORT_CENTER_2X2,
+        )
+        supported_set = {(int(gx) - halo, int(gy) - halo) for gx, gy in shifted_supported}
+        unsupported_set = {(int(gx) - halo, int(gy) - halo) for gx, gy in shifted_unsupported}
+        supported = [
+            (int(gx), int(gy))
+            for gx, gy in sorted(set(validated_targets), key=lambda item: (int(item[1]), int(item[0])))
+            if (int(gx), int(gy)) in supported_set
+        ]
+        unsupported = [
+            (int(gx), int(gy))
+            for gx, gy in sorted(set(validated_targets), key=lambda item: (int(item[1]), int(item[0])))
+            if (int(gx), int(gy)) in unsupported_set
+        ]
+        return tuple(supported), tuple(unsupported)
     windows = enumerate_progressive_windows(
         grid_w=int(grid_w),
         grid_h=int(grid_h),
@@ -252,9 +288,12 @@ def plan_progressive_steps(
     stride_cells: int = 2,
     grid_step_px: int = 256,
     edit_support: str = EDIT_SUPPORT_CENTER_2X2,
+    selection_mode: str = "coverage",
 ) -> list[PlannedProgressiveStep]:
     if str(edit_support) not in EDIT_SUPPORT_CHOICES:
         raise ValueError(f"Unsupported edit_support: {edit_support}")
+    if str(selection_mode) not in {"coverage", "overlap"}:
+        raise ValueError(f"Unsupported selection_mode: {selection_mode}")
     validated_targets = validate_cells(list(target_cells), grid_w=int(grid_w), grid_h=int(grid_h))
     target_set = set(validated_targets)
     if not target_set:
@@ -319,16 +358,30 @@ def plan_progressive_steps(
                 ),
             )
         else:
-            chosen = min(
-                viable,
-                key=lambda window: (
-                    -len(window_targets[window.window_id].intersection(remaining)),
-                    abs(int(window.gx0) - int(current_window.gx0)) + abs(int(window.gy0) - int(current_window.gy0)),
-                    int(window.gy0),
-                    int(window.gx0),
-                    str(window.window_id),
-                ),
-            )
+            if str(selection_mode) == "overlap":
+                covered = target_set - remaining
+                chosen = min(
+                    viable,
+                    key=lambda window: (
+                        abs(int(window.gx0) - int(current_window.gx0)) + abs(int(window.gy0) - int(current_window.gy0)),
+                        -len(window_targets[window.window_id].intersection(covered)),
+                        -len(window_targets[window.window_id].intersection(remaining)),
+                        int(window.gy0),
+                        int(window.gx0),
+                        str(window.window_id),
+                    ),
+                )
+            else:
+                chosen = min(
+                    viable,
+                    key=lambda window: (
+                        -len(window_targets[window.window_id].intersection(remaining)),
+                        abs(int(window.gx0) - int(current_window.gx0)) + abs(int(window.gy0) - int(current_window.gy0)),
+                        int(window.gy0),
+                        int(window.gx0),
+                        str(window.window_id),
+                    ),
+                )
 
         edit_cells = tuple(
             sorted(

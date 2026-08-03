@@ -1,0 +1,25 @@
+{
+  "task_name": "prad_morphology_group",
+  "label_source": "artifacts/prad_gleason_inputs/slide_labels.csv",
+  "split_manifest": "artifacts/prad_gleason_inputs/splits/prad_morphology_group_patient_stratified_80_20.json",
+  "projects": ["TCGA-PRAD"],
+  "label_column": "morphology_group",
+  "include_labels": [
+    "pattern_1_3_well_formed",
+    "pattern_4_cribriform_poorly_formed_fused",
+    "pattern_5_solid_single_necrosis"
+  ],
+  "concept_labels": [
+    "pattern_1_3_well_formed",
+    "pattern_4_cribriform_poorly_formed_fused",
+    "pattern_5_solid_single_necrosis"
+  ],
+  "association_split": "train",
+  "representative_split": "all",
+  "sae_variant": "relu_sae_base",
+  "ranking_mode": "attention_aware_optional",
+  "classifier_run_dir": "artifacts/classifier_training/prad_morphology_group",
+  "top_concepts": 20,
+  "candidate_latents": 150,
+  "top_tiles_per_concept": 50
+}

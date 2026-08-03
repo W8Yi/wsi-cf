@@ -38,7 +38,7 @@ not by a fixed top-N or target count.
 the historical fixed top-23/prune-28 showcase artifact, or
 `--edit-cell-selection-mode importance_mass_sae_neighbors` to recover the older
 attention+SAE mass selector. Pair the default selector with
-`configs/edit_policies/showcase_best.json`.
+`configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json`.
 
 Example:
 ```bash
@@ -48,7 +48,9 @@ bash examples/hnscc_hpv/02_find_regions.sh
 ### `scripts/run_progressive_region_edit.py`
 Runs the canonical progressive region editor from a region image, region bank, or edit manifest. Outputs source/final images and run metadata by default, with debug artifacts when requested.
 Supports reusable edit policies through `--edit-policy`, for example
-`configs/edit_policies/showcase_best.json`; explicit CLI flags override policy values.
+`configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json`.
+That policy is applied by default; explicit CLI flags override policy values.
+Use `--no-edit-policy` only when raw runner defaults are intentionally needed.
 
 Default HNSCC steering example:
 ```bash
@@ -58,11 +60,10 @@ examples/hnscc_hpv_showcase_smoothed28/01_run_progressive_edit.sh
 ```
 
 This default example uses the fixed smoothed-28 showcase manifest,
-`configs/edit_policies/showcase_best.json`, `--direction hpv_neg`, and the
+policy 09, `--direction hpv_neg`, and the
 legacy `relu_sae_base` paths matching the current HNSCC prototype bundle.
-Because the policy enforces `center_2x2` edit support, the historical 28-cell
-request executes on 14 coverable cells over 5 windows and records the 14
-unsupported border cells in `run_manifest.json`.
+Policy 09 uses padded-center support, stride-1 overlap, full-window commits,
+and strong outer-context preservation.
 `examples/hnscc_hpv/03_run_showcase_edit.sh` delegates to the same command.
 
 ### `scripts/analyze_concept_uni_features.py`
@@ -122,6 +123,24 @@ Paper showcase wrapper:
 PYTHON=/common/users/wq50/envs/pace/bin/python \
 DEVICE=cuda:3 \
 examples/hnscc_hpv_showcase_smoothed28/04_run_paper_policy_benchmark.sh
+```
+
+HNSCC showcase attention-budget sweep for pathologist review. This starts from
+the reviewed smoothed-28 target set, then cumulatively adds more cells by
+descending attention rank until all 64 region cells are targeted. The wrapper
+uses `showcase_best` generation settings but overrides planning to
+`edit_support=border_relaxed` so border cells are actually editable:
+```bash
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/05_run_attention_budget_sweep.sh
+```
+
+Useful overrides:
+```bash
+BUDGETS=28,36,44,52,64 \
+OUT_ROOT=paper_example/hnscc_hpv_showcase_smoothed28_attention_budget_sweep_custom \
+DEVICE=cuda:3 \
+examples/hnscc_hpv_showcase_smoothed28/05_run_attention_budget_sweep.sh
 ```
 
 Full bidirectional HNSCC HPV paper benchmark wrapper:

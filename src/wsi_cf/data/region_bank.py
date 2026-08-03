@@ -37,6 +37,10 @@ class RegionBankRow:
     feature_grid_path: str
     cell_preview_path: str
     region_dir: str = ""
+    coords_path: str = ""
+    raw_coord_tile_size_level0: int = 0
+    selection_tile_size_level0: int = 0
+    clam_aggregate_ratio: int = 1
 
 
 @dataclass(frozen=True)
@@ -259,6 +263,10 @@ def parse_region_bank_csv(csv_path: Path) -> list[RegionBankRow]:
                     feature_grid_path=str(row["feature_grid_path"]),
                     cell_preview_path=str(row.get("cell_preview_path", "")),
                     region_dir=str(row.get("region_dir", "")),
+                    coords_path=str(row.get("coords_path", "")),
+                    raw_coord_tile_size_level0=_int_value("raw_coord_tile_size_level0", 0),
+                    selection_tile_size_level0=_int_value("selection_tile_size_level0", 0),
+                    clam_aggregate_ratio=_int_value("clam_aggregate_ratio", 1),
                 )
             )
     return out

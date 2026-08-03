@@ -27,6 +27,7 @@ from wsi_cf.common.runtime import resolve_device  # noqa: E402
 from wsi_cf.eval.grade_risk import map_region_cells_to_bag, replace_region_features  # noqa: E402
 from wsi_cf.eval.hnsc_hpv import build_mil_from_checkpoint, run_mil_attention  # noqa: E402
 from wsi_cf.generation.pixcell import build_uni_grid_from_image, load_uni2  # noqa: E402
+from wsi_cf.steering.edit_policy import DEFAULT_EDIT_POLICY  # noqa: E402
 from wsi_cf.steering.progressive import split_cells_by_edit_support  # noqa: E402
 
 
@@ -46,7 +47,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=Path,
         default=WSI_CF_ROOT / "artifacts/morphology_label_concept_review/selected/01_luad_lusc__LUSC",
     )
-    parser.add_argument("--edit-policy", type=Path, default=WSI_CF_ROOT / "configs/edit_policies/showcase_best.json")
+    parser.add_argument("--edit-policy", type=Path, default=WSI_CF_ROOT / DEFAULT_EDIT_POLICY)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--cell-counts", default="1,4,16,32,64")
     parser.add_argument("--max-runs", type=int, default=10)

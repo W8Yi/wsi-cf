@@ -255,7 +255,7 @@ run_top1_steer() {
     --max-concepts 1 \
     --max-runs "${MAX_RUNS}" \
     --target-magnification 20 \
-    --edit-support border_relaxed \
+    --edit-support padded_center_2x2 \
     --sae-variant "${SAE_VARIANT}" \
     --prototype-strength "${PROTOTYPE_STRENGTH}" \
     --steer-blend 1.0 \

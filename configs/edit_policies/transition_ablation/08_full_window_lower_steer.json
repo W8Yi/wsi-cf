@@ -1,0 +1,37 @@
+{
+  "policy_name": "transition_full_window_lower_steer",
+  "description": "Whole-window commit with softer steering and stronger context preservation.",
+  "version": 1,
+  "generation": {
+    "steps": 30,
+    "guidance": 2.0,
+    "patch_batch": 256
+  },
+  "steering": {
+    "prototype_strength": 0.65,
+    "steer_blend": 1.0,
+    "mid_steer_start_ratio": 0.6,
+    "mid_steer_end_ratio": 1.0,
+    "mid_steer_alpha_start": 0.25,
+    "mid_steer_alpha_end": 0.8,
+    "mid_steer_alpha_schedule": "linear",
+    "steer_context_halo_weight": 0.2,
+    "steer_context_halo_radius_cells": 1
+  },
+  "preservation": {
+    "preserve_edit_strength": 0.05,
+    "preserve_visited_strength": 0.9,
+    "preserve_fresh_context_strength": 0.55
+  },
+  "planning": {
+    "edit_support": "padded_center_2x2",
+    "context_halo_cells": 1,
+    "window_stride_cells": 1,
+    "window_selection_mode": "overlap",
+    "steer_full_support": true,
+    "commit_mode": "full_window",
+    "commit_feather_px": 0,
+    "commit_halo_cells": 0,
+    "commit_halo_alpha": 0.0
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "policy_name": "bad_naive_no_preserve_no_sliding",
+  "description": "Deliberately poor visual baseline: padded center-cell support for compatibility with benchmark manifests, but no source-image preservation, no stride-1 overlap/sliding refinement, full-window commits, and full-strength steering for the whole diffusion trajectory.",
+  "version": 1,
+  "generation": {
+    "steps": 30,
+    "guidance": 2.0,
+    "patch_batch": 256
+  },
+  "steering": {
+    "prototype_strength": 0.9,
+    "steer_blend": 1.0,
+    "mid_steer_start_ratio": 0.0,
+    "mid_steer_end_ratio": 1.0,
+    "mid_steer_alpha_start": 1.0,
+    "mid_steer_alpha_end": 1.0,
+    "mid_steer_alpha_schedule": "linear",
+    "steer_context_halo_weight": 0.0,
+    "steer_context_halo_radius_cells": 0
+  },
+  "preservation": {
+    "preserve_edit_strength": 0.0,
+    "preserve_visited_strength": 0.0,
+    "preserve_fresh_context_strength": 0.0
+  },
+  "planning": {
+    "edit_support": "full_window",
+    "context_halo_cells": 1,
+    "window_stride_cells": 4,
+    "window_selection_mode": "coverage",
+    "steer_full_support": true,
+    "preserve_full_support": false,
+    "commit_mode": "full_window",
+    "commit_feather_px": 0,
+    "commit_halo_cells": 0,
+    "commit_halo_alpha": 0.0
+  }
+}

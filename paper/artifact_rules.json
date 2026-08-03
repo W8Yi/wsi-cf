@@ -1,0 +1,310 @@
+{
+  "classes": [
+    "source_data",
+    "feature_cache",
+    "model",
+    "concepts",
+    "regions",
+    "generated",
+    "metrics",
+    "scratch",
+    "legacy"
+  ],
+  "keep_levels": [
+    "must_keep",
+    "paper_keep",
+    "reproducible_cache",
+    "scratch",
+    "archive_candidate",
+    "delete_candidate"
+  ],
+  "paper_view_dirs": [
+    "inputs",
+    "models",
+    "concepts",
+    "regions",
+    "generated",
+    "metrics"
+  ],
+  "rules": [
+    {
+      "pattern": "artifacts/.gitkeep",
+      "artifact_class": "source_data",
+      "keep_level": "must_keep",
+      "paper_status": "repo_placeholder",
+      "paper_view": null,
+      "notes": "Repository placeholder; do not archive through artifact cleanup."
+    },
+    {
+      "pattern": "artifacts/normal_tumor_slides",
+      "artifact_class": "source_data",
+      "keep_level": "must_keep",
+      "paper_status": "paper_input",
+      "paper_view": "inputs",
+      "notes": "Downloaded GDC normal SVS slides; expensive to reacquire."
+    },
+    {
+      "pattern": "artifacts/normal_tumor_features",
+      "artifact_class": "feature_cache",
+      "keep_level": "must_keep",
+      "paper_status": "paper_input",
+      "paper_view": "inputs",
+      "notes": "UNI2 feature bags for normal/tumor experiments."
+    },
+    {
+      "pattern": "artifacts/normal_tumor_inputs",
+      "artifact_class": "source_data",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_input",
+      "paper_view": "inputs",
+      "notes": "Normal/tumor manifests and concept-task JSONs."
+    },
+    {
+      "pattern": "artifacts/normal_to_tumor_regions*",
+      "artifact_class": "regions",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_result",
+      "paper_view": "regions",
+      "notes": "Normal-to-tumor source region banks and edit manifests."
+    },
+    {
+      "pattern": "artifacts/normal_to_tumor_after_images*",
+      "artifact_class": "generated",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_result",
+      "paper_view": "generated",
+      "notes": "Normal-to-tumor generated after-images."
+    },
+    {
+      "pattern": "artifacts/classifier_training",
+      "artifact_class": "model",
+      "keep_level": "must_keep",
+      "paper_status": "paper_input",
+      "paper_view": "models",
+      "notes": "Core trained attention classifiers."
+    },
+    {
+      "pattern": "artifacts/classifier_training_normal_tumor",
+      "artifact_class": "model",
+      "keep_level": "must_keep",
+      "paper_status": "paper_input",
+      "paper_view": "models",
+      "notes": "Normal-vs-tumor trained attention classifiers."
+    },
+    {
+      "pattern": "artifacts/hnscc_hpv_paper_benchmark",
+      "artifact_class": "metrics",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_result",
+      "paper_view": "metrics",
+      "notes": "HNSCC HPV paper benchmark outputs."
+    },
+    {
+      "pattern": "artifacts/hnscc_hpv_showcase_best_paper_policy_benchmark",
+      "artifact_class": "metrics",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_result",
+      "paper_view": "metrics",
+      "notes": "HNSCC showcase policy benchmark outputs."
+    },
+    {
+      "pattern": "artifacts/hnscc_hpv_showcase_attention_budget_sweep",
+      "artifact_class": "metrics",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_result",
+      "paper_view": "metrics",
+      "notes": "HNSCC attention-budget sweep manifests and summaries."
+    },
+    {
+      "pattern": "artifacts/morphology_label_concept_review_top1_showcase_best_10slides",
+      "artifact_class": "generated",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_result",
+      "paper_view": "generated",
+      "notes": "Top-1 morphology-label showcase generations."
+    },
+    {
+      "pattern": "artifacts/luad_to_lusc_cell_budget_showcase_best_10slides",
+      "artifact_class": "metrics",
+      "keep_level": "paper_keep",
+      "paper_status": "paper_result",
+      "paper_view": "metrics",
+      "notes": "LUAD-to-LUSC edited-cell budget classifier-shift results."
+    },
+    {
+      "pattern": "artifacts/concept_discovery*",
+      "artifact_class": "concepts",
+      "keep_level": "paper_keep",
+      "paper_status": "candidate",
+      "paper_view": "concepts",
+      "notes": "JSON-driven concept discovery outputs."
+    },
+    {
+      "pattern": "artifacts/classifier_label_concepts*",
+      "artifact_class": "concepts",
+      "keep_level": "paper_keep",
+      "paper_status": "candidate",
+      "paper_view": "concepts",
+      "notes": "Classifier-associated concept bundles."
+    },
+    {
+      "pattern": "artifacts/label_only_concepts*",
+      "artifact_class": "concepts",
+      "keep_level": "paper_keep",
+      "paper_status": "candidate",
+      "paper_view": "concepts",
+      "notes": "Labels-only concept bundles."
+    },
+    {
+      "pattern": "artifacts/concept_label_associations*",
+      "artifact_class": "concepts",
+      "keep_level": "reproducible_cache",
+      "paper_status": "cache",
+      "paper_view": "concepts",
+      "notes": "Concept association intermediate outputs."
+    },
+    {
+      "pattern": "artifacts/*region_bank*",
+      "artifact_class": "regions",
+      "keep_level": "reproducible_cache",
+      "paper_status": "candidate",
+      "paper_view": "regions",
+      "notes": "Region-bank and region-selection outputs."
+    },
+    {
+      "pattern": "artifacts/pathology_aware_*regions*",
+      "artifact_class": "regions",
+      "keep_level": "reproducible_cache",
+      "paper_status": "candidate",
+      "paper_view": "regions",
+      "notes": "Pathology-aware region discovery outputs."
+    },
+    {
+      "pattern": "artifacts/grade_risk_training*",
+      "artifact_class": "model",
+      "keep_level": "paper_keep",
+      "paper_status": "candidate",
+      "paper_view": "models",
+      "notes": "KIRC grade-risk model training outputs."
+    },
+    {
+      "pattern": "artifacts/sae_grade_risk_training*",
+      "artifact_class": "model",
+      "keep_level": "paper_keep",
+      "paper_status": "candidate",
+      "paper_view": "models",
+      "notes": "SAE concept grade-risk model training outputs."
+    },
+    {
+      "pattern": "artifacts/prad_gleason_inputs",
+      "artifact_class": "source_data",
+      "keep_level": "paper_keep",
+      "paper_status": "candidate",
+      "paper_view": "inputs",
+      "notes": "PRAD Gleason task inputs."
+    },
+    {
+      "pattern": "artifacts/label_sources",
+      "artifact_class": "source_data",
+      "keep_level": "paper_keep",
+      "paper_status": "candidate",
+      "paper_view": "inputs",
+      "notes": "Derived label sources used by paper candidate tasks."
+    },
+    {
+      "pattern": "artifacts/_dry_*",
+      "artifact_class": "scratch",
+      "keep_level": "scratch",
+      "paper_status": "scratch",
+      "paper_view": null,
+      "notes": "Dry-run scratch output."
+    },
+    {
+      "pattern": "artifacts/*dryrun*",
+      "artifact_class": "scratch",
+      "keep_level": "scratch",
+      "paper_status": "scratch",
+      "paper_view": null,
+      "notes": "Dry-run scratch output."
+    },
+    {
+      "pattern": "artifacts/test_*",
+      "artifact_class": "scratch",
+      "keep_level": "scratch",
+      "paper_status": "scratch",
+      "paper_view": null,
+      "notes": "Test output."
+    },
+    {
+      "pattern": "artifacts/sample_*",
+      "artifact_class": "scratch",
+      "keep_level": "scratch",
+      "paper_status": "scratch",
+      "paper_view": null,
+      "notes": "Sample output."
+    },
+    {
+      "pattern": "artifacts/*smoke*",
+      "artifact_class": "scratch",
+      "keep_level": "scratch",
+      "paper_status": "scratch",
+      "paper_view": null,
+      "notes": "Smoke-test output."
+    },
+    {
+      "pattern": "artifacts/notebook_*",
+      "artifact_class": "scratch",
+      "keep_level": "scratch",
+      "paper_status": "scratch",
+      "paper_view": null,
+      "notes": "Notebook exploration output."
+    },
+    {
+      "pattern": "artifacts/*old*",
+      "artifact_class": "legacy",
+      "keep_level": "archive_candidate",
+      "paper_status": "legacy",
+      "paper_view": null,
+      "notes": "Old or superseded experiment output."
+    },
+    {
+      "pattern": "artifacts/*rerun*",
+      "artifact_class": "legacy",
+      "keep_level": "archive_candidate",
+      "paper_status": "legacy",
+      "paper_view": null,
+      "notes": "Rerun output that may be superseded."
+    },
+    {
+      "pattern": "artifacts/*strength_sweep*",
+      "artifact_class": "legacy",
+      "keep_level": "archive_candidate",
+      "paper_status": "legacy",
+      "paper_view": null,
+      "notes": "Strength sweep output; archive once paper selections are stable."
+    },
+    {
+      "pattern": "artifacts/*visibility_ablation*",
+      "artifact_class": "legacy",
+      "keep_level": "archive_candidate",
+      "paper_status": "legacy",
+      "paper_view": null,
+      "notes": "Visibility-ablation output; archive once paper selections are stable."
+    },
+    {
+      "pattern": "artifacts/*policy*",
+      "artifact_class": "legacy",
+      "keep_level": "archive_candidate",
+      "paper_status": "legacy",
+      "paper_view": null,
+      "notes": "Policy experiment output; keep paper benchmark separately."
+    }
+  ],
+  "default_rule": {
+    "artifact_class": "generated",
+    "keep_level": "archive_candidate",
+    "paper_status": "unclassified",
+    "paper_view": null,
+    "notes": "Unclassified top-level artifact; review before cleanup."
+  }
+}

@@ -54,6 +54,65 @@ def test_update_full_zgrid_selected_cells_only_overwrites_selected() -> None:
     assert np.allclose(out[7, 7], 0.0)
 
 
+def test_build_commit_alpha_mask_support_cells_with_soft_halo() -> None:
+    script = load_script_module("run_progressive_region_edit.py")
+
+    alpha = script.build_commit_alpha_mask(
+        width=128,
+        height=128,
+        grid_step_px=32,
+        cells_local=[(1, 1), (2, 1), (1, 2), (2, 2)],
+        feather_px=0,
+        halo_cells=1,
+        halo_alpha=0.35,
+    )
+
+    assert alpha.shape == (128, 128, 1)
+    assert np.isclose(alpha[48, 48, 0], 1.0)
+    assert np.isclose(alpha[80, 80, 0], 1.0)
+    assert np.isclose(alpha[16, 16, 0], 0.35)
+    assert np.isclose(alpha[112, 112, 0], 0.35)
+
+
+def test_composite_invalid_feature_cells_restores_blank_tiles() -> None:
+    script = load_script_module("run_progressive_region_edit.py")
+    source = Image.fromarray(np.full((64, 64, 3), 245, dtype=np.uint8))
+    generated = Image.fromarray(np.full((64, 64, 3), 120, dtype=np.uint8))
+    valid_mask = np.asarray([[1, 0], [1, 1]], dtype=np.uint8)
+
+    composited, alpha = script.composite_invalid_feature_cells(
+        generated_img=generated,
+        source_img=source,
+        valid_feature_mask=valid_mask,
+        grid_step_px=32,
+        feather_px=0,
+    )
+    out = np.asarray(composited)
+
+    assert alpha.shape == (64, 64, 1)
+    assert np.all(out[16, 16] == 120)
+    assert np.all(out[16, 48] == 245)
+    assert np.all(out[48, 48] == 120)
+
+
+def test_valid_feature_alpha_mask_feathers_tile_boundary() -> None:
+    script = load_script_module("run_progressive_region_edit.py")
+    valid_mask = np.asarray([[1, 0], [1, 1]], dtype=np.uint8)
+
+    alpha = script.build_valid_feature_alpha_mask(
+        valid_feature_mask=valid_mask,
+        width=64,
+        height=64,
+        grid_step_px=32,
+        feather_px=4,
+    )
+
+    assert alpha[16, 16, 0] > 0.99
+    assert 0.0 < alpha[16, 31, 0] < 1.0
+    assert 0.0 < alpha[16, 32, 0] < 1.0
+    assert alpha[16, 48, 0] < 0.01
+
+
 def test_commit_progressive_window_update_uses_full_window_latest_wins() -> None:
     script = load_script_module("run_region_bank_10x_sae_cases.py")
     canvas = np.zeros((2048, 2048, 3), dtype=np.float32)

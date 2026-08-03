@@ -43,3 +43,5 @@ paper_example/showcase_smoothed28/*
 !paper_example/showcase_smoothed28/progressive_stage_canvases/
 paper_example/showcase_smoothed28/progressive_stage_canvases/*
 !paper_example/showcase_smoothed28/progressive_stage_canvases/progressive_window_sequence_no_text.gif
+
+paper_outputs/

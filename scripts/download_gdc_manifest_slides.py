@@ -5,6 +5,7 @@ import argparse
 import csv
 import hashlib
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -16,6 +17,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--max-files", type=int, default=0, help="Maximum files to download; 0 means all manifest rows.")
     parser.add_argument("--chunk-mb", type=int, default=4)
+    parser.add_argument("--retries", type=int, default=5, help="Per-file download attempts before failing.")
+    parser.add_argument("--retry-sleep", type=float, default=30.0, help="Seconds to sleep between retry attempts.")
     parser.add_argument("--verify-md5", action=argparse.BooleanOptionalAction, default=True)
     return parser
 
@@ -32,6 +35,47 @@ def file_is_valid(path: Path, expected_size: int, expected_md5: str, verify_md5:
     if not path.exists() or path.stat().st_size != expected_size:
         return False
     return not verify_md5 or not expected_md5 or md5sum(path).lower() == expected_md5.lower()
+
+
+def download_one_file(
+    *,
+    file_id: str,
+    filename: str,
+    out_path: Path,
+    expected_size: int,
+    expected_md5: str,
+    chunk_mb: int,
+    verify_md5: bool,
+    retries: int,
+    retry_sleep: float,
+) -> None:
+    tmp_path = out_path.with_suffix(out_path.suffix + ".part")
+    attempts = max(1, int(retries))
+    for attempt in range(1, attempts + 1):
+        if tmp_path.exists():
+            tmp_path.unlink()
+        try:
+            with requests.get(f"https://api.gdc.cancer.gov/data/{file_id}", stream=True, timeout=(60, 600)) as response:
+                response.raise_for_status()
+                with tmp_path.open("wb") as output:
+                    for chunk in response.iter_content(chunk_size=max(1, int(chunk_mb)) * 1024 * 1024):
+                        if chunk:
+                            output.write(chunk)
+            if not file_is_valid(tmp_path, expected_size, expected_md5, verify_md5):
+                tmp_path.unlink(missing_ok=True)
+                raise RuntimeError(f"Downloaded file failed size or MD5 verification: {filename}")
+            tmp_path.rename(out_path)
+            return
+        except (requests.RequestException, OSError, RuntimeError) as exc:
+            tmp_path.unlink(missing_ok=True)
+            if attempt >= attempts:
+                raise
+            print(
+                f"[retry {attempt}/{attempts}] {filename}: {exc}; sleeping {float(retry_sleep):.1f}s",
+                file=sys.stderr,
+                flush=True,
+            )
+            time.sleep(max(0.0, float(retry_sleep)))
 
 
 def main() -> None:
@@ -63,20 +107,18 @@ def main() -> None:
             reused += 1
             print(f"[skip {index}/{len(rows)}] {filename}", flush=True)
             continue
-        tmp_path = out_path.with_suffix(out_path.suffix + ".part")
-        if tmp_path.exists():
-            tmp_path.unlink()
         print(f"[download {index}/{len(rows)}] {filename} size_gb={expected_size / 1e9:.2f}", flush=True)
-        with requests.get(f"https://api.gdc.cancer.gov/data/{file_id}", stream=True, timeout=(60, 600)) as response:
-            response.raise_for_status()
-            with tmp_path.open("wb") as output:
-                for chunk in response.iter_content(chunk_size=max(1, int(args.chunk_mb)) * 1024 * 1024):
-                    if chunk:
-                        output.write(chunk)
-        if not file_is_valid(tmp_path, expected_size, expected_md5, bool(args.verify_md5)):
-            tmp_path.unlink(missing_ok=True)
-            raise RuntimeError(f"Downloaded file failed size or MD5 verification: {filename}")
-        tmp_path.rename(out_path)
+        download_one_file(
+            file_id=file_id,
+            filename=filename,
+            out_path=out_path,
+            expected_size=expected_size,
+            expected_md5=expected_md5,
+            chunk_mb=int(args.chunk_mb),
+            verify_md5=bool(args.verify_md5),
+            retries=int(args.retries),
+            retry_sleep=float(args.retry_sleep),
+        )
         downloaded += 1
     print(f"[ok] downloaded={downloaded} reused={reused} total={len(rows)}", flush=True)
 

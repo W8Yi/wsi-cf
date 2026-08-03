@@ -1,0 +1,96 @@
+{
+  "benchmark_name": "prediction_transition_balanced",
+  "description": "Balanced prediction-transition benchmark for HPV, normal-to-tumor, and PRAD morphology-group steering. The older PRAD five-grade-group task is retained as an opt-in task.",
+  "output_root": "paper_outputs/prediction_transition_benchmark",
+  "edit_policy": "configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json",
+  "sae_variant": "relu_sae_base",
+  "budgets": [1, 2, 4, 8, 16, 32, 48, 64],
+  "random_repeats": 5,
+  "score_scope": "local_region",
+  "local_source": "source_image",
+  "seed": 7,
+  "region_selection": {
+    "slides_per_source_label": 20,
+    "regions_per_slide": 5,
+    "region_size": 2048,
+    "target_magnification": 20,
+    "grid_step_px": 256,
+    "min_label_confidence": 0.5,
+    "max_label_confidence": 0.9995,
+    "attention_percentile": 50,
+    "min_selected_cells": 16,
+    "max_selected_cells": 32,
+    "target_importance_mass": 0.9
+  },
+  "generation": {
+    "edit_support": "padded_center_2x2",
+    "window_stride_cells": 1,
+    "window_selection_mode": "overlap",
+    "commit_mode": "full_window",
+    "output_mode": "minimal",
+    "concept_target_top_k": 5,
+    "max_concepts": 3
+  },
+  "tasks": {
+    "hnscc_hpv": {
+      "classifier_ckpt": "resources/models/classifiers/hnscc_hpv/mil_split0.pt",
+      "region_bank_csv": "artifacts/hnscc_hpv_paper_benchmark/regions/region_bank.csv",
+      "label_order": "hpv_neg,hpv_pos",
+      "directions": [
+        {"direction": "hpv_pos_to_hpv_neg", "source_label": "hpv_pos", "target_label": "hpv_neg", "runner_direction": "hpv_neg"},
+        {"direction": "hpv_neg_to_hpv_pos", "source_label": "hpv_neg", "target_label": "hpv_pos", "runner_direction": "hpv_pos"}
+      ]
+    },
+    "normal_tumor": {
+      "classifier_root": "artifacts/classifier_training_normal_tumor",
+      "concept_root": "artifacts/concept_discovery_normal_tumor_relu_sae_base",
+      "region_root": "artifacts/normal_to_tumor_regions_showcase_sae_cell_fraction_sweep_padded_center_commit_rerun_diverse",
+      "tasks": ["luad_normal_tumor", "coad_normal_tumor", "kirc_normal_tumor", "brca_normal_tumor"],
+      "directions": [
+        {"direction": "normal_to_tumor", "source_label": "normal", "target_label": "tumor", "runner_direction": "hpv_pos"}
+      ]
+    },
+    "prad_grade_group": {
+      "classifier_run_dir": "artifacts/classifier_training/prad_grade_group",
+      "concept_root": "artifacts/concept_discovery_prad_grade_group_relu_sae_base/prad_grade_group/labels",
+      "region_root": "paper_outputs/prad_gleason_grade_to_grade_steering/_regions",
+      "label_order": "GG1,GG2,GG3,GG4,GG5",
+      "directions": [
+        {"direction": "gg1_to_gg2", "source_label": "GG1", "target_label": "GG2"},
+        {"direction": "gg2_to_gg3", "source_label": "GG2", "target_label": "GG3"},
+        {"direction": "gg3_to_gg4", "source_label": "GG3", "target_label": "GG4"},
+        {"direction": "gg4_to_gg5", "source_label": "GG4", "target_label": "GG5"},
+        {"direction": "gg1_to_gg5", "source_label": "GG1", "target_label": "GG5"},
+        {"direction": "gg5_to_gg1", "source_label": "GG5", "target_label": "GG1"}
+      ]
+    },
+    "prad_morphology_group": {
+      "classifier_run_dir": "artifacts/classifier_training/prad_morphology_group",
+      "concept_root": "artifacts/concept_discovery_prad_morphology_group_relu_sae_base/prad_morphology_group/labels",
+      "region_root": "paper_outputs/prad_morphology_group_steering/_regions",
+      "label_order": "pattern_1_3_well_formed,pattern_4_cribriform_poorly_formed_fused,pattern_5_solid_single_necrosis",
+      "directions": [
+        {
+          "direction": "well_to_p4",
+          "source_label": "pattern_1_3_well_formed",
+          "target_label": "pattern_4_cribriform_poorly_formed_fused"
+        },
+        {
+          "direction": "p4_to_p5",
+          "source_label": "pattern_4_cribriform_poorly_formed_fused",
+          "target_label": "pattern_5_solid_single_necrosis"
+        },
+        {
+          "direction": "well_to_p5",
+          "source_label": "pattern_1_3_well_formed",
+          "target_label": "pattern_5_solid_single_necrosis"
+        },
+        {
+          "direction": "p5_to_well",
+          "source_label": "pattern_5_solid_single_necrosis",
+          "target_label": "pattern_1_3_well_formed"
+        }
+      ]
+    }
+  }
+}

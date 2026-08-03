@@ -86,6 +86,33 @@ def test_progressive_planner_rejects_targets_outside_center_support() -> None:
         raise AssertionError("Expected planner to reject a target outside the center 2x2 support")
 
 
+def test_progressive_planner_overlap_mode_moves_one_tile_and_reuses_center_support() -> None:
+    target_cells = [(2, y) for y in range(1, 5)] + [(3, y) for y in range(1, 5)]
+
+    coverage_steps = plan_progressive_steps(
+        target_cells=target_cells,
+        grid_w=6,
+        grid_h=6,
+        window_grid_side=4,
+        stride_cells=1,
+        grid_step_px=256,
+        selection_mode="coverage",
+    )
+    overlap_steps = plan_progressive_steps(
+        target_cells=target_cells,
+        grid_w=6,
+        grid_h=6,
+        window_grid_side=4,
+        stride_cells=1,
+        grid_step_px=256,
+        selection_mode="overlap",
+    )
+
+    assert coverage_steps[1].window.gy0 == 2
+    assert overlap_steps[1].window.gy0 == 1
+    assert overlap_steps[1].edit_cells_global == ((2, 3), (3, 3))
+
+
 def test_split_cells_by_edit_support_separates_unsupported_cells() -> None:
     supported, unsupported = split_cells_by_edit_support(
         target_cells=[(0, 0), (1, 1), (6, 6), (7, 7)],
@@ -99,6 +126,36 @@ def test_split_cells_by_edit_support_separates_unsupported_cells() -> None:
 
     assert supported == ((1, 1), (6, 6))
     assert unsupported == ((0, 0), (7, 7))
+
+
+def test_split_cells_by_padded_center_support_covers_region_border_cells() -> None:
+    supported, unsupported = split_cells_by_edit_support(
+        target_cells=[(0, 0), (1, 1), (6, 6), (7, 7)],
+        grid_w=8,
+        grid_h=8,
+        window_grid_side=4,
+        stride_cells=2,
+        grid_step_px=256,
+        edit_support="padded_center_2x2",
+    )
+
+    assert supported == ((0, 0), (1, 1), (6, 6), (7, 7))
+    assert unsupported == ()
+
+
+def test_split_cells_by_full_window_support_covers_all_window_cells_without_sliding() -> None:
+    supported, unsupported = split_cells_by_edit_support(
+        target_cells=[(0, 0), (3, 3), (5, 4), (7, 7)],
+        grid_w=8,
+        grid_h=8,
+        window_grid_side=4,
+        stride_cells=4,
+        grid_step_px=256,
+        edit_support="full_window",
+    )
+
+    assert supported == ((0, 0), (3, 3), (5, 4), (7, 7))
+    assert unsupported == ()
 
 
 def test_draw_cells_overlay_draws_one_clean_shared_boundary_between_selected_cells() -> None:

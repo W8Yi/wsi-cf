@@ -22,6 +22,7 @@ TASKS = {
     "coad_normal_tumor": {"gdc_project": "TCGA-COAD", "local_projects": ["TCGA-COAD"]},
     "brca_normal_tumor": {"gdc_project": "TCGA-BRCA", "local_projects": ["TCGA-BRCA_IDC", "TCGA-BRCA_OTHERS"]},
     "kirc_normal_tumor": {"gdc_project": "TCGA-KIRC", "local_projects": ["TCGA-KIRC"]},
+    "lusc_normal_tumor": {"gdc_project": "TCGA-LUSC", "local_projects": ["TCGA-LUSC"]},
 }
 
 
@@ -78,6 +79,14 @@ def sample_id_from_slide_key(slide_key: str) -> str:
 def sample_code_from_slide_key(slide_key: str) -> str:
     parts = str(slide_key).split("-")
     return parts[3][:2] if len(parts) >= 4 else ""
+
+
+def resolve_feature_h5(features_dir: Path, slide_key: str) -> Path:
+    exact = features_dir / f"{slide_key}.h5"
+    if exact.exists():
+        return exact
+    matches = sorted(features_dir.glob(f"{slide_key}*.h5"))
+    return matches[0] if matches else exact
 
 
 def query_gdc_normal_slides(gdc_project: str) -> list[dict[str, Any]]:
@@ -148,7 +157,7 @@ def load_local_tumor_rows(
             slide_key = str(source["slide_key"])
             if sample_code_from_slide_key(slide_key) != "01":
                 continue
-            h5_path = features_root / local_project / "features_uni2" / f"{slide_key}.h5"
+            h5_path = resolve_feature_h5(features_root / local_project / "features_uni2", slide_key)
             if not h5_path.exists():
                 continue
             rows.append(
@@ -213,7 +222,7 @@ def main() -> None:
         for row in normal_rows:
             row["project_dir"] = gdc_project
             row["local_feature_project"] = gdc_project
-            row["h5_path"] = str(args.normal_features_root / gdc_project / "features_uni2" / f"{row['slide_key']}.h5")
+            row["h5_path"] = str(resolve_feature_h5(args.normal_features_root / gdc_project / "features_uni2", str(row["slide_key"])))
             row["feature_ready"] = int(Path(str(row["h5_path"])).exists())
         tumor_rows = load_local_tumor_rows(
             args.label_source,

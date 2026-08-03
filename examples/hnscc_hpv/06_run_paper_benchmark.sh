@@ -78,7 +78,7 @@ benchmark_cmd=(
   --output-mode "${OUTPUT_MODE}"
   --prepare-associations
   --require-paper-deps
-  --policy "ours=configs/edit_policies/showcase_best.json"
+  --policy "ours=configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json"
   --policy "naive_no_preserve=configs/edit_policies/naive_no_preserve.json"
   --policy "naive_full_duration=configs/edit_policies/baseline_no_preserve_full_duration.json"
 )

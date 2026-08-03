@@ -44,7 +44,7 @@ artifacts/hnscc_hpv_showcase_smoothed28_tutorial/progressive/
 Policy:
 
 ```text
-configs/edit_policies/showcase_best.json
+configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json
 ```
 
 This is the paper showcase setting: progressive PixCell windows with
@@ -152,7 +152,7 @@ examples/hnscc_hpv_showcase_smoothed28/04_run_paper_policy_benchmark.sh
 
 This compares:
 
-- `ours`: `configs/edit_policies/showcase_best.json`
+- `ours`: `configs/edit_policies/transition_ablation/09_full_window_regen_center_preserve_outer.json`
 - `naive_no_preserve`: `configs/edit_policies/naive_no_preserve.json`
 - `naive_full_duration`: `configs/edit_policies/baseline_no_preserve_full_duration.json`
 

@@ -1,0 +1,44 @@
+{
+  "benchmark_name": "prediction_transition_test_only_unbalanced",
+  "description": "Leakage-safe prediction-transition benchmark. Region banks must be built from held-out test patients only; counts are intentionally unbalanced and use all available source slides per direction. Default PRAD steering uses the three-class morphology-group task.",
+  "region_bank_root": "artifacts/prediction_transition_region_banks_test_only_unbalanced",
+  "output_root": "paper_outputs/prediction_transition_benchmark_test_only_unbalanced",
+  "selection_policy": {
+    "split": "test",
+    "split_level": "case_id",
+    "allow_unbalanced_source_counts": true,
+    "regions_per_slide": 5,
+    "normal_tumor_source_label": "normal",
+    "hnscc_hpv_split_source": "resources/models/classifiers/hnscc_hpv/splits_0.csv for strict checkpoint-split evaluation, or resources/manifests/hnsc_hpv_5fold/split_0.tsv when HNSCC_USE_TASK_SPLIT=1"
+  },
+  "expected_test_source_slide_counts": {
+    "hnscc_hpv_checkpoint_split": {
+      "hpv_pos": 4,
+      "hpv_neg": 6
+    },
+    "hnscc_hpv_5fold_split": {
+      "hpv_pos": 9,
+      "hpv_neg": 80
+    },
+    "normal_tumor": {
+      "luad_normal_tumor": 20,
+      "coad_normal_tumor": 10,
+      "kirc_normal_tumor": 48,
+      "brca_normal_tumor": 35
+    },
+    "prad_grade_group": {
+      "GG1": 8,
+      "GG2": 25,
+      "GG3": 21,
+      "GG4": 10,
+      "GG5": 24
+    },
+    "prad_morphology_group": {
+      "pattern_1_3_well_formed": 8,
+      "pattern_4_cribriform_poorly_formed_fused": 54,
+      "pattern_5_solid_single_necrosis": 26
+    }
+  },
+  "prepare_command": "DEVICE=cuda:0 examples/paper_metrics/00_prepare_test_only_unbalanced_region_banks.sh",
+  "benchmark_command": "DEVICE=cuda:0 RUN_EDITS=1 RUN_EVAL=1 examples/paper_metrics/02_run_prediction_transition_test_only_unbalanced.sh"
+}
