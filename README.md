@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/header.svg" alt="WSI-CF: Spatially scalable counterfactual explanations for whole-slide pathology" width="100%" />
+  <img src="docs/assets/header.svg?v=2" alt="WSI-CF: Spatially scalable counterfactual explanations for whole-slide pathology" width="100%" />
 </p>
 
 <p align="center">
