@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-labelledby="title desc">
+  <title id="title">WSI-CF — Spatially scalable counterfactual explanations for whole-slide pathology</title>
+  <desc id="desc">A pale lavender research-project banner with a plum title and a tissue-inspired grid. Selected cells flow through overlapping windows from source to counterfactual.</desc>
+  <defs>
+    <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse">
+      <rect x="2" y="2" width="32" height="32" rx="5" fill="#ded2e6"/>
+    </pattern>
+    <linearGradient id="field" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f7f4fa"/>
+      <stop offset="1" stop-color="#ede6f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="340" rx="20" fill="url(#field)"/>
+  <rect x="48" y="48" width="5" height="31" rx="2" fill="#795588"/>
+  <text x="68" y="72" fill="#795588" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" letter-spacing="4">WSI-CF</text>
+  <text x="48" y="136" fill="#30223b" font-family="Arial, Helvetica, sans-serif" font-size="39" font-weight="700">Spatially scalable</text>
+  <text x="48" y="184" fill="#30223b" font-family="Arial, Helvetica, sans-serif" font-size="39" font-weight="700">counterfactual explanations</text>
+  <text x="48" y="231" fill="#66566e" font-family="Arial, Helvetica, sans-serif" font-size="27">for whole-slide pathology</text>
+  <text x="48" y="293" fill="#795588" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="2">CONCEPT DISCOVERY / SPATIAL EDITING / PREDICTION SHIFT</text>
+  <g transform="translate(895 42)">
+    <rect width="304" height="228" fill="url(#grid)"/>
+    <g fill="#9370a7">
+      <rect x="78" y="40" width="32" height="32" rx="5"/>
+      <rect x="116" y="40" width="32" height="32" rx="5"/>
+      <rect x="78" y="78" width="32" height="32" rx="5"/>
+      <rect x="116" y="78" width="32" height="32" rx="5"/>
+    </g>
+    <g fill="#68a9a1">
+      <rect x="154" y="116" width="32" height="32" rx="5"/>
+      <rect x="192" y="116" width="32" height="32" rx="5"/>
+      <rect x="154" y="154" width="32" height="32" rx="5"/>
+      <rect x="192" y="154" width="32" height="32" rx="5"/>
+    </g>
+    <rect x="39" y="1" width="150" height="150" rx="9" fill="none" stroke="#795588" stroke-width="2"/>
+    <rect x="115" y="77" width="150" height="150" rx="9" fill="none" stroke="#42857d" stroke-width="2"/>
+    <path d="M111 262 H190 M183 255 L190 262 L183 269" fill="none" stroke="#795588" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="44" y="267" fill="#66566e" font-family="Arial, Helvetica, sans-serif" font-size="13">SOURCE</text>
+    <text x="203" y="267" fill="#42857d" font-family="Arial, Helvetica, sans-serif" font-size="13">TARGET</text>
+  </g>
+</svg>

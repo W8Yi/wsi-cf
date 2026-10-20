@@ -1,5 +1,7 @@
 # Region Bank Test Protocol
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 ## Goal
 
 Prepare the first fixed `1024x1024` HNSCC region bank for PixCell-1024 counterfactual steering, with each sample containing:

@@ -1,16 +1,18 @@
 # Progressive Editing Tutorial
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This document explains how to use the **canonical progressive editing pipeline** in `wsi_cf`.
 
 The pipeline is implemented by:
 
-- [scripts/run_progressive_region_edit.py](/common/users/wq50/wsi_cf/scripts/run_progressive_region_edit.py)
+- [scripts/run_progressive_region_edit.py](../scripts/run_progressive_region_edit.py)
 
 This is now the main region-level editing runner for manifest-driven experiments.
 
 The same progressive editing logic is also the default editing backend for:
 
-- [scripts/run_region_attention_classifier_eval.py](/common/users/wq50/wsi_cf/scripts/run_region_attention_classifier_eval.py)
+- `scripts/run_region_attention_classifier_eval.py` (historical entrypoint)
 
 It is designed to:
 
@@ -672,7 +674,7 @@ Fix:
 
 The old script:
 
-- [run_region_bank_10x_sae_cases.py](/common/users/wq50/wsi_cf/scripts/run_region_bank_10x_sae_cases.py)
+- `run_region_bank_10x_sae_cases.py` (historical entrypoint)
 
 is still useful for:
 
@@ -682,7 +684,7 @@ is still useful for:
 
 But for new progressive manifest-driven editing, prefer:
 
-- [run_progressive_region_edit.py](/common/users/wq50/wsi_cf/scripts/run_progressive_region_edit.py)
+- [run_progressive_region_edit.py](../scripts/run_progressive_region_edit.py)
 
 ## 15. Suggested Next Use
 

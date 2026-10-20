@@ -1,5 +1,7 @@
 # Migration Plan For `wsi_cf`
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This document tracks what should move into the focused counterfactual package and what should stay in the legacy repo for now.
 
 ## Stage 1

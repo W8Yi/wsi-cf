@@ -1,5 +1,7 @@
 # Progress Log
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This file is the running log for:
 
 - completed experiments

@@ -1,5 +1,7 @@
 # Script Registry
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This file is the central map of active repository entrypoints. Default feature inputs are 20x-equivalent UNI2 H5 bags under `/research/projects/mllab/WSI/TCGA_features/{project}/features_uni2`.
 
 ## Core Counterfactual Workflow

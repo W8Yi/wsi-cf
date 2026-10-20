@@ -1,5 +1,7 @@
 # Methods
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This document describes the **current implemented steering method** in `wsi_cf`.
 
 It is intentionally practical:
@@ -11,7 +13,7 @@ It is intentionally practical:
 
 For a step-by-step usage guide for the canonical progressive editor, see:
 
-- [PROGRESSIVE_EDIT_TUTORIAL.md](/common/users/wq50/wsi_cf/docs/PROGRESSIVE_EDIT_TUTORIAL.md)
+- [PROGRESSIVE_EDIT_TUTORIAL.md](PROGRESSIVE_EDIT_TUTORIAL.md)
 
 ## Overview
 
@@ -40,15 +42,15 @@ It is not:
 
 The canonical runner for this method is:
 
-- [run_progressive_region_edit.py](/common/users/wq50/wsi_cf/scripts/run_progressive_region_edit.py)
+- [run_progressive_region_edit.py](../scripts/run_progressive_region_edit.py)
 
 The region-level MIL attention evaluation runner now also uses the progressive editor by default for its editing stage:
 
-- [run_region_attention_classifier_eval.py](/common/users/wq50/wsi_cf/scripts/run_region_attention_classifier_eval.py)
+- `run_region_attention_classifier_eval.py` (historical entrypoint)
 
 The older script:
 
-- [run_region_bank_10x_sae_cases.py](/common/users/wq50/wsi_cf/scripts/run_region_bank_10x_sae_cases.py)
+- `run_region_bank_10x_sae_cases.py` (historical entrypoint)
 
 is still useful for legacy experiments, but it is no longer the best representation of the main progressive editing pipeline.
 

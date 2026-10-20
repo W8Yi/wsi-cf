@@ -1,5 +1,7 @@
 # Experiment Task Plan
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This document prepares the test pipeline for the paper experiments. It is organized around the current framing in `PAPER.md`: a multi-scale, concept-grounded counterfactual framework that supports tile-level, region-level, and slide-level analysis.
 
 The goal is to turn the current HNSCC pipeline into a repeatable evaluation suite, then reuse the same structure for additional pathology tasks.

@@ -1,5 +1,7 @@
 # Paper Planning (Updated Framing)
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This document is the working outline for constructing the paper around `wsi_cf`.
 
 It tracks:

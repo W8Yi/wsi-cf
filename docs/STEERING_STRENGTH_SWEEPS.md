@@ -1,5 +1,7 @@
 # Controlled Steering-Strength Sweeps
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This workflow generates the paper panel:
 
 `0% -> 20% -> 40% -> 60% -> 80% -> 100%`

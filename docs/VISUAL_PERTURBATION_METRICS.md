@@ -1,5 +1,7 @@
 # Visual Perturbation Metrics
 
+[← Documentation](README.md) · [Project home](../README.md)
+
 This benchmark compares the paper edit method against a deliberately poor naive
 baseline. The goal is to report whether a classifier transition was achieved
 with less visible image disruption.
