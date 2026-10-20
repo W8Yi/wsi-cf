@@ -1,4 +1,4 @@
-# WSI Counterfactual Steering
+# Spatially scalable counterfactual explanations for whole-slide pathology
 
 `wsi_cf` is a research codebase for whole-slide image counterfactual steering.
 It links slide-level attention, SAE concept editing, PixCell region generation,
