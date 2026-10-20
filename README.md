@@ -53,30 +53,53 @@ produces tissue edits for downstream evaluation.
 
 [View method PDF ↗](paper/figures/main.pdf)
 
+The intervention begins in feature space. A tile encoder represents the tissue,
+and the SAE organizes those features into a reusable concept bank. For a chosen
+task, representative tiles define a target prototype; selected source features
+are moved toward that prototype before conditioning image generation. The
+edited tissue is then re-encoded and evaluated by the downstream classifier.
+
+This separates the morphological direction of an edit from its spatial extent:
+the concept prototype controls what to change, while the selected cells control
+where the intervention is applied.
+
 ### 02 / A shared vocabulary of tissue concepts
 
-The SAE concept bank connects tile features to spatial concept maps and
-representative morphology across TCGA cohorts. The figure illustrates concepts
-associated with histologic subtype, tumor grade, and molecular status.
+The concept bank draws on a broad tissue collection. Panel **a** summarizes
+141.1 million tiles from 10,484 whole-slide images, covering 8,641 patients,
+32 TCGA cohorts, and 25 anatomic sites. Panel **b** shows the cohort composition
+and the relative contributions of different tissue groups.
 
 <a href="paper/figures/SAE.pdf">
-  <img src="paper/figures/previews/SAE.png" alt="SAE concept discovery across TCGA: cohort composition, sparse concept encoding, spatial concept maps, representative tiles, and examples of subtype, grade, and molecular-status concepts." width="100%" />
+  <img src="paper/figures/previews/SAE.png" alt="Panels a and b of the SAE figure: dataset scale across tiles, slides, patients, cohorts, and anatomic sites, followed by the TCGA cohort composition." width="100%" />
 </a>
 
-[View concept discovery PDF ↗](paper/figures/SAE.pdf)
+[View full concept discovery PDF ↗](paper/figures/SAE.pdf)
+
+This shared collection provides the basis for learning the SAE representation.
+Task-specific concept selection then identifies a steering direction within
+that representation. Applying the direction to a tissue region also requires
+spatial control: the editor must distinguish the cells to change from the
+surrounding context.
 
 ### 03 / Local edits, progressive coverage
 
-Selected features are steered within a local edit window. Overlapping windows
-extend the intervention across the region while tracking edited cells and
-preserving context. The panels compare boundary behavior, visual change, and
-the prediction trajectory.
+Panel **a** shows the local operation: selected features in the center of a
+`4 × 4` window are steered toward the target concept, with the surrounding
+features providing context. Panel **b** compares independently generated edits
+with the progressive approach and highlights the tissue boundaries in each.
 
 <a href="paper/figures/edit.pdf">
-  <img src="paper/figures/previews/edit.png" alt="Progressive editing figure with local feature steering, source and counterfactual tissue, boundary comparisons, perturbation curves, window traversal, and HPV prediction transitions." width="100%" />
+  <img src="paper/figures/previews/edit.png" alt="Panels a and b of the progressive editing figure: a local edit window and feature-steering schematic, followed by source, independent, and progressive counterfactuals with boundary-detail comparisons." width="100%" />
 </a>
 
-[View progressive editing PDF ↗](paper/figures/edit.pdf)
+[View full progressive editing PDF ↗](paper/figures/edit.pdf)
+
+To extend beyond a single window, the editor traverses overlapping windows and
+records which cells have already been visited. A history-aware preservation map
+controls how existing tissue is retained during each generation step. The same
+local operation can therefore be repeated across a larger selected region,
+with each new window incorporating context from the evolving canvas.
 
 ### 04 / Counterfactuals across tasks and scales
 
@@ -90,20 +113,20 @@ shown in its whole-slide context.
 
 [View qualitative results PDF ↗](paper/figures/qual.pdf)
 
-### 05 / Editing budget and prediction response
+These examples place the intervention at several spatial scales. Source and
+counterfactual pairs show the requested morphological direction; the coverage
+examples show how much of the region is selected for editing. The whole-slide
+view places a local change back into its broader tissue context. Together,
+these views connect the feature-space intervention to the tissue image that is
+passed back to the prediction model.
 
-The benchmark figure plots target-class probability against the number of
-edited tiles across normal-to-tumor, HPV-status, and Gleason-pattern tasks.
-Dashed lines mark the model decision threshold.
-
-<a href="paper/figures/bench.pdf">
-  <img src="paper/figures/previews/bench.png" alt="Nine benchmark panels plotting target probability after editing against edited tile count, with decision thresholds, across breast, colon, kidney, head and neck, lung, and prostate tasks." width="100%" />
-</a>
-
-[View benchmark PDF ↗](paper/figures/bench.pdf) ·
 [Browse all six original PDFs](paper/figures/README.md)
 
 ## Progressive editing in action
+
+The animation below makes the traversal explicit. Each frame shows the current
+window and the cells accumulated by earlier steps, illustrating how a sequence
+of local operations covers the selected region.
 
 <p align="center">
   <img src="paper_example/showcase_smoothed28/progressive_stage_canvases/progressive_window_sequence_no_text.gif" alt="Animated sequence of overlapping progressive edit windows on a selected HNSCC tissue region." width="720" />

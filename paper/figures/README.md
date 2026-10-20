@@ -2,8 +2,9 @@
 
 [← Project home](../../README.md) · [Documentation](../../docs/README.md)
 
-All six project figures are displayed in the [project README](../../README.md).
-Click a preview there to open its original PDF.
+The [project README](../../README.md) displays five selected figures. The SAE
+and progressive-editing previews show panels **a–b** only; click either preview
+to open the complete original PDF. All six original PDFs remain available below.
 
 | Figure | Contents | Original PDF |
 | :--- | :--- | :--- |
@@ -16,4 +17,5 @@ Click a preview there to open its original PDF.
 
 The PDFs are the supplied originals. PNGs in [`previews/`](previews/) are
 rendered display copies with outer whitespace trimmed and a white margin added
-for readability on GitHub. The original PDF contents and filenames are preserved.
+for readability on GitHub. `SAE.png` and `edit.png` are cropped to panels a–b.
+The original PDF contents and filenames are preserved.
