@@ -11,6 +11,17 @@ The default task is HNSCC HPV status. The showcase above edits a selected
 current cells to edit, grey marks current context, and blue marks cells already
 visited by the progressive editor.
 
+## Paper Figures
+
+The project figures are available as PDFs in [`paper/figures/`](paper/figures/):
+
+- [Conceptual overview](paper/figures/conceptual.pdf)
+- [Method overview](paper/figures/main.pdf)
+- [SAE concept discovery](paper/figures/SAE.pdf)
+- [Progressive editing](paper/figures/edit.pdf)
+- [Qualitative results](paper/figures/qual.pdf)
+- [Benchmark results](paper/figures/bench.pdf)
+
 ## Workflow
 
 The canonical workflow is:
