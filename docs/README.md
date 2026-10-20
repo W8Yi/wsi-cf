@@ -1,6 +1,6 @@
 # Documentation
 
-[← Project home](../README.md) · [Figure gallery](../paper/figures/README.md)
+[← Project home](../README.md) · [Pipeline walkthrough](../README.md#how-it-works)
 
 WSI-CF connects attention-guided region selection, SAE concept steering,
 progressive PixCell generation, and downstream prediction evaluation.

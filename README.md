@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="#overview">Overview</a> ·
-  <a href="#figure-gallery">Figures</a> ·
+  <a href="#how-it-works">How it works</a> ·
   <a href="#progressive-editing-in-action">Demo</a> ·
   <a href="#getting-started">Get started</a> ·
   <a href="docs/README.md">Documentation</a>
@@ -18,131 +18,123 @@
 
 ## Overview
 
-**WSI-CF** is a research framework for spatially scalable counterfactual
-explanations in whole-slide pathology. It connects slide-level attention,
-sparse autoencoder (SAE) concepts, and PixCell generation to explore how
-selected changes in tissue morphology affect a model's prediction.
+**WSI-CF** explores a concrete question: **what change to this tissue would
+change the model's prediction?** Starting with a real pathology image, the
+pipeline steers selected tissue toward a target morphology, generates the
+edited region, and evaluates it with the same prediction model.
 
-<a href="paper/figures/conceptual.pdf">
-  <img src="paper/figures/previews/conceptual.png" alt="Conceptual overview: a selected normal tissue region is changed toward tumor-associated morphology, then evaluated with the same prediction model." width="100%" />
-</a>
+<img src="paper/figures/previews/conceptual.png" alt="A normal tissue image, a counterfactual question about a selected region, and the generated tissue with a changed model prediction." width="100%" />
 
-*A counterfactual question: what change to this tissue would shift the model's
-prediction from normal to tumor?* [View PDF ↗](paper/figures/conceptual.pdf)
+Read the example from left to right. The source image is predicted as normal.
+Inside the highlighted region, the intervention changes the glandular
+appearance toward tumor-associated morphology. Passing the edited image back
+through the same model reveals whether that change shifts its prediction.
 
-The workflow combines three building blocks:
+Two choices guide the intervention: **where to edit** and **what morphology to
+move toward**. WSI-CF connects these choices through a shared concept space and
+an editor that works across overlapping tissue windows.
 
-- **Concept-guided control.** Discover morphological concepts in SAE feature
-  space and steer selected tile features toward a target prototype.
-- **Spatially progressive generation.** Edit regions through overlapping
-  PixCell windows with preservation of previously visited context.
-- **Prediction-level evaluation.** Re-encode edited tissue and measure changes
-  in downstream predictions alongside visual perturbation.
+## How it works
 
-## Figure gallery
+**Slide → region selection → concept steering → tissue generation → prediction check**
 
-### 01 / Method overview
+### 01 / Read the slide and choose a region
 
-From whole-slide features to concept-guided interventions: attention identifies
-regions, SAE concepts define the steering direction, and progressive generation
-produces tissue edits for downstream evaluation.
+A whole-slide image is too large to process as one ordinary image. The pipeline
+first divides it into tiles and uses a tile encoder to turn each tile into a
+numerical description of its tissue. An attention-based multiple instance
+learning (MIL) model combines these descriptions into a slide-level prediction.
+Its attention map can guide the choice of a region to investigate.
 
-<a href="paper/figures/main.pdf">
-  <img src="paper/figures/previews/main.png" alt="Method diagram showing tile encoding, attention-based MIL, SAE concept discovery and selection, feature steering, region generation, and slide-level prediction evaluation." width="100%" />
-</a>
+<img src="paper/figures/previews/main.png" alt="The full pipeline: encode slide tiles, predict with attention-based MIL, discover and select SAE concepts, steer selected features, generate tissue progressively, and re-evaluate the prediction." width="100%" />
 
-[View method PDF ↗](paper/figures/main.pdf)
+The diagram connects the two sides of the workflow. On the left, the model
+summarizes the slide and produces a prediction. On the right, the concept and
+generation stages construct a tissue intervention. The loop closes when the
+edited tissue is encoded again and passed back to the prediction model.
 
-The intervention begins in feature space. A tile encoder represents the tissue,
-and the SAE organizes those features into a reusable concept bank. For a chosen
-task, representative tiles define a target prototype; selected source features
-are moved toward that prototype before conditioning image generation. The
-edited tissue is then re-encoded and evaluated by the downstream classifier.
+Once a region is chosen, a grid records the cells to edit. This selection sets
+the intervention's location and extent; the next step defines its direction.
 
-This separates the morphological direction of an edit from its spatial extent:
-the concept prototype controls what to change, while the selected cells control
-where the intervention is applied.
+### 02 / Choose what morphology to change
 
-### 02 / A shared vocabulary of tissue concepts
+A sparse autoencoder (SAE) learns a shared vocabulary of tissue patterns from
+tile features. Its concept bank helps identify a direction relevant to the
+target task, such as a change in histologic appearance. Representative tiles
+for a selected concept provide a **prototype**: a reference feature pattern
+toward which the selected source features can be moved.
 
-The concept bank draws on a broad tissue collection. Panel **a** summarizes
-141.1 million tiles from 10,484 whole-slide images, covering 8,641 patients,
-32 TCGA cohorts, and 25 anatomic sites. Panel **b** shows the cohort composition
-and the relative contributions of different tissue groups.
+<img src="paper/figures/previews/SAE.png" alt="Panels a and b show the tissue collection used for the shared representation: dataset scale and TCGA cohort composition." width="100%" />
 
-<a href="paper/figures/SAE.pdf">
-  <img src="paper/figures/previews/SAE.png" alt="Panels a and b of the SAE figure: dataset scale across tiles, slides, patients, cohorts, and anatomic sites, followed by the TCGA cohort composition." width="100%" />
-</a>
+The collection above gives this vocabulary a broad tissue foundation. Panel
+**a** summarizes 141.1 million tiles from 10,484 whole-slide images, covering
+8,641 patients, 32 TCGA cohorts, and 25 anatomic sites. Panel **b** shows how the
+collection is distributed across cohorts and tissue groups.
 
-[View full concept discovery PDF ↗](paper/figures/SAE.pdf)
+Concept steering changes the selected tiles' feature representations before
+image generation. The prototype supplies the direction, and steering strength
+controls how far the source features move toward it. The generator then turns
+those edited features into a tissue image.
 
-This shared collection provides the basis for learning the SAE representation.
-Task-specific concept selection then identifies a steering direction within
-that representation. Applying the direction to a tissue region also requires
-spatial control: the editor must distinguish the cells to change from the
-surrounding context.
+### 03 / Generate the edit while preserving context
 
-### 03 / Local edits, progressive coverage
+A local edit needs surrounding tissue to remain visually connected. Within
+each `4 × 4` feature window, the editor steers the selected center cells and
+uses the surrounding cells as context. PixCell generates the corresponding
+tissue, with a preservation map controlling how existing content is retained.
 
-Panel **a** shows the local operation: selected features in the center of a
-`4 × 4` window are steered toward the target concept, with the surrounding
-features providing context. Panel **b** compares independently generated edits
-with the progressive approach and highlights the tissue boundaries in each.
+<img src="paper/figures/previews/edit.png" alt="Panels a and b show center-cell steering within a local window, source and generated tissue, and boundary comparisons between independent and progressive edits." width="100%" />
 
-<a href="paper/figures/edit.pdf">
-  <img src="paper/figures/previews/edit.png" alt="Panels a and b of the progressive editing figure: a local edit window and feature-steering schematic, followed by source, independent, and progressive counterfactuals with boundary-detail comparisons." width="100%" />
-</a>
+Panel **a** connects the feature edit to its generated appearance. Panel **b**
+compares independent editing with the progressive approach; the enlarged
+boundary views show where the generated tissue meets its surroundings.
 
-[View full progressive editing PDF ↗](paper/figures/edit.pdf)
+For a larger region, the editor repeats this operation through overlapping
+windows. It records which cells have already been visited so that each new
+window can incorporate context from the evolving image. This is how local
+interventions extend across a larger selected area.
 
-To extend beyond a single window, the editor traverses overlapping windows and
-records which cells have already been visited. A history-aware preservation map
-controls how existing tissue is retained during each generation step. The same
-local operation can therefore be repeated across a larger selected region,
-with each new window incorporating context from the evolving canvas.
+#### Progressive editing in action
 
-### 04 / Counterfactuals across tasks and scales
-
-Qualitative examples include normal-to-tumor changes in COAD and KIRC, HPV
-status steering in HNSCC, Gleason pattern changes in PRAD, and an edited region
-shown in its whole-slide context.
-
-<a href="paper/figures/qual.pdf">
-  <img src="paper/figures/previews/qual.png" alt="Qualitative counterfactuals across COAD, KIRC, HNSCC, and PRAD, with varied editing coverage and a whole-slide view of a localized intervention." width="100%" />
-</a>
-
-[View qualitative results PDF ↗](paper/figures/qual.pdf)
-
-These examples place the intervention at several spatial scales. Source and
-counterfactual pairs show the requested morphological direction; the coverage
-examples show how much of the region is selected for editing. The whole-slide
-view places a local change back into its broader tissue context. Together,
-these views connect the feature-space intervention to the tissue image that is
-passed back to the prediction model.
-
-[Browse all six original PDFs](paper/figures/README.md)
-
-## Progressive editing in action
-
-The animation below makes the traversal explicit. Each frame shows the current
-window and the cells accumulated by earlier steps, illustrating how a sequence
-of local operations covers the selected region.
+Follow the moving window in the animation below. **Red** marks the current
+edit cells, **grey** marks current context, and **blue** marks cells already
+visited. The example traverses a selected `2048 × 2048` HNSCC tissue region.
 
 <p align="center">
-  <img src="paper_example/showcase_smoothed28/progressive_stage_canvases/progressive_window_sequence_no_text.gif" alt="Animated sequence of overlapping progressive edit windows on a selected HNSCC tissue region." width="720" />
+  <img src="paper_example/showcase_smoothed28/progressive_stage_canvases/progressive_window_sequence_no_text.gif" alt="Overlapping windows progressively cover selected HNSCC tissue, distinguishing current edits, context, and previously visited cells." width="720" />
 </p>
 
-The HNSCC HPV showcase traverses a selected `2048 × 2048` tissue region.
-**Red** marks current edit cells, **grey** marks current context, and **blue**
-marks cells already visited by the progressive editor.
+The window moves across the region while its history grows. The final image
+is assembled from successive local generations, with each window contributing
+to the same tissue canvas. The
+[showcase tutorial](examples/hnscc_hpv_showcase_smoothed28/README.md) follows
+this sequence in a runnable example.
 
-[Follow the showcase tutorial →](examples/hnscc_hpv_showcase_smoothed28/README.md)
+### 04 / Inspect the tissue and check the prediction
+
+Read each source–counterfactual pair as an intervention: what changed, where
+did it change, and how does the result sit within the original tissue?
+The examples below span normal-to-tumor changes in COAD and KIRC, HPV-status
+steering in HNSCC, and Gleason-pattern changes in PRAD.
+
+<img src="paper/figures/previews/qual.png" alt="Counterfactual examples across COAD, KIRC, HNSCC, and PRAD, showing source–edited pairs, different editing coverage, and a local change in whole-slide context." width="100%" />
+
+Panel **a** shows different target morphologies. Panel **b** varies the fraction
+of a region selected for editing, illustrating the spatial extent of the
+intervention. Panel **c** places a local edit back into the whole-slide view,
+so the changed area can be inspected alongside the surrounding tissue.
+
+The last step returns to the original question. Re-encode the edited tissue,
+update the corresponding features, and evaluate them with the same downstream
+classifier. Comparing the source and counterfactual predictions shows how the
+model responds to the intervention. Reading that response together with the
+tissue change connects **the selected concept**, **the edited location**, and
+**the model's decision**.
 
 ## Getting started
 
-The figures and animation above can be explored immediately. Running generation
-requires the research environment, model access, and prepared region/feature
-inputs described in the [setup guide](docs/GETTING_STARTED.md).
+To run this pipeline, prepare the research environment, model access, and
+region/feature inputs described in the [setup guide](docs/GETTING_STARTED.md).
 
 ```bash
 git lfs install
@@ -175,7 +167,6 @@ for original lab commands, policy details, and resource provenance.
 | Find the right command | [Script registry](docs/SCRIPTS.md) |
 | Examples and comparisons | [HNSCC workflow](examples/hnscc_hpv/) · [Showcase](examples/hnscc_hpv_showcase_smoothed28/) |
 | Model and data resources | [Resource defaults](docs/REPRODUCTION.md#default-resources) · [Task configs](resources/tasks/) |
-| Figures and downloads | [Figure collection](paper/figures/README.md) |
 | Current research status | [Progress and caveats](docs/PROGRESS.md) |
 
 ```text

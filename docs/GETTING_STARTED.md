@@ -2,10 +2,9 @@
 
 [← Documentation](README.md) · [Project home](../README.md)
 
-The [project overview](../README.md#overview),
-[figure gallery](../paper/figures/README.md), and
-[animated showcase](../README.md#progressive-editing-in-action) can be viewed
-without running the code.
+Start with the illustrated [pipeline walkthrough](../README.md#how-it-works)
+to understand region selection, concept steering, progressive generation, and
+prediction evaluation before running the code.
 
 ## Get the repository
 
